@@ -4,6 +4,8 @@ import 'dart:convert';
 import 'dart:io';
 
 import 'package:calculator/language/home.dart';
+import 'package:calculator/screens/home/widgets/recent_container_home.dart';
+import 'package:calculator/screens/home/widgets/recent_lateral_bar_component.dart';
 import 'package:calculator/styles/styles.dart';
 import 'package:calculator/widgets/horizontal_line.dart';
 import 'package:calculator/widgets/vertical_line.dart';
@@ -32,14 +34,15 @@ class _HomePageState extends State<HomePage> {
   bool darkTheme = false;
   int language = 0;
 
-  List resentProjectHistory = [];
+  List recentProjectHistory = [];
+  List<bool> recentProjectComponentSelected = [];
 
   @override
   void initState() {
     darkTheme = widget.darkTheme;
     language = widget.language;
 
-    readResentProjects();
+    readRecentProjects();
 
     super.initState();
   }
@@ -68,39 +71,26 @@ class _HomePageState extends State<HomePage> {
                           color: Colors.grey
                         ),
                         child: Text(
-                          resentProjects(language),
+                          recentProjects(language),
                           style: TextStyle(color: Colors.black87),
                         ),
                       ),
                     ),
                     Expanded(
-                        child: resentProjectHistory.isEmpty
+                        child: recentProjectHistory.isEmpty
                             ? Center(
-                                child: Text(noResentProjectsToShow(language),
+                                child: Text(noRecentProjectsToShow(language),
                                     textAlign: TextAlign.center,
                                     style:
                                         TextStyle(color: textColor(darkTheme))),
                               )
                             : ListView.builder(
-                                itemCount: resentProjectHistory.length,
+                                itemCount: recentProjectHistory.length,
                                 itemBuilder: (context, index) {
-                                  return ListTile(
-                                    title: Tooltip(
-                                      verticalOffset: 8,
-                                      message: resentProjectHistory[index],
-                                      child: Row(
-                                        mainAxisAlignment: MainAxisAlignment.start,
-                                        children: [
-                                          TextButton(
-                                            onPressed: (){},
-                                            child: Text(resentProjectHistory[index],
-                                                overflow: TextOverflow.ellipsis,
-                                                style: TextStyle(
-                                                    color: textColor(darkTheme))),
-                                          ),
-                                        ],
-                                      ),
-                                    ),
+                                  return RecentLateralBarComponent(
+                                    darkTheme: darkTheme,
+                                    fileName: recentProjectHistory[index],
+                                      openProject: openProject
                                   );
                                 },
                               ))
@@ -112,10 +102,32 @@ class _HomePageState extends State<HomePage> {
                 children: [
                   Expanded(child: Row(
                     children: [
-                      Expanded(child: Container()),
+                      Expanded(
+                          child: Container(
+                            margin: EdgeInsets.all(5),
+                            // color: Colors.white,
+                            child: ListView(
+                              children: [
+                                Wrap(
+                                  alignment: WrapAlignment.start,
+                                  crossAxisAlignment: WrapCrossAlignment.start,
+                                  children: [
+                                    for (var recent in recentProjectHistory)
+                                      RecentContainerHomeWidget(
+                                          darkTheme: darkTheme,
+                                          fileName: recent,
+                                          openProject: openProject
+                                      )
+                                  ],
+                                )
+                              ],
+                            ),
+                          )
+                      ),
                       VerticalLine(),
                       Container(
-                        margin: EdgeInsets.fromLTRB(5, 5, 0, 5),
+                        color: Colors.white,
+                        margin: EdgeInsets.all(5),
                         width: 200,
                         child: Column(),
                       )
@@ -123,32 +135,28 @@ class _HomePageState extends State<HomePage> {
                   )),
                   HorizontalLine(),
                   SizedBox(
-                    height: 200,
+                    height: 150,
                     child: Column(),
                   )
                 ],
               ))
             ],
           )),
-          // Row(
-          //   mainAxisAlignment: MainAxisAlignment.end,
-          //   children: [
-          //     Container(
-          //       padding: EdgeInsets.all(5),
-          //       decoration: BoxDecoration(
-          //           color: blueTheme(darkTheme),
-          //           borderRadius: BorderRadius.all(Radius.circular(5))),
-          //       child: Text("New"),
-          //     )
-          //   ],
-          // )
         ],
       ),
     );
   }
 
-  // create app folder and resent projects file if it doesn't exist
-  readResentProjects() async {
+  openProject(){
+
+  }
+
+  setRecentSelected(){
+
+  }
+
+  // create app folder and recent projects file if it doesn't exist
+  readRecentProjects() async {
     String home = "";
     Map<String, String> envVars = Platform.environment;
     if (Platform.isMacOS) {
@@ -160,7 +168,7 @@ class _HomePageState extends State<HomePage> {
     }
 
     var dir = Directory("$home/Pixel Generator/");
-    var file = File("$home/Pixel Generator/resent.json");
+    var file = File("$home/Pixel Generator/recent.json");
 
     if (!dir.existsSync()){
       dir.createSync();
@@ -173,12 +181,17 @@ class _HomePageState extends State<HomePage> {
         // Read the file
         final contents = await file.readAsString();
 
-        Map resent = jsonDecode(contents);
+        Map recent = jsonDecode(contents);
         
-        if (resent.containsKey("resents") && resent["resents"].runtimeType == List){
-          List r = resent["resents"];
-          resentProjectHistory = r.where((element) => checkIsJsonFile(element.toString())).toList();
+        if (recent.containsKey("recents") && recent["recents"].runtimeType == List){
+          List r = recent["recents"];
+
+          recentProjectHistory = r.where((element) => checkIsJsonFile(element.toString())).toList();
+          recentProjectComponentSelected = List.generate(
+              recentProjectHistory.length, (index) => false
+          );
         }
+
         setState(() {});
         
         return;
@@ -190,7 +203,7 @@ class _HomePageState extends State<HomePage> {
 
     file.createSync();
 
-    file.writeAsString("{\n    \"resents\": []\n}\n");
+    file.writeAsString("{\n    \"recents\": []\n}\n");
   }
 
   checkIsJsonFile(String elem){

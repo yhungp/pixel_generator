@@ -15,3 +15,7 @@ dividerLine() {
 textColor(bool darkTheme) {
   return darkTheme ? Colors.grey : Colors.black87;
 }
+
+textColorRecentContainerHome() {
+  return Colors.black87;
+}
