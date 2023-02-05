@@ -25,9 +25,9 @@ class RecentLateralBarComponent extends StatelessWidget {
             TextButton(
               onPressed: (){},
               child: Text(fileName,
-                  overflow: TextOverflow.ellipsis,
-                  style: TextStyle(
-                      color: textColor(darkTheme))),
+                overflow: TextOverflow.ellipsis,
+                style: TextStyle(
+                  color: textColor(darkTheme))),
             ),
           ],
         ),

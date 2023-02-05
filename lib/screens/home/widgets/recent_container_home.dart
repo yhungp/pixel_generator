@@ -2,18 +2,25 @@
 
 import 'package:calculator/styles/styles.dart';
 import 'package:flutter/material.dart';
+import 'package:path/path.dart' as p;
 
 class RecentContainerHomeWidget extends StatefulWidget {
   RecentContainerHomeWidget({
     Key? key,
     required this.darkTheme,
     required this.fileName,
-    required this.openProject}
+    required this.openProject,
+    required this.index,
+    required this.setRecentSelected}
       ) : super(key: key);
 
   String fileName;
   bool darkTheme;
+
   Function openProject;
+  Function setRecentSelected;
+
+  int index;
 
   @override
   State<RecentContainerHomeWidget> createState() => _RecentContainerHomeWidgetState();
@@ -33,6 +40,7 @@ class _RecentContainerHomeWidgetState extends State<RecentContainerHomeWidget> {
     fileName = widget.fileName;
     darkTheme = widget.darkTheme;
     openProject = widget.openProject;
+
     super.initState();
   }
 
@@ -42,12 +50,14 @@ class _RecentContainerHomeWidgetState extends State<RecentContainerHomeWidget> {
       onTap: (){
         setState(() {
           expand = !expand;
+          widget.setRecentSelected(widget.index);
         });
       },
       child: Container(
-        width: 100,
-        height: !expand ? 100 : 130,
+        width: 130,
+        height: 130,
         padding: EdgeInsets.all(5),
+        margin: EdgeInsets.symmetric(horizontal: 5),
         decoration: BoxDecoration(
           borderRadius: BorderRadius.all(Radius.circular(5)),
           color: Colors.grey,
@@ -60,33 +70,37 @@ class _RecentContainerHomeWidgetState extends State<RecentContainerHomeWidget> {
               size: 60,
               color: textColorRecentContainerHome()
             ),
-            Text(
-              widget.fileName,
-              style: TextStyle(color: textColorRecentContainerHome()),
-              overflow: TextOverflow.ellipsis,
-            ),
-            Visibility(
-              visible: expand,
-                child: GestureDetector(
-                  onTap: (){
-                    print(fileName);
-                  },
-                  child: Container(
-                    width: double.infinity,
-                    margin: EdgeInsets.only(top: 5),
-                    padding: EdgeInsets.all(5),
-                    decoration: BoxDecoration(
-                      borderRadius: BorderRadius.all(Radius.circular(5)),
-                      color: Colors.black87
-                    ),
-                    child: Text(
-                      "Open",
-                      style: TextStyle(color: Colors.white),
-                      textAlign: TextAlign.center,
+            Expanded(
+              child: Column(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  Text(
+                    p.basename(widget.fileName),
+                    style: TextStyle(color: textColorRecentContainerHome()),
+                    overflow: TextOverflow.ellipsis,
                   ),
+                ],
+              ),
+            ),
+            GestureDetector(
+              onTap: (){
+                print(fileName);
+              },
+              child: Container(
+                width: double.infinity,
+                margin: EdgeInsets.only(top: 5),
+                padding: EdgeInsets.all(5),
+                decoration: BoxDecoration(
+                  borderRadius: BorderRadius.all(Radius.circular(5)),
+                  color: Colors.black87
                 ),
+                child: Text(
+                  "Open",
+                  style: TextStyle(color: Colors.white),
+                  textAlign: TextAlign.center,
+              ),
+            ),
               )
-            )
           ],
         ),
       ),

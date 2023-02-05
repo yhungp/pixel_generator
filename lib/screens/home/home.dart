@@ -33,6 +33,7 @@ class HomePage extends StatefulWidget {
 class _HomePageState extends State<HomePage> {
   bool darkTheme = false;
   int language = 0;
+  int selected = -1;
 
   List recentProjectHistory = [];
   List<bool> recentProjectComponentSelected = [];
@@ -104,21 +105,14 @@ class _HomePageState extends State<HomePage> {
                     children: [
                       Expanded(
                           child: Container(
-                            margin: EdgeInsets.all(5),
+                            margin: EdgeInsets.symmetric(vertical: 5),
                             // color: Colors.white,
                             child: ListView(
                               children: [
                                 Wrap(
                                   alignment: WrapAlignment.start,
                                   crossAxisAlignment: WrapCrossAlignment.start,
-                                  children: [
-                                    for (var recent in recentProjectHistory)
-                                      RecentContainerHomeWidget(
-                                          darkTheme: darkTheme,
-                                          fileName: recent,
-                                          openProject: openProject
-                                      )
-                                  ],
+                                  children: generateListOfRecentCards(),
                                 )
                               ],
                             ),
@@ -128,7 +122,7 @@ class _HomePageState extends State<HomePage> {
                       Container(
                         color: Colors.white,
                         margin: EdgeInsets.all(5),
-                        width: 200,
+                        width: 250,
                         child: Column(),
                       )
                     ],
@@ -147,12 +141,41 @@ class _HomePageState extends State<HomePage> {
     );
   }
 
+  List<Widget> generateListOfRecentCards(){
+    List<Widget> widget = [];
+
+    int counter = 0;
+    for (var recent in recentProjectHistory) {
+      widget.add(RecentContainerHomeWidget(
+        darkTheme: darkTheme,
+        fileName: recent,
+        openProject: openProject,
+        setRecentSelected: setRecentSelected,
+        index: counter,
+      ));
+      counter += 1;
+    }
+
+    return widget;
+  }
+
   openProject(){
 
   }
 
-  setRecentSelected(){
+  setRecentSelected(int index){
+    setState(() {
+      selected = index;
+      recentProjectComponentSelected[index] = !recentProjectComponentSelected[index];
+      recentProjectComponentSelected.asMap().forEach((i, _) {
+        if ( i != index){
+          recentProjectComponentSelected[index] = false;
+          return;
+        }
 
+        recentProjectComponentSelected[index] = !recentProjectComponentSelected[index];
+      });
+    });
   }
 
   // create app folder and recent projects file if it doesn't exist
