@@ -1,5 +1,10 @@
+// ignore_for_file: prefer_const_literals_to_create_immutables
+
 import 'dart:math';
 
+import 'package:calculator/home/home.dart';
+import 'package:calculator/matrix_creation/matrix_creation.dart';
+import 'package:calculator/new_project/new_project.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter/material.dart';
@@ -37,7 +42,7 @@ class MyApp extends StatelessWidget {
         primarySwatch: Colors.blue,
       ),
       scrollBehavior: MyCustomScrollBehavior(),
-      home: const MyHomePage(title: 'Flutter Demo Home Page'),
+      home: const MyHomePage(title: 'Pixel matrix generator'),
     );
   }
 }
@@ -52,6 +57,8 @@ class MyHomePage extends StatefulWidget {
 }
 
 class _MyHomePageState extends State<MyHomePage> {
+  String route = "home";
+
   @override
   void initState() {
     super.initState();
@@ -63,10 +70,17 @@ class _MyHomePageState extends State<MyHomePage> {
       appBar: AppBar(
         title: Text(widget.title),
       ),
-      body: Column(
-        children: [],
-      ),
+      body: routes(route),
     );
+  }
+
+  routes(String value) {
+    switch (value) {
+      case "home":
+        return const HomePage(title: "Home");
+      case "matrix_creation":
+        return const MatrixCreation(title: "Matrix creation");
+    }
   }
 }
 
