@@ -1,12 +1,9 @@
 // ignore_for_file: prefer_const_literals_to_create_immutables
 
-import 'dart:math';
-
 import 'package:calculator/home/home.dart';
 import 'package:calculator/matrix_creation/matrix_creation.dart';
-import 'package:calculator/new_project/new_project.dart';
+import 'package:calculator/styles/styles.dart';
 import 'package:flutter/gestures.dart';
-import 'package:flutter/rendering.dart';
 import 'package:flutter/material.dart';
 
 void main() async {
@@ -58,6 +55,11 @@ class MyHomePage extends StatefulWidget {
 
 class _MyHomePageState extends State<MyHomePage> {
   String route = "home";
+  String title = "Home";
+
+  bool darkTheme = true;
+
+  int language = 0;
 
   @override
   void initState() {
@@ -68,16 +70,28 @@ class _MyHomePageState extends State<MyHomePage> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text(widget.title),
+        backgroundColor: blueTheme(darkTheme),
+        title: Text(title),
       ),
-      body: routes(route),
+      body: Container(child: routes(route)),
     );
+  }
+
+  setRoute(String r, String t) {
+    setState(() {
+      route = r;
+      title = t;
+    });
   }
 
   routes(String value) {
     switch (value) {
       case "home":
-        return const HomePage(title: "Home");
+        return HomePage(
+            title: "Home",
+            setRoute: setRoute,
+            darkTheme: darkTheme,
+            language: language);
       case "matrix_creation":
         return const MatrixCreation(title: "Matrix creation");
     }
