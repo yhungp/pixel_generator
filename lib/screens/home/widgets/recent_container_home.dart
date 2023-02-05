@@ -98,9 +98,9 @@ class _RecentContainerHomeWidgetState extends State<RecentContainerHomeWidget> {
                   "Open",
                   style: TextStyle(color: Colors.white),
                   textAlign: TextAlign.center,
+                ),
               ),
-            ),
-              )
+            )
           ],
         ),
       ),

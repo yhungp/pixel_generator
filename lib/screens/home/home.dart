@@ -33,6 +33,7 @@ class HomePage extends StatefulWidget {
 
 class _HomePageState extends State<HomePage> {
   bool darkTheme = false;
+
   int language = 0;
   int selected = -1;
   int fileSize = 0;
@@ -40,6 +41,8 @@ class _HomePageState extends State<HomePage> {
   List recentProjectHistory = [];
   List<bool> recentProjectComponentSelected = [];
   List<int> recentProjectComponentFileSize = [];
+
+  String fileContent = "";
 
   @override
   void initState() {
@@ -59,90 +62,184 @@ class _HomePageState extends State<HomePage> {
       child: Column(
         children: [
           Expanded(
-              child: Row(
-            children: [
-              Container(
-                width: 250,
-                padding: const EdgeInsets.all(5.0),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Center(
-                      child: Container(
-                        padding: EdgeInsets.all(10),
-                        decoration: BoxDecoration(
-                          borderRadius: BorderRadius.all(Radius.circular(20)),
-                          color: Colors.grey
-                        ),
-                        child: Text(
-                          recentProjects(language),
-                          style: TextStyle(color: Colors.black87),
+            child: Row(
+              children: [
+                Container(
+                  width: 250,
+                  padding: const EdgeInsets.all(5.0),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Center(
+                        child: Container(
+                          padding: EdgeInsets.all(10),
+                          decoration: BoxDecoration(
+                            borderRadius: BorderRadius.all(Radius.circular(20)),
+                            color: Colors.grey
+                          ),
+                          child: Text(
+                            recentProjects(language),
+                            style: TextStyle(color: Colors.black87),
+                          ),
                         ),
                       ),
-                    ),
-                    Expanded(
-                        child: recentProjectHistory.isEmpty
-                            ? Center(
-                                child: Text(noRecentProjectsToShow(language),
-                                    textAlign: TextAlign.center,
-                                    style:
-                                        TextStyle(color: textColor(darkTheme))),
-                              )
-                            : ListView.builder(
-                                itemCount: recentProjectHistory.length,
-                                itemBuilder: (context, index) {
-                                  return RecentLateralBarComponent(
-                                    darkTheme: darkTheme,
-                                    fileName: recentProjectHistory[index],
-                                    openProject: openProject
-                                  );
-                                },
-                              ))
-                  ],
+                      Expanded(
+                          child: recentProjectHistory.isEmpty
+                              ? Center(
+                                  child: Text(noRecentProjectsToShow(language),
+                                      textAlign: TextAlign.center,
+                                      style:
+                                          TextStyle(color: textColor(darkTheme))),
+                                )
+                              : ListView.builder(
+                                  itemCount: recentProjectHistory.length,
+                                  itemBuilder: (context, index) {
+                                    return RecentLateralBarComponent(
+                                      darkTheme: darkTheme,
+                                      fileName: recentProjectHistory[index],
+                                      openProject: openProject
+                                    );
+                                  },
+                                ))
+                    ],
+                  ),
                 ),
-              ),
-              VerticalLine(),
-              Expanded(child: Column(
-                children: [
-                  Expanded(
-                    child: Row(
+                VerticalLine(),
+                recentProjectHistory.isEmpty ?
+                Expanded(
+                  child: Center(
+                    child: Column(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      crossAxisAlignment: CrossAxisAlignment.center,
                       children: [
-                        Expanded(
-                            child: Container(
-                              margin: EdgeInsets.symmetric(vertical: 5),
-                              // color: Colors.white,
-                              child: ListView(
-                                children: [
-                                  Wrap(
-                                    alignment: WrapAlignment.start,
-                                    crossAxisAlignment: WrapCrossAlignment.start,
-                                    children: generateListOfRecentCards(),
-                                  )
-                                ],
+                        Text(noRecentProjectsToShow(language),
+                            textAlign: TextAlign.center,
+                            style:
+                            TextStyle(color: textColor(darkTheme))),
+
+                        SizedBox(height: 10),
+
+                        Row(
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            GestureDetector(
+                              onTap: (){
+
+                              },
+                              child: Container(
+                                // width: double.infinity,
+                                margin: EdgeInsets.only(top: 5),
+                                padding: EdgeInsets.all(5),
+                                decoration: BoxDecoration(
+                                    borderRadius: BorderRadius.all(Radius.circular(5)),
+                                    color: Colors.black87
+                                ),
+                                child: Text(
+                                  createNewProject(language),
+                                  style: TextStyle(color: Colors.white),
+                                  textAlign: TextAlign.center,
+                                ),
+                              ),
+                            ),
+
+                            SizedBox(width: 10),
+
+                            GestureDetector(
+                              onTap: (){
+
+                              },
+                              child: Container(
+                                // width: double.infinity,
+                                margin: EdgeInsets.only(top: 5),
+                                padding: EdgeInsets.all(5),
+                                decoration: BoxDecoration(
+                                    borderRadius: BorderRadius.all(Radius.circular(5)),
+                                    color: Colors.black87
+                                ),
+                                child: Text(
+                                  openExistingProject(language),
+                                  style: TextStyle(color: Colors.white),
+                                  textAlign: TextAlign.center,
+                                ),
                               ),
                             )
-                        ),
-                        VerticalLine(),
-                        Container(
-                          margin: EdgeInsets.all(5),
-                          width: 250,
-                          child: selected == -1 ? Container() :
-                          FileInformation(
-                            darkTheme: darkTheme,
-                            fileName: recentProjectHistory[selected],
-                            language: language,
-                          ),
+                          ],
                         )
                       ],
-                    )
+                    ),
                   ),
-                  HorizontalLine(),
-                  SizedBox(
-                    height: 150,
-                    child: Column(),
-                  )
-                ],
-              ))
+                )
+                :
+                Expanded(child: Column(
+                  children: [
+                    Expanded(
+                      child: Row(
+                        children: [
+                          Expanded(
+                              child: Container(
+                                margin: EdgeInsets.symmetric(vertical: 5),
+                                // color: Colors.white,
+                                child: ListView(
+                                  controller: ScrollController(),
+                                  children: [
+                                    Wrap(
+                                      alignment: WrapAlignment.start,
+                                      crossAxisAlignment: WrapCrossAlignment.start,
+                                      children: generateListOfRecentCards(),
+                                    )
+                                  ],
+                                ),
+                              )
+                          ),
+                          VerticalLine(),
+                          Container(
+                            margin: EdgeInsets.all(5),
+                            width: 250,
+                            child: selected == -1 ? Container() :
+                            FileInformation(
+                              darkTheme: darkTheme,
+                              fileName: recentProjectHistory[selected],
+                              language: language,
+                            ),
+                          )
+                        ],
+                      )
+                    ),
+                    Visibility(child: HorizontalLine()),
+                    Container(
+                      padding: EdgeInsets.all(5),
+                      height: 150,
+                      child: Column(
+                        children: [
+                          Expanded(
+                            child: ![
+                                fileEmpty(language), errorLoadingFile(language)
+                              ].contains(fileContent)
+                              ? ListView(
+                              controller: ScrollController(),
+                              children: [
+                                Text(
+                                  fileContent,
+                                  style: TextStyle(color: textColor(darkTheme)),
+                                  textAlign: TextAlign.start
+                                )
+                              ],
+                            ) :
+                            Center(
+                              child: Text(
+                                fileContent,
+                                style: TextStyle(color: textColor(darkTheme)),
+                                textAlign: TextAlign.center,
+                              ),
+                            )
+                          )
+                        ],
+                      ),
+                    )
+                  ],
+                )
+              )
             ],
           )),
         ],
@@ -176,6 +273,7 @@ class _HomePageState extends State<HomePage> {
   setRecentSelected(int index){
     setState(() {
       selected = index;
+      setContent(index);
 
       fileSize = recentProjectComponentFileSize[index];
       recentProjectComponentSelected[index] = !recentProjectComponentSelected[index];
@@ -188,6 +286,41 @@ class _HomePageState extends State<HomePage> {
         recentProjectComponentSelected[index] = !recentProjectComponentSelected[index];
       });
     });
+  }
+
+  setContent(int index) async {
+    var file = File(recentProjectHistory[index]);
+
+    if (file.existsSync()){
+      try {
+        // Read the file
+        final contents = await file.readAsString();
+
+        Map recent = jsonDecode(contents);
+
+        JsonEncoder encoder = JsonEncoder.withIndent('  ');
+        String prettyprint = encoder.convert(recent);
+
+        if (prettyprint.replaceAll(" ", "").isEmpty){
+          setState(() {
+            fileContent = fileEmpty(language);
+          });
+
+          return;
+        }
+
+        setState(() {
+          fileContent = prettyprint;
+        });
+
+        return;
+      } catch (e) {
+        setState(() {
+          fileContent = errorLoadingFile(language);
+        });
+        return;
+      }
+    }
   }
 
   // create app folder and recent projects file if it doesn't exist
