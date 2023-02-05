@@ -1,4 +1,4 @@
-recentProjects(int language) {
+resentProjects(int language) {
   switch (language) {
     case 0:
       return "Recent projects";
@@ -7,7 +7,7 @@ recentProjects(int language) {
   }
 }
 
-noRecentProjectsToShow(int language) {
+noResentProjectsToShow(int language) {
   switch (language) {
     case 0:
       return "No recent projects to show";

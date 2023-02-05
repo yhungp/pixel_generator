@@ -8,7 +8,7 @@ blackTheme(bool darkTheme) {
   return darkTheme ? Colors.black87 : Colors.white;
 }
 
-verticalLine() {
+dividerLine() {
   return const Color.fromARGB(255, 150, 150, 150);
 }
 

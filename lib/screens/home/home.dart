@@ -1,9 +1,11 @@
 // ignore_for_file: prefer_const_constructors, prefer_const_literals_to_create_immutables
 
+import 'dart:convert';
 import 'dart:io';
 
 import 'package:calculator/language/home.dart';
 import 'package:calculator/styles/styles.dart';
+import 'package:calculator/widgets/horizontal_line.dart';
 import 'package:calculator/widgets/vertical_line.dart';
 import 'package:flutter/material.dart';
 
@@ -30,12 +32,14 @@ class _HomePageState extends State<HomePage> {
   bool darkTheme = false;
   int language = 0;
 
-  List recentProjectHistory = [];
+  List resentProjectHistory = [];
 
   @override
   void initState() {
     darkTheme = widget.darkTheme;
     language = widget.language;
+
+    readResentProjects();
 
     super.initState();
   }
@@ -57,30 +61,45 @@ class _HomePageState extends State<HomePage> {
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Center(
-                      child: Text(
-                        recentProjects(language),
-                        style: TextStyle(color: textColor(darkTheme)),
+                      child: Container(
+                        padding: EdgeInsets.all(10),
+                        decoration: BoxDecoration(
+                          borderRadius: BorderRadius.all(Radius.circular(20)),
+                          color: Colors.grey
+                        ),
+                        child: Text(
+                          resentProjects(language),
+                          style: TextStyle(color: Colors.black87),
+                        ),
                       ),
                     ),
                     Expanded(
-                        child: recentProjectHistory.isEmpty
+                        child: resentProjectHistory.isEmpty
                             ? Center(
-                                child: Text(noRecentProjectsToShow(language),
+                                child: Text(noResentProjectsToShow(language),
                                     textAlign: TextAlign.center,
                                     style:
                                         TextStyle(color: textColor(darkTheme))),
                               )
                             : ListView.builder(
-                                itemCount: recentProjectHistory.length,
+                                itemCount: resentProjectHistory.length,
                                 itemBuilder: (context, index) {
                                   return ListTile(
                                     title: Tooltip(
                                       verticalOffset: 8,
-                                      message: recentProjectHistory[index],
-                                      child: Text(recentProjectHistory[index],
-                                          overflow: TextOverflow.ellipsis,
-                                          style: TextStyle(
-                                              color: textColor(darkTheme))),
+                                      message: resentProjectHistory[index],
+                                      child: Row(
+                                        mainAxisAlignment: MainAxisAlignment.start,
+                                        children: [
+                                          TextButton(
+                                            onPressed: (){},
+                                            child: Text(resentProjectHistory[index],
+                                                overflow: TextOverflow.ellipsis,
+                                                style: TextStyle(
+                                                    color: textColor(darkTheme))),
+                                          ),
+                                        ],
+                                      ),
                                     ),
                                   );
                                 },
@@ -88,7 +107,27 @@ class _HomePageState extends State<HomePage> {
                   ],
                 ),
               ),
-              VerticalLine()
+              VerticalLine(),
+              Expanded(child: Column(
+                children: [
+                  Expanded(child: Row(
+                    children: [
+                      Expanded(child: Container()),
+                      VerticalLine(),
+                      Container(
+                        margin: EdgeInsets.fromLTRB(5, 5, 0, 5),
+                        width: 200,
+                        child: Column(),
+                      )
+                    ],
+                  )),
+                  HorizontalLine(),
+                  SizedBox(
+                    height: 200,
+                    child: Column(),
+                  )
+                ],
+              ))
             ],
           )),
           // Row(
@@ -108,8 +147,8 @@ class _HomePageState extends State<HomePage> {
     );
   }
 
-
-  readRecentProjects() async {
+  // create app folder and resent projects file if it doesn't exist
+  readResentProjects() async {
     String home = "";
     Map<String, String> envVars = Platform.environment;
     if (Platform.isMacOS) {
@@ -120,9 +159,43 @@ class _HomePageState extends State<HomePage> {
       home = envVars['UserProfile']!;
     }
 
-    if (!Directory("$home/Pixel Generator/").existsSync()){
-      Directory("$home/Pixel Generator/").createSync();
-      File("$home/Pixel Generator/recent.json").createSync();
+    var dir = Directory("$home/Pixel Generator/");
+    var file = File("$home/Pixel Generator/resent.json");
+
+    if (!dir.existsSync()){
+      dir.createSync();
+      file.createSync();
+      return;
     }
+
+    if (file.existsSync()){
+      try {
+        // Read the file
+        final contents = await file.readAsString();
+
+        Map resent = jsonDecode(contents);
+        
+        if (resent.containsKey("resents") && resent["resents"].runtimeType == List){
+          List r = resent["resents"];
+          resentProjectHistory = r.where((element) => checkIsJsonFile(element.toString())).toList();
+        }
+        setState(() {});
+        
+        return;
+      } catch (e) {
+        // If encountering an error, return 0
+        return;
+      }
+    }
+
+    file.createSync();
+
+    file.writeAsString("{\n    \"resents\": []\n}\n");
+  }
+
+  checkIsJsonFile(String elem){
+    List elemSplit = elem.split(".");
+
+    return elemSplit[elemSplit.length - 1] == "json";
   }
 }
