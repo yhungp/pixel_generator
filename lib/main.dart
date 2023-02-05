@@ -1,7 +1,7 @@
 // ignore_for_file: prefer_const_literals_to_create_immutables
 
-import 'package:calculator/home/home.dart';
-import 'package:calculator/matrix_creation/matrix_creation.dart';
+import 'package:calculator/screens/home/home.dart';
+import 'package:calculator/screens/matrix_creation/matrix_creation.dart';
 import 'package:calculator/styles/styles.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';

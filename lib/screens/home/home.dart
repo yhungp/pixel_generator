@@ -107,4 +107,22 @@ class _HomePageState extends State<HomePage> {
       ),
     );
   }
+
+
+  readRecentProjects() async {
+    String home = "";
+    Map<String, String> envVars = Platform.environment;
+    if (Platform.isMacOS) {
+      home = envVars['HOME']!;
+    } else if (Platform.isLinux) {
+      home = envVars['HOME']!;
+    } else if (Platform.isWindows) {
+      home = envVars['UserProfile']!;
+    }
+
+    if (!Directory("$home/Pixel Generator/").existsSync()){
+      Directory("$home/Pixel Generator/").createSync();
+      File("$home/Pixel Generator/recent.json").createSync();
+    }
+  }
 }
