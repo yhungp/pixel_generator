@@ -4,6 +4,7 @@ import 'dart:convert';
 import 'dart:io';
 
 import 'package:calculator/language/home.dart';
+import 'package:calculator/screens/home/widgets/file_information.dart';
 import 'package:calculator/screens/home/widgets/recent_container_home.dart';
 import 'package:calculator/screens/home/widgets/recent_lateral_bar_component.dart';
 import 'package:calculator/styles/styles.dart';
@@ -34,9 +35,11 @@ class _HomePageState extends State<HomePage> {
   bool darkTheme = false;
   int language = 0;
   int selected = -1;
+  int fileSize = 0;
 
   List recentProjectHistory = [];
   List<bool> recentProjectComponentSelected = [];
+  List<int> recentProjectComponentFileSize = [];
 
   @override
   void initState() {
@@ -91,7 +94,7 @@ class _HomePageState extends State<HomePage> {
                                   return RecentLateralBarComponent(
                                     darkTheme: darkTheme,
                                     fileName: recentProjectHistory[index],
-                                      openProject: openProject
+                                    openProject: openProject
                                   );
                                 },
                               ))
@@ -101,32 +104,38 @@ class _HomePageState extends State<HomePage> {
               VerticalLine(),
               Expanded(child: Column(
                 children: [
-                  Expanded(child: Row(
-                    children: [
-                      Expanded(
-                          child: Container(
-                            margin: EdgeInsets.symmetric(vertical: 5),
-                            // color: Colors.white,
-                            child: ListView(
-                              children: [
-                                Wrap(
-                                  alignment: WrapAlignment.start,
-                                  crossAxisAlignment: WrapCrossAlignment.start,
-                                  children: generateListOfRecentCards(),
-                                )
-                              ],
-                            ),
-                          )
-                      ),
-                      VerticalLine(),
-                      Container(
-                        color: Colors.white,
-                        margin: EdgeInsets.all(5),
-                        width: 250,
-                        child: Column(),
-                      )
-                    ],
-                  )),
+                  Expanded(
+                    child: Row(
+                      children: [
+                        Expanded(
+                            child: Container(
+                              margin: EdgeInsets.symmetric(vertical: 5),
+                              // color: Colors.white,
+                              child: ListView(
+                                children: [
+                                  Wrap(
+                                    alignment: WrapAlignment.start,
+                                    crossAxisAlignment: WrapCrossAlignment.start,
+                                    children: generateListOfRecentCards(),
+                                  )
+                                ],
+                              ),
+                            )
+                        ),
+                        VerticalLine(),
+                        Container(
+                          margin: EdgeInsets.all(5),
+                          width: 250,
+                          child: selected == -1 ? Container() :
+                          FileInformation(
+                            darkTheme: darkTheme,
+                            fileName: recentProjectHistory[selected],
+                            language: language,
+                          ),
+                        )
+                      ],
+                    )
+                  ),
                   HorizontalLine(),
                   SizedBox(
                     height: 150,
@@ -146,12 +155,13 @@ class _HomePageState extends State<HomePage> {
 
     int counter = 0;
     for (var recent in recentProjectHistory) {
+      final int count = counter;
       widget.add(RecentContainerHomeWidget(
         darkTheme: darkTheme,
         fileName: recent,
         openProject: openProject,
         setRecentSelected: setRecentSelected,
-        index: counter,
+        index: count,
       ));
       counter += 1;
     }
@@ -166,6 +176,8 @@ class _HomePageState extends State<HomePage> {
   setRecentSelected(int index){
     setState(() {
       selected = index;
+
+      fileSize = recentProjectComponentFileSize[index];
       recentProjectComponentSelected[index] = !recentProjectComponentSelected[index];
       recentProjectComponentSelected.asMap().forEach((i, _) {
         if ( i != index){
@@ -212,6 +224,9 @@ class _HomePageState extends State<HomePage> {
           recentProjectHistory = r.where((element) => checkIsJsonFile(element.toString())).toList();
           recentProjectComponentSelected = List.generate(
               recentProjectHistory.length, (index) => false
+          );
+          recentProjectComponentFileSize = List.generate(
+              recentProjectHistory.length, (index) => 0
           );
         }
 
