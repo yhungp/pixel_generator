@@ -4,6 +4,7 @@ import 'dart:convert';
 import 'dart:io';
 
 import 'package:calculator/language/home.dart';
+import 'package:calculator/widgets/generic_button.dart';
 import 'package:calculator/screens/home/widgets/file_information.dart';
 import 'package:calculator/screens/home/widgets/recent_container_home.dart';
 import 'package:calculator/screens/home/widgets/recent_lateral_bar_component.dart';
@@ -123,47 +124,19 @@ class _HomePageState extends State<HomePage> {
                           mainAxisAlignment: MainAxisAlignment.center,
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
-                            GestureDetector(
-                              onTap: (){
-
-                              },
-                              child: Container(
-                                // width: double.infinity,
-                                margin: EdgeInsets.only(top: 5),
-                                padding: EdgeInsets.all(5),
-                                decoration: BoxDecoration(
-                                    borderRadius: BorderRadius.all(Radius.circular(5)),
-                                    color: Colors.black87
-                                ),
-                                child: Text(
-                                  createNewProject(language),
-                                  style: TextStyle(color: Colors.white),
-                                  textAlign: TextAlign.center,
-                                ),
-                              ),
+                            ButtonOnHome(
+                                label: createNewProject(language),
+                                func: newProject,
+                                darkTheme: darkTheme
                             ),
 
                             SizedBox(width: 10),
 
-                            GestureDetector(
-                              onTap: (){
-
-                              },
-                              child: Container(
-                                // width: double.infinity,
-                                margin: EdgeInsets.only(top: 5),
-                                padding: EdgeInsets.all(5),
-                                decoration: BoxDecoration(
-                                    borderRadius: BorderRadius.all(Radius.circular(5)),
-                                    color: Colors.black87
-                                ),
-                                child: Text(
-                                  openExistingProject(language),
-                                  style: TextStyle(color: Colors.white),
-                                  textAlign: TextAlign.center,
-                                ),
-                              ),
-                            )
+                            ButtonOnHome(
+                                label: openExistingProject(language),
+                                func: openProject,
+                                darkTheme: darkTheme
+                            ),
                           ],
                         )
                       ],
@@ -266,7 +239,41 @@ class _HomePageState extends State<HomePage> {
     return widget;
   }
 
-  openProject(){
+  openProject(BuildContext context){
+    Widget okButton = TextButton(
+      child: Text("OK"),
+      onPressed: () {
+        Navigator.of(context).pop();
+      },
+    );
+
+    Widget cancelButton = TextButton(
+      child: Text("Cancel"),
+      onPressed: () {
+        Navigator.of(context).pop();
+      },
+    );
+
+    // set up the AlertDialog
+    AlertDialog alert = AlertDialog(
+      title: Text("My title"),
+      content: Text("This is my message."),
+      actions: [
+        cancelButton,
+        okButton,
+      ],
+    );
+
+    // show the dialog
+    showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        return alert;
+      },
+    );
+  }
+
+  newProject(){
 
   }
 

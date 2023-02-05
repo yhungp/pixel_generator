@@ -13,7 +13,15 @@ dividerLine() {
 }
 
 textColor(bool darkTheme) {
-  return darkTheme ? Colors.grey : Colors.black87;
+  return Colors.grey;
+}
+
+buttonOnHomeTextColor(bool darkTheme) {
+  return darkTheme ? const Color.fromARGB(255, 200, 200, 200): Colors.white;
+}
+
+buttonOnHome(bool darkTheme) {
+  return darkTheme ? Colors.blueGrey : Colors.grey;
 }
 
 textColorRecentContainerHome() {
