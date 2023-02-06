@@ -56,6 +56,7 @@ class MyHomePage extends StatefulWidget {
 class _MyHomePageState extends State<MyHomePage> {
   String route = "home";
   String title = "Home";
+  String filePath = "";
 
   bool darkTheme = true;
 
@@ -77,24 +78,39 @@ class _MyHomePageState extends State<MyHomePage> {
     );
   }
 
-  setRoute(String r, String t) {
+  setRoute(String r) {
     setState(() {
       route = r;
-      title = t;
     });
   }
 
   routes(String value) {
     switch (value) {
       case "home":
+        setState(() {
+          title = "Home";
+        });
         return HomePage(
-            title: "Home",
             setRoute: setRoute,
+            setProjectFile: setProjectFile,
             darkTheme: darkTheme,
             language: language);
       case "matrix_creation":
-        return const MatrixCreation(title: "Matrix creation");
+        setState(() {
+          title = "Matrix creation";
+        });
+        return MatrixCreation(
+          darkTheme: darkTheme,
+          language: language,
+          filePath: filePath,
+        );
     }
+  }
+
+  setProjectFile(String value) {
+    setState(() {
+      filePath = value;
+    });
   }
 }
 

@@ -1,13 +1,15 @@
+// ignore_for_file: must_be_immutable
+
 import 'package:calculator/styles/styles.dart';
 import 'package:flutter/material.dart';
 
 class RecentLateralBarComponent extends StatelessWidget {
-  RecentLateralBarComponent({
-    Key? key,
-    required this.darkTheme,
-    required this.fileName,
-    required this.openProject}
-      ) : super(key: key);
+  RecentLateralBarComponent(
+      {Key? key,
+      required this.darkTheme,
+      required this.fileName,
+      required this.openProject})
+      : super(key: key);
 
   String fileName;
   bool darkTheme;
@@ -23,11 +25,12 @@ class RecentLateralBarComponent extends StatelessWidget {
           mainAxisAlignment: MainAxisAlignment.start,
           children: [
             TextButton(
-              onPressed: (){},
+              onPressed: () {
+                openProject(fileName);
+              },
               child: Text(fileName,
-                overflow: TextOverflow.ellipsis,
-                style: TextStyle(
-                  color: textColor(darkTheme))),
+                  overflow: TextOverflow.ellipsis,
+                  style: TextStyle(color: textColor(darkTheme))),
             ),
           ],
         ),

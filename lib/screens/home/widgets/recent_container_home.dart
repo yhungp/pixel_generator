@@ -1,18 +1,18 @@
-// ignore_for_file: prefer_const_constructors, prefer_const_literals_to_create_immutables
+// ignore_for_file: prefer_const_constructors, prefer_const_literals_to_create_immutables, must_be_immutable, depend_on_referenced_packages
 
 import 'package:calculator/styles/styles.dart';
 import 'package:flutter/material.dart';
 import 'package:path/path.dart' as p;
 
 class RecentContainerHomeWidget extends StatefulWidget {
-  RecentContainerHomeWidget({
-    Key? key,
-    required this.darkTheme,
-    required this.fileName,
-    required this.openProject,
-    required this.index,
-    required this.setRecentSelected}
-      ) : super(key: key);
+  RecentContainerHomeWidget(
+      {Key? key,
+      required this.darkTheme,
+      required this.fileName,
+      required this.openProject,
+      required this.index,
+      required this.setRecentSelected})
+      : super(key: key);
 
   String fileName;
   bool darkTheme;
@@ -23,11 +23,11 @@ class RecentContainerHomeWidget extends StatefulWidget {
   int index;
 
   @override
-  State<RecentContainerHomeWidget> createState() => _RecentContainerHomeWidgetState();
+  State<RecentContainerHomeWidget> createState() =>
+      _RecentContainerHomeWidgetState();
 }
 
 class _RecentContainerHomeWidgetState extends State<RecentContainerHomeWidget> {
-
   String fileName = "";
 
   bool darkTheme = false;
@@ -47,7 +47,7 @@ class _RecentContainerHomeWidgetState extends State<RecentContainerHomeWidget> {
   @override
   Widget build(BuildContext context) {
     return GestureDetector(
-      onTap: (){
+      onTap: () {
         setState(() {
           expand = !expand;
           widget.setRecentSelected(widget.index);
@@ -65,11 +65,8 @@ class _RecentContainerHomeWidgetState extends State<RecentContainerHomeWidget> {
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            Icon(
-              Icons.file_present_rounded,
-              size: 60,
-              color: textColorRecentContainerHome()
-            ),
+            Icon(Icons.file_present_rounded,
+                size: 60, color: textColorRecentContainerHome()),
             Expanded(
               child: Column(
                 mainAxisAlignment: MainAxisAlignment.center,
@@ -83,17 +80,16 @@ class _RecentContainerHomeWidgetState extends State<RecentContainerHomeWidget> {
               ),
             ),
             GestureDetector(
-              onTap: (){
-                print(fileName);
+              onTap: () {
+                widget.openProject(fileName);
               },
               child: Container(
                 width: double.infinity,
                 margin: EdgeInsets.only(top: 5),
                 padding: EdgeInsets.all(5),
                 decoration: BoxDecoration(
-                  borderRadius: BorderRadius.all(Radius.circular(5)),
-                  color: Colors.black87
-                ),
+                    borderRadius: BorderRadius.all(Radius.circular(5)),
+                    color: Colors.black87),
                 child: Text(
                   "Open",
                   style: TextStyle(color: Colors.white),
