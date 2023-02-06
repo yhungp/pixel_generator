@@ -12,6 +12,7 @@ import 'package:calculator/screens/home/widgets/recent_lateral_bar_component.dar
 import 'package:calculator/styles/styles.dart';
 import 'package:calculator/widgets/horizontal_line.dart';
 import 'package:calculator/widgets/vertical_line.dart';
+import 'package:file_picker/file_picker.dart';
 import 'package:flutter/material.dart';
 
 class HomePage extends StatefulWidget {
@@ -296,15 +297,21 @@ class _HomePageState extends State<HomePage> {
                                 ),
                               ),
                             ),
-                            Container(
-                              width: 40,
-                              height: double.infinity,
-                              decoration: BoxDecoration(
-                                  color: blueTheme(darkTheme),
-                                  borderRadius: BorderRadius.only(
-                                      topRight: Radius.circular(10),
-                                      bottomRight: Radius.circular(10))),
-                              child: Icon(Icons.search),
+                            GestureDetector(
+                              onTap: () async {
+                                var file = await openFile();
+                                dir.text = file;
+                              },
+                              child: Container(
+                                width: 40,
+                                height: double.infinity,
+                                decoration: BoxDecoration(
+                                    color: blueTheme(darkTheme),
+                                    borderRadius: BorderRadius.only(
+                                        topRight: Radius.circular(10),
+                                        bottomRight: Radius.circular(10))),
+                                child: Icon(Icons.search),
+                              ),
                             )
                           ],
                         ),
@@ -326,6 +333,19 @@ class _HomePageState extends State<HomePage> {
     );
   }
 
+  Future<String> openFile() async {
+    FilePickerResult? result = await FilePicker.platform.pickFiles(
+      type: FileType.custom,
+      allowedExtensions: ['json'],
+    );
+
+    if (result != null) {
+      return result.files.single.path.toString();
+    }
+
+    return "";
+  }
+
   Future<bool> checkValidProjectFile(String path) async {
     var file = File(path);
 
@@ -339,14 +359,13 @@ class _HomePageState extends State<HomePage> {
 
       Map recent = jsonDecode(contents);
 
-      if (recent.containsKey("matrix_columns") &&
-          recent["matrix_columns"].runtimeType == int &&
-          recent.containsKey("matrix_rows") &&
-          recent["matrix_rows"].runtimeType == int &&
-          recent.containsKey("columns") &&
-          recent["columns"].runtimeType == int &&
-          recent.containsKey("rows") &&
-          recent["rows"].runtimeType == int) {
+      if ((recent.containsKey("matrix_columns") &&
+              recent["matrix_columns"].runtimeType == int) ||
+          (recent.containsKey("matrix_rows") &&
+              recent["matrix_rows"].runtimeType == int) ||
+          (recent.containsKey("columns") &&
+              recent["columns"].runtimeType == int) ||
+          (recent.containsKey("rows") && recent["rows"].runtimeType == int)) {
         return true;
       }
       return false;
