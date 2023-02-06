@@ -240,15 +240,18 @@ class _HomePageState extends State<HomePage> {
   }
 
   openProject(BuildContext context){
+    TextEditingController dir = TextEditingController();
+
     Widget okButton = TextButton(
-      child: Text("OK"),
+      child: Text("OK", style: TextStyle(color: Colors.grey)),
       onPressed: () {
         Navigator.of(context).pop();
+        print(dir.text);
       },
     );
 
     Widget cancelButton = TextButton(
-      child: Text("Cancel"),
+      child: Text("Cancel", style: TextStyle(color: Colors.grey)),
       onPressed: () {
         Navigator.of(context).pop();
       },
@@ -256,8 +259,62 @@ class _HomePageState extends State<HomePage> {
 
     // set up the AlertDialog
     AlertDialog alert = AlertDialog(
-      title: Text("My title"),
-      content: Text("This is my message."),
+      title: Text(
+        existingProjectTitle(language),
+        style: TextStyle(
+          color: Color.fromARGB(255, 100, 100, 100)
+        )
+      ),
+      content: Wrap(
+        children: [
+          SizedBox(
+            width: 500,
+            child: Column (
+              mainAxisAlignment: MainAxisAlignment.start,
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(existingProjectMsg(language), style: TextStyle(color: Colors.grey)),
+                Container(
+                  margin: EdgeInsets.only(top: 10),
+                  height: 60,
+                  child: Row(
+                    children: [
+                      Expanded(
+                        child: Container(
+                          padding: EdgeInsets.fromLTRB(10, 10, 5, 10),
+                          decoration: BoxDecoration(
+                            color: Color.fromARGB(255, 200, 200, 200),
+                            borderRadius: BorderRadius.only(
+                              topLeft: Radius.circular(10),
+                              bottomLeft: Radius.circular(10)
+                            )
+                          ),
+                          child: TextField(
+                            controller: dir,
+                          ),
+                        ),
+                      ),
+
+                      Container(
+                        width: 40,
+                        height: double.infinity,
+                        decoration: BoxDecoration(
+                          color: blueTheme(darkTheme),
+                          borderRadius: BorderRadius.only(
+                            topRight: Radius.circular(10),
+                            bottomRight: Radius.circular(10)
+                          )
+                        ),
+                        child: Icon(Icons.search),
+                      )
+                    ],
+                  ),
+                )
+              ],
+            ),
+          )
+        ],
+      ),
       actions: [
         cancelButton,
         okButton,

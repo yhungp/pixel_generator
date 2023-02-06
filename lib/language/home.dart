@@ -70,7 +70,6 @@ fileDoNotExist(int language) {
   }
 }
 
-
 fileSizeLabel(int language) {
   switch (language) {
     case 0:
@@ -79,3 +78,22 @@ fileSizeLabel(int language) {
       return "Tamaño de archivo:";
   }
 }
+
+existingProjectTitle(int language) {
+  switch (language) {
+    case 0:
+      return "Load an existing project";
+    case 1:
+      return "Cargar desde un proyecto existente";
+  }
+}
+
+existingProjectMsg(int language) {
+  switch (language) {
+    case 0:
+      return "Insert a valid path to a project file";
+    case 1:
+      return "Inserte una dirección válida a un archivo de proyecto";
+  }
+}
+
