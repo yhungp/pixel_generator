@@ -1,4 +1,4 @@
-// ignore_for_file: prefer_const_literals_to_create_immutables
+// ignore_for_file: prefer_const_literals_to_create_immutables, prefer_const_constructors
 
 import 'dart:convert';
 import 'dart:ffi';
@@ -64,24 +64,40 @@ class _MatrixCreationState extends State<MatrixCreation> {
                 width: 120,
                 child: TextField(
                   controller: matrixColumnsText,
+                  decoration: InputDecoration(
+                    border: OutlineInputBorder(),
+                    labelText: 'Password',
+                  ),
                 ),
               ),
               Container(
                 width: 120,
                 child: TextField(
                   controller: matrixRowsText,
+                  decoration: InputDecoration(
+                    border: OutlineInputBorder(),
+                    labelText: 'Password',
+                  ),
                 ),
               ),
               Container(
                 width: 120,
                 child: TextField(
                   controller: columnsText,
+                  decoration: InputDecoration(
+                    border: OutlineInputBorder(),
+                    labelText: 'Password',
+                  ),
                 ),
               ),
               Container(
                 width: 120,
                 child: TextField(
                   controller: rowsText,
+                  decoration: InputDecoration(
+                    border: OutlineInputBorder(),
+                    labelText: 'Password',
+                  ),
                 ),
               ),
             ],
@@ -102,25 +118,33 @@ class _MatrixCreationState extends State<MatrixCreation> {
 
         if (recent.containsKey("matrix_columns") &&
             recent["matrix_columns"].runtimeType == int) {
-          matrixColumns = recent["matrix_columns"];
-          matrixColumnsText.text = recent["matrix_columns"];
+          setState(() {
+            matrixColumns = recent["matrix_columns"];
+            matrixColumnsText.value = recent["matrix_columns"];
+          });
         }
 
         if (recent.containsKey("matrix_rows") &&
             recent["matrix_rows"].runtimeType == int) {
-          matrixRows = recent["matrix_rows"];
-          matrixRowsText.text = recent["matrix_columns"];
+          setState(() {
+            matrixRows = recent["matrix_rows"];
+            matrixRowsText.value = recent["matrix_columns"];
+          });
         }
 
         if (recent.containsKey("matrix_columns") &&
             recent["columns"].runtimeType == int) {
-          columns = recent["columns"];
-          columnsText.text = recent["matrix_columns"];
+          setState(() {
+            columns = recent["columns"];
+            columnsText.value = recent["matrix_columns"];
+          });
         }
 
         if (recent.containsKey("rows") && recent["rows"].runtimeType == int) {
-          rows = recent["rows"];
-          rowsText.text = recent["matrix_columns"];
+          setState(() {
+            rows = recent["rows"];
+            rowsText.value = recent["matrix_columns"];
+          });
         }
 
         setState(() {});
