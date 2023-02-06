@@ -3,13 +3,13 @@
 import 'package:calculator/styles/styles.dart';
 import 'package:flutter/material.dart';
 
-class ButtonOnHome extends StatelessWidget {
-  ButtonOnHome({
-    Key? key,
-    required this.label,
-    required this.func,
-    required this.darkTheme
-  }) : super(key: key);
+class GenericButton extends StatelessWidget {
+  GenericButton(
+      {Key? key,
+      required this.label,
+      required this.func,
+      required this.darkTheme})
+      : super(key: key);
 
   String label;
   Function func;
@@ -24,8 +24,7 @@ class ButtonOnHome extends StatelessWidget {
         padding: EdgeInsets.all(10),
         decoration: BoxDecoration(
             borderRadius: BorderRadius.all(Radius.circular(5)),
-            color: buttonOnHome(darkTheme)
-        ),
+            color: buttonOnHome(darkTheme)),
         child: Text(
           label,
           style: TextStyle(color: buttonOnHomeTextColor(darkTheme)),

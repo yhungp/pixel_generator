@@ -123,12 +123,12 @@ class _HomePageState extends State<HomePage> {
                           mainAxisAlignment: MainAxisAlignment.center,
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
-                            ButtonOnHome(
+                            GenericButton(
                                 label: createNewProject(language),
                                 func: newProject,
                                 darkTheme: darkTheme),
                             SizedBox(width: 10),
-                            ButtonOnHome(
+                            GenericButton(
                                 label: openExistingProject(language),
                                 func: openProjectFromDialog,
                                 darkTheme: darkTheme),
@@ -148,13 +148,34 @@ class _HomePageState extends State<HomePage> {
                             child: Container(
                           margin: EdgeInsets.symmetric(vertical: 5),
                           // color: Colors.white,
-                          child: ListView(
-                            controller: ScrollController(),
+                          child: Column(
                             children: [
-                              Wrap(
-                                alignment: WrapAlignment.start,
-                                crossAxisAlignment: WrapCrossAlignment.start,
-                                children: generateListOfRecentCards(),
+                              Expanded(
+                                child: ListView(
+                                  controller: ScrollController(),
+                                  children: [
+                                    Wrap(
+                                      alignment: WrapAlignment.start,
+                                      crossAxisAlignment:
+                                          WrapCrossAlignment.start,
+                                      children: generateListOfRecentCards(),
+                                    )
+                                  ],
+                                ),
+                              ),
+                              Row(
+                                mainAxisAlignment: MainAxisAlignment.end,
+                                children: [
+                                  GenericButton(
+                                      label: createNewProject(language),
+                                      func: newProject,
+                                      darkTheme: darkTheme),
+                                  SizedBox(width: 10),
+                                  GenericButton(
+                                      label: openExistingProject(language),
+                                      func: openProjectFromDialog,
+                                      darkTheme: darkTheme)
+                                ],
                               )
                             ],
                           ),
@@ -301,6 +322,8 @@ class _HomePageState extends State<HomePage> {
                               onTap: () async {
                                 var file = await openFile();
                                 dir.text = file;
+                                showAccept = await checkValidProjectFile(file);
+                                setInnerState(() {});
                               },
                               child: Container(
                                 width: 40,
@@ -467,6 +490,11 @@ class _HomePageState extends State<HomePage> {
 
         if (!readWrite) {
           List r = recent["recents"];
+
+          if (r.contains(newFilePath)) {
+            return;
+          }
+
           r = List.from([newFilePath])..addAll(r);
 
           recent["recents"] = r;
