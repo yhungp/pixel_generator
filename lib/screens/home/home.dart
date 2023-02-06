@@ -4,6 +4,7 @@ import 'dart:convert';
 import 'dart:io';
 
 import 'package:calculator/language/home.dart';
+import 'package:calculator/utils/prettyJSON.dart';
 import 'package:calculator/widgets/generic_button.dart';
 import 'package:calculator/screens/home/widgets/file_information.dart';
 import 'package:calculator/screens/home/widgets/recent_container_home.dart';
@@ -361,9 +362,7 @@ class _HomePageState extends State<HomePage> {
         final contents = await file.readAsString();
 
         Map recent = jsonDecode(contents);
-
-        JsonEncoder encoder = JsonEncoder.withIndent('  ');
-        String prettyprint = encoder.convert(recent);
+        String prettyprint = prettyJson(recent);
 
         if (prettyprint.replaceAll(" ", "").isEmpty){
           setState(() {
