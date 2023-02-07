@@ -1,5 +1,6 @@
 // ignore_for_file: prefer_const_constructors, prefer_const_literals_to_create_immutables, must_be_immutable, depend_on_referenced_packages
 
+import 'package:calculator/main.dart';
 import 'package:calculator/styles/styles.dart';
 import 'package:flutter/material.dart';
 import 'package:path/path.dart' as p;
@@ -11,11 +12,15 @@ class RecentContainerHomeWidget extends StatefulWidget {
       required this.fileName,
       required this.openProject,
       required this.index,
-      required this.setRecentSelected})
+      required this.setRecentSelected,
+      required this.language,
+      required this.notifier})
       : super(key: key);
 
   String fileName;
   bool darkTheme;
+  int language;
+  SettingsScreenNotifier notifier;
 
   Function openProject;
   Function setRecentSelected;
@@ -34,12 +39,14 @@ class _RecentContainerHomeWidgetState extends State<RecentContainerHomeWidget> {
   bool expand = false;
 
   late Function openProject;
+  late SettingsScreenNotifier notifier;
 
   @override
   void initState() {
     fileName = widget.fileName;
     darkTheme = widget.darkTheme;
     openProject = widget.openProject;
+    notifier = widget.notifier;
 
     super.initState();
   }
@@ -50,7 +57,7 @@ class _RecentContainerHomeWidgetState extends State<RecentContainerHomeWidget> {
       onTap: () {
         setState(() {
           expand = !expand;
-          widget.setRecentSelected(widget.index);
+          widget.setRecentSelected(widget.index, widget.language);
         });
       },
       child: Container(
@@ -81,7 +88,7 @@ class _RecentContainerHomeWidgetState extends State<RecentContainerHomeWidget> {
             ),
             GestureDetector(
               onTap: () {
-                widget.openProject(fileName);
+                widget.openProject(fileName, notifier);
               },
               child: Container(
                 width: double.infinity,

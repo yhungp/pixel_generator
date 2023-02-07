@@ -28,7 +28,10 @@ void main() async {
   runApp(const MyApp());
 }
 
-var primaryColor = Color(0xFF151026);
+const List<List<String>> titles = [
+  ["Home", "Home"],
+  ["Matrix creation", "Creación de matrices"]
+];
 
 class MyApp extends StatelessWidget {
   const MyApp({Key? key}) : super(key: key);
@@ -52,7 +55,9 @@ class MyApp extends StatelessWidget {
               ),
               themeMode: notifier.darkTheme ? ThemeMode.dark : ThemeMode.light,
               scrollBehavior: MyCustomScrollBehavior(),
-              home: const MyHomePage(title: 'Pixel matrix generator'),
+              home: MyHomePage(
+                  title: titles[notifier.currentScreen][notifier.language]),
+              // home: const MyHomePage(title: 'Pixel matrix generator'),
             );
           });
         });
@@ -97,7 +102,7 @@ class _MyHomePageState extends State<MyHomePage> {
 
     return Scaffold(
       appBar: AppBar(
-        title: Text(title),
+        title: Text(widget.title),
         actions: <Widget>[
           Consumer<SettingsScreenNotifier>(builder: (context, notifier, child) {
             return Switch(
@@ -118,7 +123,7 @@ class _MyHomePageState extends State<MyHomePage> {
             onPressed: () {
               Navigator.push(
                 context,
-                MaterialPageRoute(builder: (context) => const SettingsScreen()),
+                MaterialPageRoute(builder: (context) => SettingsScreen()),
               );
             },
           ),
@@ -184,14 +189,28 @@ class MyCustomScrollBehavior extends MaterialScrollBehavior {
 class SettingsScreenNotifier extends ChangeNotifier {
   /// 1
   bool darkTheme = true;
+  int language = 0;
+  int currentScreen = 0;
 
   /// 2
   get isDarkModeEnabled => darkTheme;
+  get languageSelected => language;
 
   /// 3
   void toggleApplicationTheme(bool darkModeEnabled) {
-    /// 4
     darkTheme = darkModeEnabled;
+    notifyListeners();
+  }
+
+  void setApplicationLanguage(int languageSelection) {
+    /// 4
+    language = languageSelection;
+    notifyListeners();
+  }
+
+  void setApplicationScreen(int currentScreenState) {
+    /// 4
+    currentScreen = currentScreenState;
     notifyListeners();
   }
 }

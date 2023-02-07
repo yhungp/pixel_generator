@@ -87,7 +87,7 @@ class _HomePageState extends State<HomePage> {
                           borderRadius: BorderRadius.all(Radius.circular(20)),
                           color: Colors.grey),
                       child: Text(
-                        recentProjects(language),
+                        recentProjects(notifier.language),
                         style: TextStyle(color: Colors.black87),
                       ),
                     ),
@@ -95,7 +95,8 @@ class _HomePageState extends State<HomePage> {
                   Expanded(
                       child: recentProjectHistory.isEmpty
                           ? Center(
-                              child: Text(noRecentProjectsToShow(language),
+                              child: Text(
+                                  noRecentProjectsToShow(notifier.language),
                                   textAlign: TextAlign.center,
                                   style: TextStyle(
                                       color: textColor(notifier.darkTheme))),
@@ -120,7 +121,7 @@ class _HomePageState extends State<HomePage> {
                         mainAxisAlignment: MainAxisAlignment.center,
                         crossAxisAlignment: CrossAxisAlignment.center,
                         children: [
-                          Text(noRecentProjectsToShow(language),
+                          Text(noRecentProjectsToShow(notifier.language),
                               textAlign: TextAlign.center,
                               style: TextStyle(
                                   color: textColor(notifier.darkTheme))),
@@ -130,12 +131,12 @@ class _HomePageState extends State<HomePage> {
                             crossAxisAlignment: CrossAxisAlignment.start,
                             children: [
                               GenericButton(
-                                  label: createNewProject(language),
+                                  label: createNewProject(notifier.language),
                                   func: newProject,
                                   darkTheme: notifier.darkTheme),
                               SizedBox(width: 10),
                               GenericButton(
-                                  label: openExistingProject(language),
+                                  label: openExistingProject(notifier.language),
                                   func: openProjectFromDialog,
                                   darkTheme: notifier.darkTheme),
                             ],
@@ -173,12 +174,14 @@ class _HomePageState extends State<HomePage> {
                                   mainAxisAlignment: MainAxisAlignment.end,
                                   children: [
                                     GenericButton(
-                                        label: createNewProject(language),
+                                        label:
+                                            createNewProject(notifier.language),
                                         func: newProject,
                                         darkTheme: notifier.darkTheme),
                                     SizedBox(width: 10),
                                     GenericButton(
-                                        label: openExistingProject(language),
+                                        label: openExistingProject(
+                                            notifier.language),
                                         func: openProjectFromDialog,
                                         darkTheme: notifier.darkTheme)
                                   ],
@@ -195,7 +198,7 @@ class _HomePageState extends State<HomePage> {
                                 : FileInformation(
                                     darkTheme: notifier.darkTheme,
                                     fileName: recentProjectHistory[selected],
-                                    language: language,
+                                    language: notifier.language,
                                   ),
                           )
                         ],
@@ -208,8 +211,8 @@ class _HomePageState extends State<HomePage> {
                           children: [
                             Expanded(
                                 child: ![
-                              fileEmpty(language),
-                              errorLoadingFile(language)
+                              fileEmpty(notifier.language),
+                              errorLoadingFile(notifier.language)
                             ].contains(fileContent)
                                     ? ListView(
                                         controller: ScrollController(),
@@ -241,9 +244,10 @@ class _HomePageState extends State<HomePage> {
     });
   }
 
-  openProject(String path) {
+  openProject(String path, SettingsScreenNotifier notifier) {
     setProjectFile(path);
     setRoute("matrix_creation");
+    notifier.setApplicationScreen(1);
   }
 
   List<Widget> generateListOfRecentCards() {
@@ -256,6 +260,8 @@ class _HomePageState extends State<HomePage> {
           Consumer<SettingsScreenNotifier>(builder: (context, notifier, child) {
         return RecentContainerHomeWidget(
           darkTheme: notifier.darkTheme,
+          language: notifier.language,
+          notifier: notifier,
           fileName: recent,
           openProject: openProject,
           setRecentSelected: setRecentSelected,
@@ -297,7 +303,7 @@ class _HomePageState extends State<HomePage> {
             builder: (context, notifier, child) {
           return StatefulBuilder(builder: (context, setInnerState) {
             return AlertDialog(
-              title: Text(existingProjectTitle(language),
+              title: Text(existingProjectTitle(notifier.language),
                   style: TextStyle(color: Color.fromARGB(255, 100, 100, 100))),
               content: Wrap(
                 children: [
@@ -307,7 +313,7 @@ class _HomePageState extends State<HomePage> {
                       mainAxisAlignment: MainAxisAlignment.start,
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        Text(existingProjectMsg(language),
+                        Text(existingProjectMsg(notifier.language),
                             style: TextStyle(color: Colors.grey)),
                         Container(
                           margin: EdgeInsets.only(top: 10),
@@ -415,10 +421,10 @@ class _HomePageState extends State<HomePage> {
 
   newProject() {}
 
-  setRecentSelected(int index) {
+  setRecentSelected(int index, int language) {
     setState(() {
       selected = index;
-      setContent(index);
+      setContent(index, language);
 
       fileSize = recentProjectComponentFileSize[index];
       recentProjectComponentSelected[index] =
@@ -435,7 +441,7 @@ class _HomePageState extends State<HomePage> {
     });
   }
 
-  setContent(int index) async {
+  setContent(int index, int language) async {
     var file = File(recentProjectHistory[index]);
 
     if (file.existsSync()) {
