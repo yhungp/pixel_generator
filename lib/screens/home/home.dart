@@ -4,6 +4,7 @@ import 'dart:convert';
 import 'dart:io';
 
 import 'package:calculator/language/home.dart';
+import 'package:calculator/main.dart';
 import 'package:calculator/utils/prettyJSON.dart';
 import 'package:calculator/widgets/generic_button.dart';
 import 'package:calculator/screens/home/widgets/file_information.dart';
@@ -14,6 +15,7 @@ import 'package:calculator/widgets/horizontal_line.dart';
 import 'package:calculator/widgets/vertical_line.dart';
 import 'package:file_picker/file_picker.dart';
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
 
 class HomePage extends StatefulWidget {
   Function setRoute;
@@ -63,173 +65,180 @@ class _HomePageState extends State<HomePage> {
 
   @override
   Widget build(BuildContext context) {
-    return Container(
-      height: double.infinity,
-      width: double.infinity,
-      color: blackTheme(darkTheme),
-      padding: const EdgeInsets.all(5.0),
-      child: Row(
-        children: [
-          Container(
-            width: 250,
-            padding: const EdgeInsets.all(5.0),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Center(
-                  child: Container(
-                    padding: EdgeInsets.all(10),
-                    decoration: BoxDecoration(
-                        borderRadius: BorderRadius.all(Radius.circular(20)),
-                        color: Colors.grey),
-                    child: Text(
-                      recentProjects(language),
-                      style: TextStyle(color: Colors.black87),
+    return Consumer<SettingsScreenNotifier>(
+        builder: (context, notifier, child) {
+      return Container(
+        height: double.infinity,
+        width: double.infinity,
+        color: blackTheme(notifier.darkTheme),
+        padding: const EdgeInsets.all(5.0),
+        child: Row(
+          children: [
+            Container(
+              width: 250,
+              padding: const EdgeInsets.all(5.0),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Center(
+                    child: Container(
+                      padding: EdgeInsets.all(10),
+                      decoration: BoxDecoration(
+                          borderRadius: BorderRadius.all(Radius.circular(20)),
+                          color: Colors.grey),
+                      child: Text(
+                        recentProjects(language),
+                        style: TextStyle(color: Colors.black87),
+                      ),
                     ),
                   ),
-                ),
-                Expanded(
-                    child: recentProjectHistory.isEmpty
-                        ? Center(
-                            child: Text(noRecentProjectsToShow(language),
-                                textAlign: TextAlign.center,
-                                style: TextStyle(color: textColor(darkTheme))),
-                          )
-                        : ListView.builder(
-                            itemCount: recentProjectHistory.length,
-                            itemBuilder: (context, index) {
-                              return RecentLateralBarComponent(
-                                  darkTheme: darkTheme,
-                                  fileName: recentProjectHistory[index],
-                                  openProject: openProject);
-                            },
-                          ))
-              ],
+                  Expanded(
+                      child: recentProjectHistory.isEmpty
+                          ? Center(
+                              child: Text(noRecentProjectsToShow(language),
+                                  textAlign: TextAlign.center,
+                                  style: TextStyle(
+                                      color: textColor(notifier.darkTheme))),
+                            )
+                          : ListView.builder(
+                              itemCount: recentProjectHistory.length,
+                              itemBuilder: (context, index) {
+                                return RecentLateralBarComponent(
+                                    darkTheme: notifier.darkTheme,
+                                    fileName: recentProjectHistory[index],
+                                    openProject: openProject);
+                              },
+                            ))
+                ],
+              ),
             ),
-          ),
-          VerticalLine(),
-          recentProjectHistory.isEmpty
-              ? Expanded(
-                  child: Center(
-                    child: Column(
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      crossAxisAlignment: CrossAxisAlignment.center,
-                      children: [
-                        Text(noRecentProjectsToShow(language),
-                            textAlign: TextAlign.center,
-                            style: TextStyle(color: textColor(darkTheme))),
-                        SizedBox(height: 10),
-                        Row(
-                          mainAxisAlignment: MainAxisAlignment.center,
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            GenericButton(
-                                label: createNewProject(language),
-                                func: newProject,
-                                darkTheme: darkTheme),
-                            SizedBox(width: 10),
-                            GenericButton(
-                                label: openExistingProject(language),
-                                func: openProjectFromDialog,
-                                darkTheme: darkTheme),
-                          ],
-                        )
-                      ],
-                    ),
-                  ),
-                )
-              : Expanded(
-                  child: Column(
-                  children: [
-                    Expanded(
-                        child: Row(
-                      children: [
-                        Expanded(
-                            child: Container(
-                          margin: EdgeInsets.symmetric(vertical: 5),
-                          // color: Colors.white,
-                          child: Column(
-                            children: [
-                              Expanded(
-                                child: ListView(
-                                  controller: ScrollController(),
-                                  children: [
-                                    Wrap(
-                                      alignment: WrapAlignment.start,
-                                      crossAxisAlignment:
-                                          WrapCrossAlignment.start,
-                                      children: generateListOfRecentCards(),
-                                    )
-                                  ],
-                                ),
-                              ),
-                              Row(
-                                mainAxisAlignment: MainAxisAlignment.end,
-                                children: [
-                                  GenericButton(
-                                      label: createNewProject(language),
-                                      func: newProject,
-                                      darkTheme: darkTheme),
-                                  SizedBox(width: 10),
-                                  GenericButton(
-                                      label: openExistingProject(language),
-                                      func: openProjectFromDialog,
-                                      darkTheme: darkTheme)
-                                ],
-                              )
-                            ],
-                          ),
-                        )),
-                        VerticalLine(),
-                        Container(
-                          margin: EdgeInsets.all(5),
-                          width: 250,
-                          child: selected == -1
-                              ? Container()
-                              : FileInformation(
-                                  darkTheme: darkTheme,
-                                  fileName: recentProjectHistory[selected],
-                                  language: language,
-                                ),
-                        )
-                      ],
-                    )),
-                    Visibility(child: HorizontalLine()),
-                    Container(
-                      padding: EdgeInsets.all(5),
-                      height: 150,
+            VerticalLine(),
+            recentProjectHistory.isEmpty
+                ? Expanded(
+                    child: Center(
                       child: Column(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        crossAxisAlignment: CrossAxisAlignment.center,
                         children: [
-                          Expanded(
-                              child: ![
-                            fileEmpty(language),
-                            errorLoadingFile(language)
-                          ].contains(fileContent)
-                                  ? ListView(
-                                      controller: ScrollController(),
-                                      children: [
-                                        Text(fileContent,
-                                            style: TextStyle(
-                                                color: textColor(darkTheme)),
-                                            textAlign: TextAlign.start)
-                                      ],
-                                    )
-                                  : Center(
-                                      child: Text(
-                                        fileContent,
-                                        style: TextStyle(
-                                            color: textColor(darkTheme)),
-                                        textAlign: TextAlign.center,
-                                      ),
-                                    ))
+                          Text(noRecentProjectsToShow(language),
+                              textAlign: TextAlign.center,
+                              style: TextStyle(
+                                  color: textColor(notifier.darkTheme))),
+                          SizedBox(height: 10),
+                          Row(
+                            mainAxisAlignment: MainAxisAlignment.center,
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              GenericButton(
+                                  label: createNewProject(language),
+                                  func: newProject,
+                                  darkTheme: notifier.darkTheme),
+                              SizedBox(width: 10),
+                              GenericButton(
+                                  label: openExistingProject(language),
+                                  func: openProjectFromDialog,
+                                  darkTheme: notifier.darkTheme),
+                            ],
+                          )
                         ],
                       ),
-                    )
-                  ],
-                ))
-        ],
-      ),
-    );
+                    ),
+                  )
+                : Expanded(
+                    child: Column(
+                    children: [
+                      Expanded(
+                          child: Row(
+                        children: [
+                          Expanded(
+                              child: Container(
+                            margin: EdgeInsets.symmetric(vertical: 5),
+                            // color: Colors.white,
+                            child: Column(
+                              children: [
+                                Expanded(
+                                  child: ListView(
+                                    controller: ScrollController(),
+                                    children: [
+                                      Wrap(
+                                        alignment: WrapAlignment.start,
+                                        crossAxisAlignment:
+                                            WrapCrossAlignment.start,
+                                        children: generateListOfRecentCards(),
+                                      )
+                                    ],
+                                  ),
+                                ),
+                                Row(
+                                  mainAxisAlignment: MainAxisAlignment.end,
+                                  children: [
+                                    GenericButton(
+                                        label: createNewProject(language),
+                                        func: newProject,
+                                        darkTheme: notifier.darkTheme),
+                                    SizedBox(width: 10),
+                                    GenericButton(
+                                        label: openExistingProject(language),
+                                        func: openProjectFromDialog,
+                                        darkTheme: notifier.darkTheme)
+                                  ],
+                                )
+                              ],
+                            ),
+                          )),
+                          VerticalLine(),
+                          Container(
+                            margin: EdgeInsets.all(5),
+                            width: 250,
+                            child: selected == -1
+                                ? Container()
+                                : FileInformation(
+                                    darkTheme: notifier.darkTheme,
+                                    fileName: recentProjectHistory[selected],
+                                    language: language,
+                                  ),
+                          )
+                        ],
+                      )),
+                      Visibility(child: HorizontalLine()),
+                      Container(
+                        padding: EdgeInsets.all(5),
+                        height: 150,
+                        child: Column(
+                          children: [
+                            Expanded(
+                                child: ![
+                              fileEmpty(language),
+                              errorLoadingFile(language)
+                            ].contains(fileContent)
+                                    ? ListView(
+                                        controller: ScrollController(),
+                                        children: [
+                                          Text(fileContent,
+                                              style: TextStyle(
+                                                  color: textColor(
+                                                      notifier.darkTheme)),
+                                              textAlign: TextAlign.start)
+                                        ],
+                                      )
+                                    : Center(
+                                        child: Text(
+                                          fileContent,
+                                          style: TextStyle(
+                                              color: textColor(
+                                                  notifier.darkTheme)),
+                                          textAlign: TextAlign.center,
+                                        ),
+                                      ))
+                          ],
+                        ),
+                      )
+                    ],
+                  ))
+          ],
+        ),
+      );
+    });
   }
 
   openProject(String path) {
@@ -243,13 +252,16 @@ class _HomePageState extends State<HomePage> {
     int counter = 0;
     for (var recent in recentProjectHistory) {
       final int count = counter;
-      widget.add(RecentContainerHomeWidget(
-        darkTheme: darkTheme,
-        fileName: recent,
-        openProject: openProject,
-        setRecentSelected: setRecentSelected,
-        index: count,
-      ));
+      widget.add(
+          Consumer<SettingsScreenNotifier>(builder: (context, notifier, child) {
+        return RecentContainerHomeWidget(
+          darkTheme: notifier.darkTheme,
+          fileName: recent,
+          openProject: openProject,
+          setRecentSelected: setRecentSelected,
+          index: count,
+        );
+      }));
       counter += 1;
     }
 
@@ -281,76 +293,80 @@ class _HomePageState extends State<HomePage> {
     showDialog(
       context: context,
       builder: (BuildContext context) {
-        return StatefulBuilder(builder: (context, setInnerState) {
-          return AlertDialog(
-            title: Text(existingProjectTitle(language),
-                style: TextStyle(color: Color.fromARGB(255, 100, 100, 100))),
-            content: Wrap(
-              children: [
-                SizedBox(
-                  width: 500,
-                  child: Column(
-                    mainAxisAlignment: MainAxisAlignment.start,
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Text(existingProjectMsg(language),
-                          style: TextStyle(color: Colors.grey)),
-                      Container(
-                        margin: EdgeInsets.only(top: 10),
-                        height: 60,
-                        child: Row(
-                          children: [
-                            Expanded(
-                              child: Container(
-                                padding: EdgeInsets.fromLTRB(10, 10, 5, 10),
-                                decoration: BoxDecoration(
-                                    color: Color.fromARGB(255, 200, 200, 200),
-                                    borderRadius: BorderRadius.only(
-                                        topLeft: Radius.circular(10),
-                                        bottomLeft: Radius.circular(10))),
-                                child: TextField(
-                                  controller: dir,
-                                  onChanged: (text) async {
-                                    showAccept =
-                                        await checkValidProjectFile(text);
-                                    setInnerState(() {});
-                                  },
+        return Consumer<SettingsScreenNotifier>(
+            builder: (context, notifier, child) {
+          return StatefulBuilder(builder: (context, setInnerState) {
+            return AlertDialog(
+              title: Text(existingProjectTitle(language),
+                  style: TextStyle(color: Color.fromARGB(255, 100, 100, 100))),
+              content: Wrap(
+                children: [
+                  SizedBox(
+                    width: 500,
+                    child: Column(
+                      mainAxisAlignment: MainAxisAlignment.start,
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(existingProjectMsg(language),
+                            style: TextStyle(color: Colors.grey)),
+                        Container(
+                          margin: EdgeInsets.only(top: 10),
+                          height: 60,
+                          child: Row(
+                            children: [
+                              Expanded(
+                                child: Container(
+                                  padding: EdgeInsets.fromLTRB(10, 10, 5, 10),
+                                  decoration: BoxDecoration(
+                                      color: Color.fromARGB(255, 200, 200, 200),
+                                      borderRadius: BorderRadius.only(
+                                          topLeft: Radius.circular(10),
+                                          bottomLeft: Radius.circular(10))),
+                                  child: TextField(
+                                    controller: dir,
+                                    onChanged: (text) async {
+                                      showAccept =
+                                          await checkValidProjectFile(text);
+                                      setInnerState(() {});
+                                    },
+                                  ),
                                 ),
                               ),
-                            ),
-                            GestureDetector(
-                              onTap: () async {
-                                var file = await openFile();
-                                dir.text = file;
-                                showAccept = await checkValidProjectFile(file);
-                                setInnerState(() {});
-                              },
-                              child: Container(
-                                width: 40,
-                                height: double.infinity,
-                                decoration: BoxDecoration(
-                                    color: blueTheme(darkTheme),
-                                    borderRadius: BorderRadius.only(
-                                        topRight: Radius.circular(10),
-                                        bottomRight: Radius.circular(10))),
-                                child: Icon(Icons.search),
-                              ),
-                            )
-                          ],
-                        ),
-                      )
-                    ],
-                  ),
-                )
-              ],
-            ),
-            actions: showAccept
-                ? [
-                    cancelButton,
-                    okButton,
-                  ]
-                : [cancelButton],
-          );
+                              GestureDetector(
+                                onTap: () async {
+                                  var file = await openFile();
+                                  dir.text = file;
+                                  showAccept =
+                                      await checkValidProjectFile(file);
+                                  setInnerState(() {});
+                                },
+                                child: Container(
+                                  width: 40,
+                                  height: double.infinity,
+                                  decoration: BoxDecoration(
+                                      color: blueTheme(notifier.darkTheme),
+                                      borderRadius: BorderRadius.only(
+                                          topRight: Radius.circular(10),
+                                          bottomRight: Radius.circular(10))),
+                                  child: Icon(Icons.search),
+                                ),
+                              )
+                            ],
+                          ),
+                        )
+                      ],
+                    ),
+                  )
+                ],
+              ),
+              actions: showAccept
+                  ? [
+                      cancelButton,
+                      okButton,
+                    ]
+                  : [cancelButton],
+            );
+          });
         });
       },
     );

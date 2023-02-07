@@ -1,10 +1,11 @@
-// ignore_for_file: prefer_const_literals_to_create_immutables
+// ignore_for_file: prefer_const_literals_to_create_immutables, prefer_const_constructors
 
 import 'package:calculator/screens/home/home.dart';
 import 'package:calculator/screens/matrix_creation/matrix_creation.dart';
-import 'package:calculator/styles/styles.dart';
+import 'package:calculator/screens/settings/settings.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
 
 void main() async {
   // WidgetsFlutterBinding.ensureInitialized();
@@ -27,20 +28,34 @@ void main() async {
   runApp(const MyApp());
 }
 
+var primaryColor = Color(0xFF151026);
+
 class MyApp extends StatelessWidget {
   const MyApp({Key? key}) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
-    return MaterialApp(
-      title: 'Flutter Demo',
-      debugShowCheckedModeBanner: false,
-      theme: ThemeData(
-        primarySwatch: Colors.blue,
-      ),
-      scrollBehavior: MyCustomScrollBehavior(),
-      home: const MyHomePage(title: 'Pixel matrix generator'),
-    );
+    return ChangeNotifierProvider(
+        create: (context) => SettingsScreenNotifier(),
+        builder: (context, provider) {
+          return Consumer<SettingsScreenNotifier>(
+              builder: (context, notifier, child) {
+            return MaterialApp(
+              title: 'Flutter Demo',
+              debugShowCheckedModeBanner: false,
+              // theme: ThemeData(
+              //   primarySwatch: Colors.blue,
+              // ),
+              theme: ThemeData(
+                primarySwatch:
+                    notifier.darkTheme ? Colors.blueGrey : Colors.blue,
+              ),
+              themeMode: notifier.darkTheme ? ThemeMode.dark : ThemeMode.light,
+              scrollBehavior: MyCustomScrollBehavior(),
+              home: const MyHomePage(title: 'Pixel matrix generator'),
+            );
+          });
+        });
   }
 }
 
@@ -58,24 +73,67 @@ class _MyHomePageState extends State<MyHomePage> {
   String title = "Home";
   String filePath = "";
 
-  bool darkTheme = true;
+  bool darkTheme = false;
 
   int language = 0;
 
   @override
   void initState() {
     super.initState();
+
+    bodyContent = routes(route);
   }
+
+  bool reload = false;
+  late Widget bodyContent;
 
   @override
   Widget build(BuildContext context) {
+    if (reload) {
+      setState(() {
+        reload = false;
+      });
+    }
+
     return Scaffold(
       appBar: AppBar(
-        backgroundColor: blueTheme(darkTheme),
         title: Text(title),
+        actions: <Widget>[
+          Consumer<SettingsScreenNotifier>(builder: (context, notifier, child) {
+            return Switch(
+              value: notifier.darkTheme,
+              activeThumbImage: AssetImage("assets/white-moon.png"),
+              inactiveThumbImage: AssetImage("assets/dark-sun.png"),
+              activeColor: Colors.white,
+              onChanged: (value) {
+                notifier.toggleApplicationTheme(value);
+              },
+            );
+          }),
+          IconButton(
+            icon: const Icon(
+              Icons.settings,
+              color: Colors.white,
+            ),
+            onPressed: () {
+              Navigator.push(
+                context,
+                MaterialPageRoute(builder: (context) => const SettingsScreen()),
+              );
+            },
+          ),
+        ],
       ),
       body: Container(child: routes(route)),
     );
+  }
+
+  void toggleSwitch(bool value) {
+    setState(() {
+      darkTheme = !darkTheme;
+      reload = true;
+      bodyContent = routes(route);
+    });
   }
 
   setRoute(String r) {
@@ -121,4 +179,19 @@ class MyCustomScrollBehavior extends MaterialScrollBehavior {
         PointerDeviceKind.touch,
         PointerDeviceKind.mouse,
       };
+}
+
+class SettingsScreenNotifier extends ChangeNotifier {
+  /// 1
+  bool darkTheme = true;
+
+  /// 2
+  get isDarkModeEnabled => darkTheme;
+
+  /// 3
+  void toggleApplicationTheme(bool darkModeEnabled) {
+    /// 4
+    darkTheme = darkModeEnabled;
+    notifyListeners();
+  }
 }
