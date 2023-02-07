@@ -32,11 +32,12 @@ class CustomTextField extends StatelessWidget {
               BoxDecoration(borderRadius: BorderRadius.all(Radius.circular(5))),
           width: 150,
           child: TextField(
+            style: TextStyle(color: Colors.white),
             controller: controller,
             decoration: InputDecoration(
               border: OutlineInputBorder(),
               labelText: 'Matrix columns',
-              hintStyle: TextStyle(color: textColor(darkTheme)),
+              hintStyle: TextStyle(color: Colors.white),
             ),
             onChanged: (value) => onTextChange(),
           ),

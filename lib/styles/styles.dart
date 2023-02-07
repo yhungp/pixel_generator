@@ -17,7 +17,7 @@ textColor(bool darkTheme) {
 }
 
 buttonOnHomeTextColor(bool darkTheme) {
-  return darkTheme ? const Color.fromARGB(255, 200, 200, 200): Colors.white;
+  return darkTheme ? const Color.fromARGB(255, 200, 200, 200) : Colors.white;
 }
 
 buttonOnHome(bool darkTheme) {
@@ -26,4 +26,8 @@ buttonOnHome(bool darkTheme) {
 
 textColorRecentContainerHome() {
   return Colors.black87;
+}
+
+matrixCellColor(bool darkTheme) {
+  return darkTheme ? Colors.white : Colors.grey;
 }

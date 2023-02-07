@@ -4,9 +4,12 @@ import 'dart:convert';
 import 'dart:ffi';
 import 'dart:io';
 
+import 'package:calculator/language/matrix_creation.dart';
+import 'package:calculator/main.dart';
 import 'package:calculator/screens/matrix_creation/widgets/custom_text_field.dart';
 import 'package:calculator/styles/styles.dart';
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
 
 class MatrixCreation extends StatefulWidget {
   bool darkTheme;
@@ -63,98 +66,107 @@ class _MatrixCreationState extends State<MatrixCreation> {
 
   @override
   Widget build(BuildContext context) {
-    return Container(
-      padding: EdgeInsets.all(10),
-      height: double.infinity,
-      width: double.infinity,
-      color: blackTheme(darkTheme),
-      child: Column(
-        mainAxisAlignment: MainAxisAlignment.start,
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Row(
-            children: [
-              Container(
-                  padding: EdgeInsets.all(10),
-                  margin: EdgeInsets.only(right: 10),
-                  decoration: BoxDecoration(
-                      color: blueTheme(darkTheme),
-                      borderRadius: BorderRadius.all(Radius.circular(5))),
-                  child: Column(
-                    children: [
-                      Text("Individual matrix"),
-                      Row(
-                        children: [
-                          CustomTextField(
-                              controller: matrixColumnsText,
-                              darkTheme: darkTheme,
-                              index: "matrixColumnsText",
-                              upDownValue: upDownValue,
-                              onTextChange: onTextChange),
-                          CustomTextField(
-                              controller: matrixRowsText,
-                              darkTheme: darkTheme,
-                              index: "matrixRowsText",
-                              upDownValue: upDownValue,
-                              onTextChange: onTextChange),
-                        ],
-                      ),
-                    ],
-                  )),
-              Container(
-                  padding: EdgeInsets.all(10),
-                  decoration: BoxDecoration(
-                      color: blueTheme(darkTheme),
-                      borderRadius: BorderRadius.all(Radius.circular(5))),
-                  child: Column(
-                    children: [
-                      Text("Matrix array"),
-                      Row(
-                        children: [
-                          CustomTextField(
-                              controller: columnsText,
-                              darkTheme: darkTheme,
-                              index: "columnsText",
-                              upDownValue: upDownValue,
-                              onTextChange: onTextChange),
-                          CustomTextField(
-                              controller: rowsText,
-                              darkTheme: darkTheme,
-                              index: "rowsText",
-                              upDownValue: upDownValue,
-                              onTextChange: onTextChange),
-                        ],
-                      ),
-                    ],
-                  )),
-            ],
-          ),
-          SizedBox(height: 10),
-          Expanded(
-            child: Scrollbar(
-              controller: _vertical,
-              thumbVisibility: true,
-              trackVisibility: true,
+    return Consumer<SettingsScreenNotifier>(
+        builder: (context, notifier, child) {
+      return Container(
+        padding: EdgeInsets.all(10),
+        height: double.infinity,
+        width: double.infinity,
+        color: blackTheme(notifier.darkTheme),
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.start,
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Row(
+              children: [
+                Container(
+                    padding: EdgeInsets.all(10),
+                    margin: EdgeInsets.only(right: 10),
+                    decoration: BoxDecoration(
+                        color: blueTheme(notifier.darkTheme),
+                        borderRadius: BorderRadius.all(Radius.circular(5))),
+                    child: Column(
+                      children: [
+                        Text(
+                          individualMatrix(notifier.language),
+                          style: TextStyle(color: Colors.white),
+                        ),
+                        Row(
+                          children: [
+                            CustomTextField(
+                                controller: matrixColumnsText,
+                                darkTheme: notifier.darkTheme,
+                                index: "matrixColumnsText",
+                                upDownValue: upDownValue,
+                                onTextChange: onTextChange),
+                            CustomTextField(
+                                controller: matrixRowsText,
+                                darkTheme: notifier.darkTheme,
+                                index: "matrixRowsText",
+                                upDownValue: upDownValue,
+                                onTextChange: onTextChange),
+                          ],
+                        ),
+                      ],
+                    )),
+                Container(
+                    padding: EdgeInsets.all(10),
+                    decoration: BoxDecoration(
+                        color: blueTheme(notifier.darkTheme),
+                        borderRadius: BorderRadius.all(Radius.circular(5))),
+                    child: Column(
+                      children: [
+                        Text(
+                          matrixArray(notifier.language),
+                          style: TextStyle(color: Colors.white),
+                        ),
+                        Row(
+                          children: [
+                            CustomTextField(
+                                controller: columnsText,
+                                darkTheme: notifier.darkTheme,
+                                index: "columnsText",
+                                upDownValue: upDownValue,
+                                onTextChange: onTextChange),
+                            CustomTextField(
+                                controller: rowsText,
+                                darkTheme: notifier.darkTheme,
+                                index: "rowsText",
+                                upDownValue: upDownValue,
+                                onTextChange: onTextChange),
+                          ],
+                        ),
+                      ],
+                    )),
+              ],
+            ),
+            SizedBox(height: 10),
+            Expanded(
               child: Scrollbar(
-                controller: _horizontal,
+                controller: _vertical,
                 thumbVisibility: true,
                 trackVisibility: true,
-                notificationPredicate: (notif) => notif.depth == 1,
-                child: SingleChildScrollView(
-                  controller: _vertical,
+                child: Scrollbar(
+                  controller: _horizontal,
+                  thumbVisibility: true,
+                  trackVisibility: true,
+                  notificationPredicate: (notif) => notif.depth == 1,
                   child: SingleChildScrollView(
-                      controller: _horizontal,
-                      scrollDirection: Axis.horizontal,
-                      child: Column(
-                        children: matrixGenerator(),
-                      )),
+                    controller: _vertical,
+                    child: SingleChildScrollView(
+                        controller: _horizontal,
+                        scrollDirection: Axis.horizontal,
+                        child: Column(
+                          children: matrixGenerator(notifier.darkTheme),
+                        )),
+                  ),
                 ),
               ),
             ),
-          ),
-        ],
-      ),
-    );
+          ],
+        ),
+      );
+    });
   }
 
   upDownValue(bool upDown, String tag) {
@@ -206,7 +218,7 @@ class _MatrixCreationState extends State<MatrixCreation> {
     });
   }
 
-  matrixGenerator() {
+  matrixGenerator(bool darkTheme) {
     List<Widget> widgets = List.generate(
         int.parse(rowsText.text),
         (index) => Row(
@@ -225,7 +237,8 @@ class _MatrixCreationState extends State<MatrixCreation> {
                                           (index) => Container(
                                                 width: 10,
                                                 height: 10,
-                                                color: Colors.white,
+                                                color:
+                                                    matrixCellColor(darkTheme),
                                                 margin: EdgeInsets.all(2),
                                               )),
                                     ),
