@@ -6,7 +6,9 @@ import 'dart:io';
 
 import 'package:calculator/language/matrix_creation.dart';
 import 'package:calculator/main.dart';
+import 'package:calculator/screens/matrix_creation/widgets/button.dart';
 import 'package:calculator/screens/matrix_creation/widgets/custom_text_field.dart';
+import 'package:calculator/screens/matrix_creation/widgets/scale_button.dart';
 import 'package:calculator/styles/styles.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
@@ -34,6 +36,11 @@ class _MatrixCreationState extends State<MatrixCreation> {
   int matrixRows = 8;
   int columns = 1;
   int rows = 1;
+  int startingMatrixColumns = 8;
+  int startingMatrixRows = 8;
+  int startingColumns = 1;
+  int startingRows = 1;
+
   int language = 0;
 
   String filePath = "";
@@ -97,12 +104,14 @@ class _MatrixCreationState extends State<MatrixCreation> {
                                 controller: matrixColumnsText,
                                 darkTheme: notifier.darkTheme,
                                 index: "matrixColumnsText",
+                                notifier: notifier,
                                 upDownValue: upDownValue,
                                 onTextChange: onTextChange),
                             CustomTextField(
                                 controller: matrixRowsText,
                                 darkTheme: notifier.darkTheme,
                                 index: "matrixRowsText",
+                                notifier: notifier,
                                 upDownValue: upDownValue,
                                 onTextChange: onTextChange),
                           ],
@@ -126,12 +135,14 @@ class _MatrixCreationState extends State<MatrixCreation> {
                                 controller: columnsText,
                                 darkTheme: notifier.darkTheme,
                                 index: "columnsText",
+                                notifier: notifier,
                                 upDownValue: upDownValue,
                                 onTextChange: onTextChange),
                             CustomTextField(
                                 controller: rowsText,
                                 darkTheme: notifier.darkTheme,
                                 index: "rowsText",
+                                notifier: notifier,
                                 upDownValue: upDownValue,
                                 onTextChange: onTextChange),
                           ],
@@ -141,32 +152,147 @@ class _MatrixCreationState extends State<MatrixCreation> {
               ],
             ),
             SizedBox(height: 10),
+            arrayOfMatrix(notifier),
+            viewScale(notifier)
+          ],
+        ),
+      );
+    });
+  }
+
+  Expanded arrayOfMatrix(SettingsScreenNotifier notifier) {
+    return Expanded(
+      child: Scrollbar(
+        controller: _vertical,
+        thumbVisibility: true,
+        trackVisibility: true,
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.start,
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
             Expanded(
               child: Scrollbar(
-                controller: _vertical,
+                controller: _horizontal,
                 thumbVisibility: true,
                 trackVisibility: true,
-                child: Scrollbar(
-                  controller: _horizontal,
-                  thumbVisibility: true,
-                  trackVisibility: true,
-                  notificationPredicate: (notif) => notif.depth == 1,
-                  child: SingleChildScrollView(
-                    controller: _vertical,
-                    child: SingleChildScrollView(
-                        controller: _horizontal,
-                        scrollDirection: Axis.horizontal,
-                        child: Column(
-                          children: matrixGenerator(notifier.darkTheme),
-                        )),
-                  ),
+                notificationPredicate: (notif) => notif.depth == 1,
+                child: Row(
+                  mainAxisAlignment: MainAxisAlignment.start,
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Expanded(
+                      child: SingleChildScrollView(
+                        controller: _vertical,
+                        child: SingleChildScrollView(
+                            controller: _horizontal,
+                            scrollDirection: Axis.horizontal,
+                            child: Column(
+                              mainAxisAlignment: MainAxisAlignment.start,
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: matrixGenerator(notifier.darkTheme),
+                            )),
+                      ),
+                    ),
+                  ],
                 ),
               ),
             ),
           ],
         ),
-      );
-    });
+      ),
+    );
+  }
+
+  double scale = 1;
+  Row viewScale(SettingsScreenNotifier notifier) {
+    return Row(
+      children: [
+        ScaleButton(
+          text: "-",
+          darkTheme: notifier.darkTheme,
+          func: downScale,
+        ),
+        Container(
+          width: 100,
+          alignment: Alignment.center,
+          padding: EdgeInsets.all(10),
+          child: Text(
+            "Zoom: ${scale >= 1 ? scale.toStringAsFixed(0) : scale}",
+            style: TextStyle(
+              color: textColorMatrixCreation(
+                notifier.darkTheme,
+              ),
+            ),
+          ),
+        ),
+        ScaleButton(
+          text: "+",
+          darkTheme: notifier.darkTheme,
+          func: upScale,
+        ),
+        Expanded(child: Container()),
+        Visibility(
+          visible: checkIsDifferent(),
+          child: buttonOnMatrix(
+            saveAndContinueToNextStep,
+            notifier.darkTheme,
+            saveAndContinueBtn(notifier.language),
+          ),
+        ),
+        SizedBox(width: 10),
+        buttonOnMatrix(
+          continueToNextStep,
+          notifier.darkTheme,
+          continueBtn(notifier.language),
+        ),
+      ],
+    );
+  }
+
+  checkIsDifferent() {
+    return int.parse(matrixColumnsText.text) != startingMatrixColumns ||
+        int.parse(matrixRowsText.text) != startingMatrixRows ||
+        int.parse(columnsText.text) != startingColumns ||
+        int.parse(rowsText.text) != startingRows;
+  }
+
+  continueToNextStep() {}
+
+  saveAndContinueToNextStep() {}
+
+  upScale() {
+    if (scale >= 1) {
+      setState(() {
+        scale += 1;
+        scale = double.parse(scale.toStringAsFixed(1));
+      });
+      return;
+    }
+    if (scale <= 0.9) {
+      setState(() {
+        scale += 0.1;
+        scale = double.parse(scale.toStringAsFixed(1));
+      });
+      return;
+    }
+    scale = 1;
+  }
+
+  downScale() {
+    if (scale > 1) {
+      setState(() {
+        scale -= 1;
+        scale = double.parse(scale.toStringAsFixed(1));
+      });
+      return;
+    }
+    if (scale > 0.1) {
+      setState(() {
+        scale -= 0.1;
+        scale = double.parse(scale.toStringAsFixed(1));
+      });
+      return;
+    }
   }
 
   upDownValue(bool upDown, String tag) {
@@ -235,8 +361,8 @@ class _MatrixCreationState extends State<MatrixCreation> {
                                       children: List.generate(
                                           int.parse(matrixColumnsText.text),
                                           (index) => Container(
-                                                width: 10,
-                                                height: 10,
+                                                width: 10 * scale,
+                                                height: 10 * scale,
                                                 color:
                                                     matrixCellColor(darkTheme),
                                                 margin: EdgeInsets.all(2),
@@ -267,6 +393,7 @@ class _MatrixCreationState extends State<MatrixCreation> {
             recent["matrix_columns"].runtimeType == int) {
           setState(() {
             matrixColumns = recent["matrix_columns"];
+            startingMatrixColumns = recent["matrix_columns"];
             matrixColumnsText.text = recent["matrix_columns"].toString();
           });
         }
@@ -275,6 +402,7 @@ class _MatrixCreationState extends State<MatrixCreation> {
             recent["matrix_rows"].runtimeType == int) {
           setState(() {
             matrixRows = recent["matrix_rows"];
+            startingMatrixRows = recent["matrix_rows"];
             matrixRowsText.text = recent["matrix_rows"].toString();
           });
         }
@@ -283,6 +411,7 @@ class _MatrixCreationState extends State<MatrixCreation> {
             recent["columns"].runtimeType == int) {
           setState(() {
             columns = recent["columns"];
+            startingColumns = recent["columns"];
             columnsText.text = recent["columns"].toString();
           });
         }
@@ -290,6 +419,7 @@ class _MatrixCreationState extends State<MatrixCreation> {
         if (recent.containsKey("rows") && recent["rows"].runtimeType == int) {
           setState(() {
             rows = recent["rows"];
+            startingRows = recent["rows"];
             rowsText.text = recent["rows"].toString();
           });
         }

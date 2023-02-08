@@ -31,3 +31,11 @@ textColorRecentContainerHome() {
 matrixCellColor(bool darkTheme) {
   return darkTheme ? Colors.white : Colors.grey;
 }
+
+matrixValuesTextField(bool darkTheme) {
+  return darkTheme ? Colors.white : const Color.fromARGB(255, 220, 220, 220);
+}
+
+textColorMatrixCreation(bool darkTheme) {
+  return darkTheme ? Colors.white : Colors.grey;
+}

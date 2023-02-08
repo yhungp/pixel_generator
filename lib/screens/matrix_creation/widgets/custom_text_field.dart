@@ -1,7 +1,9 @@
 // ignore_for_file: prefer_const_constructors, must_be_immutable
 
+import 'package:calculator/main.dart';
 import 'package:calculator/styles/styles.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 
 class CustomTextField extends StatelessWidget {
   CustomTextField(
@@ -10,8 +12,11 @@ class CustomTextField extends StatelessWidget {
       required this.darkTheme,
       required this.index,
       required this.onTextChange,
-      required this.upDownValue})
+      required this.upDownValue,
+      required this.notifier})
       : super(key: key);
+
+  SettingsScreenNotifier notifier;
 
   TextEditingController controller;
   bool darkTheme;
@@ -33,11 +38,26 @@ class CustomTextField extends StatelessWidget {
           width: 150,
           child: TextField(
             style: TextStyle(color: Colors.white),
+            keyboardType: TextInputType.number,
+            inputFormatters: <TextInputFormatter>[
+              FilteringTextInputFormatter.allow(RegExp(r'[0-9]')),
+              FilteringTextInputFormatter.digitsOnly
+            ],
             controller: controller,
             decoration: InputDecoration(
               border: OutlineInputBorder(),
               labelText: 'Matrix columns',
-              hintStyle: TextStyle(color: Colors.white),
+              labelStyle:
+                  TextStyle(color: matrixValuesTextField(notifier.darkTheme)),
+              hintStyle:
+                  TextStyle(color: matrixValuesTextField(notifier.darkTheme)),
+              enabledBorder: OutlineInputBorder(
+                borderSide: BorderSide(
+                    width: 1,
+                    color: matrixValuesTextField(
+                        notifier.darkTheme)), //<-- SEE HERE
+              ),
+              // focusColor: Colors.black,
             ),
             onChanged: (value) => onTextChange(),
           ),
