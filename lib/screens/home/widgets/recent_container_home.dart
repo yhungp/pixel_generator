@@ -11,6 +11,7 @@ class RecentContainerHomeWidget extends StatefulWidget {
       required this.darkTheme,
       required this.fileName,
       required this.openProject,
+      required this.editProject,
       required this.index,
       required this.setRecentSelected,
       required this.language,
@@ -23,6 +24,7 @@ class RecentContainerHomeWidget extends StatefulWidget {
   SettingsScreenNotifier notifier;
 
   Function openProject;
+  Function editProject;
   Function setRecentSelected;
 
   int index;
@@ -62,7 +64,7 @@ class _RecentContainerHomeWidgetState extends State<RecentContainerHomeWidget> {
       },
       child: Container(
         width: 130,
-        height: 130,
+        height: 160,
         padding: EdgeInsets.all(5),
         margin: EdgeInsets.symmetric(horizontal: 5),
         decoration: BoxDecoration(
@@ -86,23 +88,50 @@ class _RecentContainerHomeWidgetState extends State<RecentContainerHomeWidget> {
                 ],
               ),
             ),
-            GestureDetector(
-              onTap: () {
-                widget.openProject(fileName, notifier);
-              },
-              child: Container(
-                width: double.infinity,
-                margin: EdgeInsets.only(top: 5),
-                padding: EdgeInsets.all(5),
-                decoration: BoxDecoration(
-                    borderRadius: BorderRadius.all(Radius.circular(5)),
-                    color: Colors.black87),
-                child: Text(
-                  "Open",
-                  style: TextStyle(color: Colors.white),
-                  textAlign: TextAlign.center,
+            Row(
+              children: [
+                Expanded(
+                  child: GestureDetector(
+                    onTap: () {
+                      widget.editProject(fileName, notifier);
+                    },
+                    child: Container(
+                      // width: double.infinity,
+                      margin: EdgeInsets.only(top: 5),
+                      padding: EdgeInsets.all(5),
+                      decoration: BoxDecoration(
+                        borderRadius: BorderRadius.all(Radius.circular(5)),
+                        color: Colors.black87,
+                      ),
+                      child: Icon(
+                        Icons.edit,
+                        color: Colors.white,
+                      ),
+                    ),
+                  ),
                 ),
-              ),
+                SizedBox(width: 10),
+                Expanded(
+                  child: GestureDetector(
+                    onTap: () {
+                      widget.openProject(fileName, notifier);
+                    },
+                    child: Container(
+                      // width: double.infinity,
+                      margin: EdgeInsets.only(top: 5),
+                      padding: EdgeInsets.all(5),
+                      decoration: BoxDecoration(
+                        borderRadius: BorderRadius.all(Radius.circular(5)),
+                        color: Colors.black87,
+                      ),
+                      child: Icon(
+                        Icons.folder_open_outlined,
+                        color: Colors.white,
+                      ),
+                    ),
+                  ),
+                ),
+              ],
             )
           ],
         ),

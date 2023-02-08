@@ -250,6 +250,12 @@ class _HomePageState extends State<HomePage> {
     notifier.setApplicationScreen(1);
   }
 
+  editProject(String path, SettingsScreenNotifier notifier) {
+    setProjectFile(path);
+    setRoute("matrix_creation");
+    notifier.setApplicationScreen(1);
+  }
+
   List<Widget> generateListOfRecentCards() {
     List<Widget> widget = [];
 
@@ -264,6 +270,7 @@ class _HomePageState extends State<HomePage> {
           notifier: notifier,
           fileName: recent,
           openProject: openProject,
+          editProject: editProject,
           setRecentSelected: setRecentSelected,
           index: count,
         );
