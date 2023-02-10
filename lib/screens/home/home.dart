@@ -16,6 +16,7 @@ import 'package:calculator/widgets/vertical_line.dart';
 import 'package:file_picker/file_picker.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+import 'package:http/http.dart' as http;
 
 class HomePage extends StatefulWidget {
   Function setRoute;
@@ -246,14 +247,14 @@ class _HomePageState extends State<HomePage> {
 
   openProject(String path, SettingsScreenNotifier notifier) {
     setProjectFile(path);
-    setRoute("matrix_creation");
+    setRoute("media_selector");
     notifier.setApplicationScreen(1);
   }
 
   editProject(String path, SettingsScreenNotifier notifier) {
     setProjectFile(path);
     setRoute("matrix_creation");
-    notifier.setApplicationScreen(1);
+    notifier.setApplicationScreen(2);
   }
 
   List<Widget> generateListOfRecentCards() {

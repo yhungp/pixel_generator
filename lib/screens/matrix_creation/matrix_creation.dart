@@ -1,4 +1,4 @@
-// ignore_for_file: prefer_const_literals_to_create_immutables, prefer_const_constructors
+// ignore_for_file: prefer_const_literals_to_create_immutables, prefer_const_constructors, must_be_immutable
 
 import 'dart:convert';
 import 'dart:ffi';
@@ -17,12 +17,16 @@ class MatrixCreation extends StatefulWidget {
   bool darkTheme;
   int language;
   String filePath;
+  Function setRoute;
+  Function setProjectFile;
 
   MatrixCreation({
     Key? key,
     required this.darkTheme,
     required this.language,
     required this.filePath,
+    required this.setProjectFile,
+    required this.setRoute,
   }) : super(key: key);
 
   @override
@@ -235,14 +239,14 @@ class _MatrixCreationState extends State<MatrixCreation> {
           visible: checkIsDifferent(),
           child: buttonOnMatrix(
             saveAndContinueToNextStep,
-            notifier.darkTheme,
+            notifier,
             saveAndContinueBtn(notifier.language),
           ),
         ),
         SizedBox(width: 10),
         buttonOnMatrix(
           continueToNextStep,
-          notifier.darkTheme,
+          notifier,
           continueBtn(notifier.language),
         ),
       ],
@@ -256,7 +260,11 @@ class _MatrixCreationState extends State<MatrixCreation> {
         int.parse(rowsText.text) != startingRows;
   }
 
-  continueToNextStep() {}
+  continueToNextStep(SettingsScreenNotifier notifier) {
+    widget.setProjectFile(filePath);
+    widget.setRoute("media_selector");
+    notifier.setApplicationScreen(2);
+  }
 
   saveAndContinueToNextStep() {}
 

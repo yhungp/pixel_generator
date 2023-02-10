@@ -36,6 +36,17 @@ dependencies:
   tuple: ^2.0.0
   file_picker: ^4.3.0
   provider: ^6.0.5
+  process_run: ^0.12.0
+  http: ^0.13.5
+  test_process: ^2.0.3
+  image: ^3.2.2
+  
+  # dart_vlc: ^0.1.9
+  # opencv_4: ^1.0.0
+  # flutter_vlc_player: ^7.0.0
+  # video_player: ^2.5.1
+  # video_player: ^2.2.16
+  # chewie: ^1.4.0
 
   window_manager:
     git:

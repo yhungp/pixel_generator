@@ -93,6 +93,26 @@ class _RecentContainerHomeWidgetState extends State<RecentContainerHomeWidget> {
                 Expanded(
                   child: GestureDetector(
                     onTap: () {
+                      widget.openProject(fileName, notifier);
+                    },
+                    child: Container(
+                      margin: EdgeInsets.only(top: 5),
+                      padding: EdgeInsets.all(5),
+                      decoration: BoxDecoration(
+                        borderRadius: BorderRadius.all(Radius.circular(5)),
+                        color: Colors.black87,
+                      ),
+                      child: Icon(
+                        Icons.folder_open_outlined,
+                        color: Colors.white,
+                      ),
+                    ),
+                  ),
+                ),
+                SizedBox(width: 10),
+                Expanded(
+                  child: GestureDetector(
+                    onTap: () {
                       widget.editProject(fileName, notifier);
                     },
                     child: Container(
@@ -105,27 +125,6 @@ class _RecentContainerHomeWidgetState extends State<RecentContainerHomeWidget> {
                       ),
                       child: Icon(
                         Icons.edit,
-                        color: Colors.white,
-                      ),
-                    ),
-                  ),
-                ),
-                SizedBox(width: 10),
-                Expanded(
-                  child: GestureDetector(
-                    onTap: () {
-                      widget.openProject(fileName, notifier);
-                    },
-                    child: Container(
-                      // width: double.infinity,
-                      margin: EdgeInsets.only(top: 5),
-                      padding: EdgeInsets.all(5),
-                      decoration: BoxDecoration(
-                        borderRadius: BorderRadius.all(Radius.circular(5)),
-                        color: Colors.black87,
-                      ),
-                      child: Icon(
-                        Icons.folder_open_outlined,
                         color: Colors.white,
                       ),
                     ),

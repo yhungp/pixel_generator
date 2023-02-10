@@ -2,6 +2,7 @@
 
 import 'package:calculator/screens/home/home.dart';
 import 'package:calculator/screens/matrix_creation/matrix_creation.dart';
+import 'package:calculator/screens/media_selector/media_selector.dart';
 import 'package:calculator/screens/settings/settings.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
@@ -30,7 +31,8 @@ void main() async {
 
 const List<List<String>> titles = [
   ["Home", "Home"],
-  ["Matrix creation", "Creación de matrices"]
+  ["Matrix creation", "Creación de matrices"],
+  ["Media selector", "Selector de archivo multimedia"],
 ];
 
 class MyApp extends StatelessWidget {
@@ -150,19 +152,21 @@ class _MyHomePageState extends State<MyHomePage> {
   routes(String value) {
     switch (value) {
       case "home":
-        setState(() {
-          title = "Home";
-        });
         return HomePage(
             setRoute: setRoute,
             setProjectFile: setProjectFile,
             darkTheme: darkTheme,
             language: language);
       case "matrix_creation":
-        setState(() {
-          title = "Matrix creation";
-        });
         return MatrixCreation(
+          setRoute: setRoute,
+          setProjectFile: setProjectFile,
+          darkTheme: darkTheme,
+          language: language,
+          filePath: filePath,
+        );
+      case "media_selector":
+        return MediaSelector(
           darkTheme: darkTheme,
           language: language,
           filePath: filePath,
