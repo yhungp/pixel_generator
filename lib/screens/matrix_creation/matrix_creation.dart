@@ -235,20 +235,17 @@ class _MatrixCreationState extends State<MatrixCreation> {
           func: upScale,
         ),
         Expanded(child: Container()),
-        Visibility(
-          visible: checkIsDifferent(),
-          child: buttonOnMatrix(
-            saveAndContinueToNextStep,
-            notifier,
-            saveAndContinueBtn(notifier.language),
-          ),
-        ),
-        SizedBox(width: 10),
         buttonOnMatrix(
-          continueToNextStep,
+          saveAndContinueToNextStep,
           notifier,
-          continueBtn(notifier.language),
+          saveAndContinueBtn(notifier.language),
         ),
+        // SizedBox(width: 10),
+        // buttonOnMatrix(
+        //   continueToNextStep,
+        //   notifier,
+        //   continueBtn(notifier.language),
+        // ),
       ],
     );
   }
@@ -260,13 +257,17 @@ class _MatrixCreationState extends State<MatrixCreation> {
         int.parse(rowsText.text) != startingRows;
   }
 
-  continueToNextStep(SettingsScreenNotifier notifier) {
+  // continueToNextStep(SettingsScreenNotifier notifier) {
+  //   widget.setProjectFile(filePath);
+  //   widget.setRoute("media_selector_from_matrix_creation");
+  //   notifier.setApplicationScreen(2);
+  // }
+
+  saveAndContinueToNextStep(SettingsScreenNotifier notifier) {
     widget.setProjectFile(filePath);
-    widget.setRoute("media_selector");
+    widget.setRoute("media_selector_from_matrix_creation");
     notifier.setApplicationScreen(2);
   }
-
-  saveAndContinueToNextStep() {}
 
   upScale() {
     if (scale >= 1) {

@@ -4,6 +4,7 @@ import 'package:calculator/screens/home/home.dart';
 import 'package:calculator/screens/matrix_creation/matrix_creation.dart';
 import 'package:calculator/screens/media_selector/media_selector.dart';
 import 'package:calculator/screens/settings/settings.dart';
+import 'package:dart_vlc/dart_vlc.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
@@ -26,6 +27,8 @@ void main() async {
   //   await windowManager.show();
   //   await windowManager.focus();
   // });
+
+  DartVLC.initialize();
   runApp(const MyApp());
 }
 
@@ -170,6 +173,17 @@ class _MyHomePageState extends State<MyHomePage> {
           darkTheme: darkTheme,
           language: language,
           filePath: filePath,
+          setRoute: setRoute,
+          setProjectFile: setProjectFile,
+        );
+      case "media_selector_from_matrix_creation":
+        return MediaSelector(
+          darkTheme: darkTheme,
+          language: language,
+          filePath: filePath,
+          fromEdit: true,
+          setRoute: setRoute,
+          setProjectFile: setProjectFile,
         );
     }
   }

@@ -39,3 +39,7 @@ matrixValuesTextField(bool darkTheme) {
 textColorMatrixCreation(bool darkTheme) {
   return darkTheme ? Colors.white : Colors.grey;
 }
+
+backToMatrixCreationTheme(bool darkTheme) {
+  return darkTheme ? Colors.white : Colors.blue;
+}

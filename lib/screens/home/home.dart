@@ -248,7 +248,7 @@ class _HomePageState extends State<HomePage> {
   openProject(String path, SettingsScreenNotifier notifier) {
     setProjectFile(path);
     setRoute("media_selector");
-    notifier.setApplicationScreen(1);
+    notifier.setApplicationScreen(2);
   }
 
   editProject(String path, SettingsScreenNotifier notifier) {

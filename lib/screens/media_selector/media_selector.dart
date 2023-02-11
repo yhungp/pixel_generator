@@ -1,34 +1,33 @@
 // ignore_for_file: must_be_immutable, prefer_const_literals_to_create_immutables, prefer_const_constructors, empty_catches, avoid_print
 
 import 'dart:async';
-import 'dart:convert';
 import 'dart:io';
-import 'dart:typed_data';
 
+import 'package:calculator/language/media_selector.dart';
 import 'package:calculator/main.dart';
-import 'package:calculator/screens/media_selector/widgets/media_control_button.dart';
+import 'package:calculator/screens/media_selector/widgets/file_picker_widget.dart';
 import 'package:calculator/styles/styles.dart';
+import 'package:dart_vlc/dart_vlc.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter/semantics.dart';
-import 'package:process_run/shell.dart';
+import 'package:process_run/shell_run.dart';
 import 'package:provider/provider.dart';
-import 'package:http/http.dart' as http;
-import 'dart:ui' as ui;
-import 'package:test/test.dart';
-import 'package:test_process/test_process.dart';
-import 'package:image/image.dart' as img;
-import 'package:process_run/which.dart';
 
 class MediaSelector extends StatefulWidget {
   bool darkTheme;
   int language;
   String filePath;
+  bool fromEdit = true;
+  Function setRoute;
+  Function setProjectFile;
 
   MediaSelector({
     Key? key,
     required this.darkTheme,
     required this.language,
     required this.filePath,
+    required this.setProjectFile,
+    required this.setRoute,
+    this.fromEdit = false,
   }) : super(key: key);
 
   @override
@@ -36,106 +35,75 @@ class MediaSelector extends StatefulWidget {
 }
 
 class _MediaSelectorState extends State<MediaSelector> {
-  var imageLoaded = false;
-  late Image im;
+  final GlobalKey _widgetKey = GlobalKey();
 
-  late Uint8List imBytes;
-  late Uint8List resizedImg;
+  String video = "";
 
-  late ui.Image _image;
+  double screenW = 0;
+  double screenH = 0;
+  double videoW = 0;
+  double videoH = 0;
+
+  bool videoLoaded = false;
 
   late Timer timer;
 
-  late Process process;
+  final player = Player(id: 69420);
+
+  late Media file;
+
+  List<Media> medias = <Media>[];
+
+  bool fromEdit = false;
 
   @override
   void initState() {
-    startServer();
+    fromEdit = widget.fromEdit;
 
     timer = Timer.periodic(
-      Duration(milliseconds: 33),
-      (Timer t) => fetchImage(),
+      Duration(milliseconds: 40),
+      (Timer t) => checkSizeChange(),
     );
-
     super.initState();
   }
 
-  bool playPause = true;
-
   startServer() async {
-    // var shell = Shell();
-    // await shell.run("python3 assets/server.py");
     var result = await Process.run('python3', ["assets/server.py"]);
     print(result.stdout);
-    // test(
-    //   'pub get gets dependencies',
-    //   () async {
-    //     var process = await TestProcess.start('python3', ["assets/server.py"]);
-    //     await process.shouldExit(0);
-    //   },
-    // );
-    // try {
-    //   process = await Process.start('python3', ["assets/server.py"]);
-    // } catch (e) {
-    //   print(e);
-    // }
-  }
-
-  Stream getOutput() async* {
-    var p = await Process.start('python3', ["assets/test.py"]);
-    yield* p.stdout.transform(utf8.decoder);
   }
 
   @override
   void dispose() {
     // process.kill();
     timer.cancel();
+    player.dispose();
     super.dispose();
   }
 
-  fetchImage() async {
-    if (!playPause) {
-      try {
-        final response = await http.get(Uri.parse('http://127.0.0.1:5000/'));
+  checkSizeChange() {
+    try {
+      final RenderBox renderBox =
+          _widgetKey.currentContext?.findRenderObject() as RenderBox;
 
-        if (response.statusCode == 200) {
-          List l = jsonDecode(response.body)["bytes"];
-          List<int> bytes = [];
+      final Size size = renderBox.size;
 
-          for (var byte in l) {
-            bytes.add(int.parse(byte.toString()));
-          }
-
-          im = Image.memory(Uint8List.fromList(bytes));
-          imBytes = Uint8List.fromList(bytes);
-
-          // img.Image? image = img.decodeImage(bytes);
-          // img.Image resized = img.copyResize(
-          //   image!,
-          //   width: 390,
-          //   height: (390 / image.width * image.height).toInt(),
-          // );
-
-          // resizedImg = Uint8List.fromList(img.encodePng(resized));
-
-          // final ui.Codec codec = await ui.instantiateImageCodec(resizedImg);
-
-          final ui.Codec codec = await ui.instantiateImageCodec(imBytes);
-
-          final ui.Image _im = (await codec.getNextFrame()).image;
-          setState(() {
-            _image = _im;
-            imageLoaded = true;
-          });
-        }
-      } catch (e) {
-        // print(e);
+      if (size.width != screenW || size.height != screenH) {
+        setState(() {
+          screenW = size.width;
+          screenH = size.height;
+        });
       }
+    } catch (e) {
+      return;
     }
   }
 
   @override
   Widget build(BuildContext context) {
+    if (video != "") {
+      checkSizeChange();
+    }
+
     return Consumer<SettingsScreenNotifier>(
       builder: (context, notifier, child) {
         return Container(
@@ -156,69 +124,126 @@ class _MediaSelectorState extends State<MediaSelector> {
                       Radius.circular(5),
                     ),
                   ),
-                  child: Center(
-                    child: imageLoaded
-                        ? Container(
-                            width: double.infinity,
-                            height: double.infinity,
-                            child: CustomPaint(
-                              painter: Sky(_image),
+                  child: Column(
+                    children: [
+                      Expanded(
+                        child: Container(
+                          key: _widgetKey,
+                          alignment: Alignment.center,
+                          height: double.infinity,
+                          width: double.infinity,
+                          padding: EdgeInsets.all(5),
+                          child: video != ""
+                              ? ClipRRect(
+                                  borderRadius: BorderRadius.circular(5),
+                                  child: Video(
+                                    player: player,
+                                    width: screenW,
+                                    height: screenH,
+                                    // width: 1358,
+                                    // height: 819,
+                                    scale: 1.0, // default
+                                    showControls: true, // default
+                                  ),
+                                )
+                              : Text(
+                                  peekFile(notifier.language),
+                                  style: TextStyle(
+                                    color: Colors.white,
+                                    fontSize: 30,
+                                  ),
+                                ),
+                        ),
+                      ),
+                      Padding(
+                        padding: const EdgeInsets.all(5),
+                        child: Row(
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          children: [
+                            Expanded(
+                              child: filePickerWidget(
+                                  notifier, video, setVideoPath),
                             ),
-                          )
-                        : Container(),
+                          ],
+                        ),
+                      )
+                    ],
                   ),
                 ),
               ),
               Row(
-                mainAxisAlignment: MainAxisAlignment.center,
+                mainAxisAlignment: MainAxisAlignment.start,
                 children: [
-                  Expanded(
-                    child: Row(
-                      mainAxisAlignment: MainAxisAlignment.end,
-                      children: [
-                        playButtons(
-                          () {
-                            setState(() {
-                              playPause = !playPause;
-                            });
-                          },
-                          notifier,
-                          Icons.fast_rewind_rounded,
-                        ),
-                      ],
+                  Visibility(
+                    visible: fromEdit,
+                    child: GestureDetector(
+                      onTap: () {
+                        widget.setRoute("matrix_creation");
+                        notifier.setApplicationScreen(1);
+                      },
+                      child: Row(
+                        children: [
+                          Container(
+                            height: 40,
+                            width: 40,
+                            // padding: EdgeInsets.all(10),
+                            alignment: Alignment.center,
+                            decoration: BoxDecoration(
+                              color: blueTheme(notifier.darkTheme),
+                              borderRadius: BorderRadius.all(
+                                Radius.circular(20),
+                              ),
+                            ),
+                            child: Icon(
+                              Icons.arrow_back,
+                              color: Colors.white,
+                            ),
+                          ),
+                          SizedBox(
+                            width: 10,
+                          ),
+                          Text(
+                            backToMatrixCreation(
+                              notifier.language,
+                            ),
+                            style: TextStyle(
+                              color: backToMatrixCreationTheme(
+                                notifier.darkTheme,
+                              ),
+                            ),
+                          ),
+                        ],
+                      ),
                     ),
                   ),
-                  SizedBox(
-                    width: 10,
-                  ),
-                  playButtons(
-                    () {
-                      setState(() {
-                        playPause = !playPause;
-                      });
-                    },
-                    notifier,
-                    playPause ? Icons.play_arrow : Icons.pause,
-                  ),
-                  SizedBox(
-                    width: 10,
-                  ),
-                  Expanded(
-                    child: Row(
-                      mainAxisAlignment: MainAxisAlignment.start,
-                      children: [
-                        playButtons(
-                          () {
-                            setState(() {
-                              playPause = !playPause;
-                            });
-                          },
-                          notifier,
-                          Icons.fast_forward_rounded,
+                  Expanded(child: Container()),
+                  GestureDetector(
+                    onTap: () {},
+                    child: Container(
+                      height: 40,
+                      width: 120,
+                      padding: EdgeInsets.all(10),
+                      alignment: Alignment.center,
+                      decoration: BoxDecoration(
+                        color: blueTheme(notifier.darkTheme),
+                        borderRadius: BorderRadius.all(
+                          Radius.circular(5),
                         ),
-                      ],
+                      ),
+                      child: Text(
+                        fromEdit
+                            ? nextButton(
+                                notifier.language,
+                              )
+                            : acceptVideo(
+                                notifier.language,
+                              ),
+                        style: TextStyle(
+                          color: Colors.white,
+                        ),
+                      ),
                     ),
-                  ),
+                  )
                 ],
               )
             ],
@@ -227,78 +252,28 @@ class _MediaSelectorState extends State<MediaSelector> {
       },
     );
   }
-}
 
-class ImageEditor extends CustomPainter {
-  ui.Image image;
+  setVideoPath(String value) {
+    medias.clear();
 
-  ImageEditor(this.image) : super();
+    file = Media.file(
+      File(
+        '/media/yanhung/Elements/twitter_20220619_184851.mp4',
+      ),
+    );
 
-  @override
-  Future paint(Canvas canvas, Size size) async {
-    canvas.drawImage(image, const Offset(0.0, -100.0), Paint());
+    medias.add(file);
+
+    player.open(
+      Playlist(
+        medias: medias,
+      ),
+      autoStart: false,
+    );
+
+    setState(() {
+      videoLoaded = true;
+      video = value;
+    });
   }
-
-  @override
-  bool shouldRepaint(CustomPainter oldDelegate) {
-    return true;
-  }
-}
-
-class Sky extends CustomPainter {
-  ui.Image image;
-  Sky(this.image) : super();
-
-  @override
-  void paint(Canvas canvas, Size size) {
-    var scale = size.height / image.height;
-
-    if (size.width / image.width > scale) {
-      scale = size.width / image.width;
-    }
-
-    canvas.scale(scale);
-
-    var x = (size.width - image.width) / 2;
-    var y = (size.height - image.height) / 2;
-
-    Rect rect = Offset(x, y) &
-        Size(
-          image.width.toDouble(),
-          image.height.toDouble(),
-        );
-    canvas.drawImage(image, Offset.zero, Paint());
-  }
-
-  @override
-  SemanticsBuilderCallback get semanticsBuilder {
-    return (Size size) {
-      // Annotate a rectangle containing the picture of the sun
-      // with the label "Sun". When text to speech feature is enabled on the
-      // device, a user will be able to locate the sun on this picture by
-      // touch.
-      Rect rect = Offset.zero & size;
-      final double width = size.shortestSide * 0.4;
-      rect = const Alignment(0.8, -0.9).inscribe(Size(width, width), rect);
-      return <CustomPainterSemantics>[
-        CustomPainterSemantics(
-          rect: rect,
-          properties: const SemanticsProperties(
-            label: 'Sun',
-            textDirection: TextDirection.ltr,
-          ),
-        ),
-      ];
-    };
-  }
-
-  // Since this Sky painter has no fields, it always paints
-  // the same thing and semantics information is the same.
-  // Therefore we return false here. If we had fields (set
-  // from the constructor) then we would return true if any
-  // of them differed from the same fields on the oldDelegate.
-  @override
-  bool shouldRepaint(Sky oldDelegate) => true;
-  @override
-  bool shouldRebuildSemantics(Sky oldDelegate) => false;
 }
