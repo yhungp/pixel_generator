@@ -24,13 +24,13 @@ class HomePage extends StatefulWidget {
   bool darkTheme;
   int language;
 
-  HomePage(
-      {Key? key,
-      required this.setRoute,
-      required this.darkTheme,
-      required this.language,
-      required this.setProjectFile})
-      : super(key: key);
+  HomePage({
+    Key? key,
+    required this.setRoute,
+    required this.darkTheme,
+    required this.language,
+    required this.setProjectFile,
+  }) : super(key: key);
 
   @override
   State<HomePage> createState() => _HomePageState();
@@ -247,8 +247,8 @@ class _HomePageState extends State<HomePage> {
 
   openProject(String path, SettingsScreenNotifier notifier) {
     setProjectFile(path);
-    setRoute("media_selector");
-    notifier.setApplicationScreen(2);
+    setRoute("editor");
+    notifier.setApplicationScreen(3);
   }
 
   editProject(String path, SettingsScreenNotifier notifier) {

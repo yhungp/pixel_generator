@@ -9,6 +9,8 @@ import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
+import 'screens/editor/editor.dart';
+
 void main() async {
   // WidgetsFlutterBinding.ensureInitialized();
   // // Must add this line.
@@ -36,6 +38,7 @@ const List<List<String>> titles = [
   ["Home", "Home"],
   ["Matrix creation", "Creación de matrices"],
   ["Media selector", "Selector de archivo multimedia"],
+  ["Editor", "Editor"],
 ];
 
 class MyApp extends StatelessWidget {
@@ -156,14 +159,22 @@ class _MyHomePageState extends State<MyHomePage> {
     switch (value) {
       case "home":
         return HomePage(
-            setRoute: setRoute,
-            setProjectFile: setProjectFile,
-            darkTheme: darkTheme,
-            language: language);
+          setRoute: setRoute,
+          setProjectFile: setProjectFile,
+          darkTheme: darkTheme,
+          language: language,
+        );
       case "matrix_creation":
         return MatrixCreation(
           setRoute: setRoute,
           setProjectFile: setProjectFile,
+          darkTheme: darkTheme,
+          language: language,
+          filePath: filePath,
+        );
+      case "editor":
+        return Editor(
+          setRoute: setRoute,
           darkTheme: darkTheme,
           language: language,
           filePath: filePath,
