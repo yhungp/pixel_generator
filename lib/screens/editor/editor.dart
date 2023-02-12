@@ -71,14 +71,7 @@ class _EditorState extends State<Editor> {
         child: Column(
           mainAxisAlignment: MainAxisAlignment.start,
           crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            selector(notifier),
-            Padding(
-              padding: const EdgeInsets.all(5),
-              child: viewScale(notifier),
-            ),
-            editorSelector()
-          ],
+          children: [selector(notifier), editorSelector()],
         ),
       );
     });
@@ -158,71 +151,6 @@ class _EditorState extends State<Editor> {
         )
       ],
     );
-  }
-
-  Row viewScale(SettingsScreenNotifier notifier) {
-    return Row(
-      children: [
-        ScaleButton(
-          text: "-",
-          darkTheme: notifier.darkTheme,
-          func: downScale,
-        ),
-        Container(
-          width: 100,
-          alignment: Alignment.center,
-          padding: EdgeInsets.all(10),
-          child: Text(
-            "Zoom: ${scale >= 1 ? scale.toStringAsFixed(0) : scale}",
-            style: TextStyle(
-              color: textColorMatrixCreation(
-                notifier.darkTheme,
-              ),
-            ),
-          ),
-        ),
-        ScaleButton(
-          text: "+",
-          darkTheme: notifier.darkTheme,
-          func: upScale,
-        ),
-      ],
-    );
-  }
-
-  upScale() {
-    if (scale >= 1) {
-      setState(() {
-        scale += 1;
-        scale = double.parse(scale.toStringAsFixed(1));
-      });
-      return;
-    }
-    if (scale <= 0.9) {
-      setState(() {
-        scale += 0.1;
-        scale = double.parse(scale.toStringAsFixed(1));
-      });
-      return;
-    }
-    scale = 1;
-  }
-
-  downScale() {
-    if (scale > 1) {
-      setState(() {
-        scale -= 1;
-        scale = double.parse(scale.toStringAsFixed(1));
-      });
-      return;
-    }
-    if (scale > 0.1) {
-      setState(() {
-        scale -= 0.1;
-        scale = double.parse(scale.toStringAsFixed(1));
-      });
-      return;
-    }
   }
 
   loadInfo() async {

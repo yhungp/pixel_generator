@@ -10,8 +10,10 @@ Expanded arrayOfMatrix(
   int columnsTextCount,
   int matrixRowsTextCount,
   int matrixColumnsTextCount,
-  double scale,
-) {
+  double scale, {
+  Function? onClick,
+  Function? colorOfPixel,
+}) {
   final ScrollController horizontal = ScrollController();
   final ScrollController vertical = ScrollController();
 
@@ -50,6 +52,8 @@ Expanded arrayOfMatrix(
                             matrixRowsTextCount,
                             matrixColumnsTextCount,
                             scale,
+                            onClick: onClick,
+                            colorOfPixel: colorOfPixel,
                           ),
                         ),
                       ),
@@ -67,38 +71,63 @@ Expanded arrayOfMatrix(
 
 matrixGenerator(
   bool darkTheme,
-  int rowsTextCount,
-  int columnsTextCount,
+  int rowsCount,
+  int columnsCount,
   int matrixRowsTextCount,
   int matrixColumnsTextCount,
-  double scale,
-) {
+  double scale, {
+  Function? onClick,
+  Function? colorOfPixel,
+}) {
+  if (onClick == null) {
+    print("object");
+  }
+
   List<Widget> widgets = List.generate(
-      rowsTextCount,
-      (index) => Row(
+    rowsCount,
+    (rowsCountIndex) => Row(
+      children: List.generate(
+        columnsCount,
+        (columnsCountIndex) => Padding(
+          padding: const EdgeInsets.only(bottom: 5),
+          child: Column(
             children: List.generate(
-                columnsTextCount,
-                (index) => Padding(
-                      padding: const EdgeInsets.only(bottom: 5),
-                      child: Column(
-                        children: List.generate(
-                            matrixRowsTextCount,
-                            (index) => Padding(
-                                  padding: const EdgeInsets.only(right: 5),
-                                  child: Row(
-                                    children: List.generate(
-                                        matrixColumnsTextCount,
-                                        (index) => Container(
-                                              width: 10 * scale,
-                                              height: 10 * scale,
-                                              color: matrixCellColor(darkTheme),
-                                              margin: EdgeInsets.all(2),
-                                            )),
-                                  ),
-                                )),
-                      ),
-                    )),
-          ));
+              matrixRowsTextCount,
+              (matrixRowsTextCountIndex) => Padding(
+                padding: const EdgeInsets.only(right: 5),
+                child: Row(
+                  children: List.generate(
+                    matrixColumnsTextCount,
+                    (matrixColumnsTextCountIndex) => onClick == null
+                        ? Container(
+                            width: 10 * scale,
+                            height: 10 * scale,
+                            color: matrixCellColor(darkTheme),
+                            margin: EdgeInsets.all(2),
+                          )
+                        : GestureDetector(
+                            onTap: () => onClick(
+                              rowsCountIndex,
+                              columnsCountIndex,
+                              matrixRowsTextCountIndex,
+                              matrixColumnsTextCountIndex,
+                            ),
+                            child: Container(
+                              width: 10 * scale,
+                              height: 10 * scale,
+                              color: matrixCellColor(darkTheme),
+                              margin: EdgeInsets.all(2),
+                            ),
+                          ),
+                  ),
+                ),
+              ),
+            ),
+          ),
+        ),
+      ),
+    ),
+  );
 
   return widgets;
 }
