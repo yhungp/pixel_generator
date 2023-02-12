@@ -12,7 +12,7 @@ Expanded arrayOfMatrix(
   int matrixColumnsTextCount,
   double scale, {
   Function? onClick,
-  Function? colorOfPixel,
+  List<List<List<List<Color>>>>? colors,
 }) {
   final ScrollController horizontal = ScrollController();
   final ScrollController vertical = ScrollController();
@@ -53,7 +53,7 @@ Expanded arrayOfMatrix(
                             matrixColumnsTextCount,
                             scale,
                             onClick: onClick,
-                            colorOfPixel: colorOfPixel,
+                            colors: colors,
                           ),
                         ),
                       ),
@@ -77,7 +77,7 @@ matrixGenerator(
   int matrixColumnsTextCount,
   double scale, {
   Function? onClick,
-  Function? colorOfPixel,
+  List<List<List<List<Color>>>>? colors,
 }) {
   if (onClick == null) {
     print("object");
@@ -115,7 +115,9 @@ matrixGenerator(
                             child: Container(
                               width: 10 * scale,
                               height: 10 * scale,
-                              color: matrixCellColor(darkTheme),
+                              color: colors![rowsCountIndex][columnsCountIndex]
+                                      [matrixRowsTextCountIndex]
+                                  [matrixColumnsTextCountIndex],
                               margin: EdgeInsets.all(2),
                             ),
                           ),

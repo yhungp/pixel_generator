@@ -43,3 +43,7 @@ textColorMatrixCreation(bool darkTheme) {
 backToMatrixCreationTheme(bool darkTheme) {
   return darkTheme ? Colors.white : Colors.blue;
 }
+
+textColorBlackOrWhite(bool darkTheme) {
+  return darkTheme ? Colors.white : Colors.grey;
+}

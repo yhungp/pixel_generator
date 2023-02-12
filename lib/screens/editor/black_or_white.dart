@@ -28,12 +28,21 @@ class BlackOrWhite extends StatefulWidget {
   State<BlackOrWhite> createState() => _BlackOrWhiteState();
 }
 
+enum ColorOptions {
+  black,
+  white,
+}
+
 class _BlackOrWhiteState extends State<BlackOrWhite> {
   int matrixColumns = 8;
   int matrixRows = 8;
   int columns = 1;
   int rows = 1;
   double scale = 1;
+
+  List<List<List<List<Color>>>> colors = [];
+
+  ColorOptions colorOptions = ColorOptions.black;
 
   @override
   void initState() {
@@ -42,6 +51,20 @@ class _BlackOrWhiteState extends State<BlackOrWhite> {
     matrixRows = widget.matrixRows;
     columns = widget.columns;
     rows = widget.rows;
+
+    colors = List.generate(
+      rows,
+      (index) => List.generate(
+        columns,
+        (index) => List.generate(
+          matrixRows,
+          (index) => List.generate(
+            matrixColumns,
+            (index) => Colors.white,
+          ),
+        ),
+      ),
+    );
 
     super.initState();
   }
@@ -64,7 +87,23 @@ class _BlackOrWhiteState extends State<BlackOrWhite> {
                 child: Row(
                   children: [
                     GestureDetector(
-                      onTap: () {},
+                      onTap: () {
+                        setState(() {
+                          colors = List.generate(
+                            rows,
+                            (index) => List.generate(
+                              columns,
+                              (index) => List.generate(
+                                matrixRows,
+                                (index) => List.generate(
+                                  matrixColumns,
+                                  (index) => Colors.black,
+                                ),
+                              ),
+                            ),
+                          );
+                        });
+                      },
                       child: Container(
                         alignment: Alignment.center,
                         padding: EdgeInsets.all(5),
@@ -85,7 +124,23 @@ class _BlackOrWhiteState extends State<BlackOrWhite> {
                       width: 10,
                     ),
                     GestureDetector(
-                      onTap: () {},
+                      onTap: () {
+                        setState(() {
+                          colors = List.generate(
+                            rows,
+                            (index) => List.generate(
+                              columns,
+                              (index) => List.generate(
+                                matrixRows,
+                                (index) => List.generate(
+                                  matrixColumns,
+                                  (index) => Colors.white,
+                                ),
+                              ),
+                            ),
+                          );
+                        });
+                      },
                       child: Container(
                         alignment: Alignment.center,
                         padding: EdgeInsets.all(5),
@@ -105,16 +160,53 @@ class _BlackOrWhiteState extends State<BlackOrWhite> {
                   ],
                 ),
               ),
-              arrayOfMatrix(
-                notifier,
-                rows,
-                columns,
-                matrixRows,
-                matrixColumns,
-                scale,
-                onClick: editPixel,
-                colorOfPixel: colorOfPixel,
+              Expanded(
+                child: Container(
+                  decoration: BoxDecoration(
+                    borderRadius: BorderRadius.all(Radius.circular(5)),
+                    color: blueTheme(notifier.darkTheme),
+                  ),
+                  padding: EdgeInsets.all(10),
+                  child: Column(
+                    children: [
+                      arrayOfMatrix(
+                        notifier,
+                        rows,
+                        columns,
+                        matrixRows,
+                        matrixColumns,
+                        scale,
+                        onClick: editPixel,
+                        colors: colors,
+                      ),
+                    ],
+                  ),
+                ),
               ),
+              SizedBox(
+                height: 10,
+              ),
+              Container(
+                child: Row(
+                  children: [
+                    Text(
+                      "Color:   ",
+                      style: TextStyle(
+                        fontSize: 20,
+                        color: textColorBlackOrWhite(
+                          notifier.darkTheme,
+                        ),
+                      ),
+                    ),
+                    SizedBox(
+                      width: 300,
+                      child: selector(
+                        notifier,
+                      ),
+                    ),
+                  ],
+                ),
+              )
             ],
           ),
         ),
@@ -122,16 +214,62 @@ class _BlackOrWhiteState extends State<BlackOrWhite> {
     });
   }
 
-  allToWhite() {}
+  Row selector(SettingsScreenNotifier notifier) {
+    List<Widget> widgets = [];
 
-  colorOfPixel(
-    int rowsCountIndex,
-    int columnsCountIndex,
-    int matrixRowsTextCountIndex,
-    int matrixColumnsTextCountIndex,
-  ) {
-    return Colors.white;
+    for (var val in ColorOptions.values) {
+      var name = val.name;
+      name =
+          name.substring(0, 1).toUpperCase() + name.substring(1, name.length);
+
+      widgets.add(
+        SizedBox(
+          width: 100,
+          child: RadioListTile<ColorOptions>(
+            dense: false,
+            contentPadding: EdgeInsets.zero,
+            title: Text(
+              name,
+              style: TextStyle(
+                color: Colors.white,
+              ),
+            ),
+            value: val,
+            activeColor: Colors.white,
+            groupValue: colorOptions,
+            onChanged: (ColorOptions? value) {
+              setState(() {
+                colorOptions = value!;
+              });
+            },
+          ),
+        ),
+      );
+    }
+
+    return Row(
+      children: [
+        Expanded(
+          child: Container(
+            padding: EdgeInsets.all(5),
+            margin: EdgeInsets.all(5),
+            decoration: BoxDecoration(
+              color: blueTheme(notifier.darkTheme),
+              borderRadius: BorderRadius.all(
+                Radius.circular(5),
+              ),
+            ),
+            child: Wrap(
+              alignment: WrapAlignment.spaceEvenly,
+              children: widgets,
+            ),
+          ),
+        )
+      ],
+    );
   }
+
+  allToWhite() {}
 
   editPixel(
     int rowsCountIndex,
@@ -139,8 +277,17 @@ class _BlackOrWhiteState extends State<BlackOrWhite> {
     int matrixRowsTextCountIndex,
     int matrixColumnsTextCountIndex,
   ) {
-    print(
-        "$rowsCountIndex,  $columnsCountIndex,  $matrixRowsTextCountIndex,  $matrixColumnsTextCountIndex,");
+    if (colorOptions == ColorOptions.black) {
+      setState(() {
+        colors[rowsCountIndex][columnsCountIndex][matrixRowsTextCountIndex]
+            [matrixColumnsTextCountIndex] = Colors.black;
+      });
+      return;
+    }
+    setState(() {
+      colors[rowsCountIndex][columnsCountIndex][matrixRowsTextCountIndex]
+          [matrixColumnsTextCountIndex] = Colors.white;
+    });
   }
 
   Row viewScale(SettingsScreenNotifier notifier) {
