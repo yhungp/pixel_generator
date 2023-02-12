@@ -4,6 +4,7 @@ import 'dart:convert';
 import 'dart:io';
 
 import 'package:calculator/main.dart';
+import 'package:calculator/screens/editor/black_or_white.dart';
 import 'package:calculator/styles/styles.dart';
 import 'package:calculator/widgets/array_of_matrix.dart';
 import 'package:calculator/widgets/scale_button.dart';
@@ -43,10 +44,6 @@ class _EditorState extends State<Editor> {
   int matrixRows = 8;
   int columns = 1;
   int rows = 1;
-  int startingMatrixColumns = 8;
-  int startingMatrixRows = 8;
-  int startingColumns = 1;
-  int startingRows = 1;
 
   String filePath = "";
 
@@ -76,19 +73,30 @@ class _EditorState extends State<Editor> {
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             selector(notifier),
-            viewScale(notifier),
-            arrayOfMatrix(
-              notifier,
-              rows,
-              columns,
-              matrixRows,
-              matrixColumns,
-              scale,
+            Padding(
+              padding: const EdgeInsets.all(5),
+              child: viewScale(notifier),
             ),
+            editorSelector()
           ],
         ),
       );
     });
+  }
+
+  editorSelector() {
+    switch (editorOptionsSelected) {
+      case EditorOptions.blackOrWhite:
+        return BlackOrWhite(
+          columns: columns,
+          matrixColumns: matrixColumns,
+          matrixRows: matrixRows,
+          rows: rows,
+          scale: scale,
+        );
+      default:
+        return Container();
+    }
   }
 
   Row selector(SettingsScreenNotifier notifier) {
@@ -230,7 +238,6 @@ class _EditorState extends State<Editor> {
             recent["matrix_columns"].runtimeType == int) {
           setState(() {
             matrixColumns = recent["matrix_columns"];
-            startingMatrixColumns = recent["matrix_columns"];
           });
         }
 
@@ -238,7 +245,6 @@ class _EditorState extends State<Editor> {
             recent["matrix_rows"].runtimeType == int) {
           setState(() {
             matrixRows = recent["matrix_rows"];
-            startingMatrixRows = recent["matrix_rows"];
           });
         }
 
@@ -246,14 +252,12 @@ class _EditorState extends State<Editor> {
             recent["columns"].runtimeType == int) {
           setState(() {
             columns = recent["columns"];
-            startingColumns = recent["columns"];
           });
         }
 
         if (recent.containsKey("rows") && recent["rows"].runtimeType == int) {
           setState(() {
             rows = recent["rows"];
-            startingRows = recent["rows"];
           });
         }
 
