@@ -8,8 +8,9 @@ import 'package:calculator/language/matrix_creation.dart';
 import 'package:calculator/main.dart';
 import 'package:calculator/screens/matrix_creation/widgets/button.dart';
 import 'package:calculator/screens/matrix_creation/widgets/custom_text_field.dart';
-import 'package:calculator/screens/matrix_creation/widgets/scale_button.dart';
+import 'package:calculator/widgets/scale_button.dart';
 import 'package:calculator/styles/styles.dart';
+import 'package:calculator/widgets/array_of_matrix.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
@@ -156,55 +157,19 @@ class _MatrixCreationState extends State<MatrixCreation> {
               ],
             ),
             SizedBox(height: 10),
-            arrayOfMatrix(notifier),
+            arrayOfMatrix(
+              notifier,
+              int.parse(rowsText.text),
+              int.parse(columnsText.text),
+              int.parse(matrixRowsText.text),
+              int.parse(matrixColumnsText.text),
+              scale,
+            ),
             viewScale(notifier)
           ],
         ),
       );
     });
-  }
-
-  Expanded arrayOfMatrix(SettingsScreenNotifier notifier) {
-    return Expanded(
-      child: Scrollbar(
-        controller: _vertical,
-        thumbVisibility: true,
-        trackVisibility: true,
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.start,
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Expanded(
-              child: Scrollbar(
-                controller: _horizontal,
-                thumbVisibility: true,
-                trackVisibility: true,
-                notificationPredicate: (notif) => notif.depth == 1,
-                child: Row(
-                  mainAxisAlignment: MainAxisAlignment.start,
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Expanded(
-                      child: SingleChildScrollView(
-                        controller: _vertical,
-                        child: SingleChildScrollView(
-                            controller: _horizontal,
-                            scrollDirection: Axis.horizontal,
-                            child: Column(
-                              mainAxisAlignment: MainAxisAlignment.start,
-                              crossAxisAlignment: CrossAxisAlignment.start,
-                              children: matrixGenerator(notifier.darkTheme),
-                            )),
-                      ),
-                    ),
-                  ],
-                ),
-              ),
-            ),
-          ],
-        ),
-      ),
-    );
   }
 
   double scale = 1;
@@ -351,38 +316,6 @@ class _MatrixCreationState extends State<MatrixCreation> {
         default:
       }
     });
-  }
-
-  matrixGenerator(bool darkTheme) {
-    List<Widget> widgets = List.generate(
-        int.parse(rowsText.text),
-        (index) => Row(
-              children: List.generate(
-                  int.parse(columnsText.text),
-                  (index) => Padding(
-                        padding: const EdgeInsets.only(bottom: 5),
-                        child: Column(
-                          children: List.generate(
-                              int.parse(matrixRowsText.text),
-                              (index) => Padding(
-                                    padding: const EdgeInsets.only(right: 5),
-                                    child: Row(
-                                      children: List.generate(
-                                          int.parse(matrixColumnsText.text),
-                                          (index) => Container(
-                                                width: 10 * scale,
-                                                height: 10 * scale,
-                                                color:
-                                                    matrixCellColor(darkTheme),
-                                                margin: EdgeInsets.all(2),
-                                              )),
-                                    ),
-                                  )),
-                        ),
-                      )),
-            ));
-
-    return widgets;
   }
 
   onTextChange() {

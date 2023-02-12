@@ -4,12 +4,12 @@ import 'package:calculator/styles/styles.dart';
 import 'package:flutter/material.dart';
 
 class GenericButton extends StatelessWidget {
-  GenericButton(
-      {Key? key,
-      required this.label,
-      required this.func,
-      required this.darkTheme})
-      : super(key: key);
+  GenericButton({
+    Key? key,
+    required this.label,
+    required this.func,
+    required this.darkTheme,
+  }) : super(key: key);
 
   String label;
   Function func;
