@@ -5,6 +5,7 @@ import 'dart:io';
 
 import 'package:calculator/main.dart';
 import 'package:calculator/screens/editor/black_or_white.dart';
+import 'package:calculator/screens/editor/gray_scale.dart';
 import 'package:calculator/styles/styles.dart';
 import 'package:calculator/widgets/array_of_matrix.dart';
 import 'package:calculator/widgets/scale_button.dart';
@@ -81,6 +82,14 @@ class _EditorState extends State<Editor> {
     switch (editorOptionsSelected) {
       case EditorOptions.blackOrWhite:
         return BlackOrWhite(
+          columns: columns,
+          matrixColumns: matrixColumns,
+          matrixRows: matrixRows,
+          rows: rows,
+          scale: scale,
+        );
+      case EditorOptions.greyScale:
+        return GreyScale(
           columns: columns,
           matrixColumns: matrixColumns,
           matrixRows: matrixRows,
