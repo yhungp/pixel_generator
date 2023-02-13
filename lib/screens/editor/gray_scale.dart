@@ -48,6 +48,8 @@ class _GreyScaleState extends State<GreyScale> {
 
   ColorOptions colorOptions = ColorOptions.black;
 
+  bool peekingColor = false;
+
   @override
   void initState() {
     scale = widget.scale;
@@ -209,12 +211,24 @@ class _GreyScaleState extends State<GreyScale> {
                     padding: EdgeInsets.all(5),
                     child: Row(
                       children: [
+                        Container(
+                          width: 30,
+                          height: 30,
+                          decoration: BoxDecoration(
+                            borderRadius: BorderRadius.all(Radius.circular(5)),
+                            color: currentColor,
+                          ),
+                        ),
+                        SizedBox(
+                          width: 10,
+                        ),
                         GestureDetector(
                           onPanUpdate: (details) {
                             final tapPosition = details.localPosition;
                             if (tapPosition.dx > 0 && tapPosition.dx < 500) {
                               setState(() {
                                 posx = tapPosition.dx;
+                                currentColor = updateColor(posx);
                               });
                             }
                           },
@@ -223,6 +237,7 @@ class _GreyScaleState extends State<GreyScale> {
                             if (tapPosition.dx > 0 && tapPosition.dx < 500) {
                               setState(() {
                                 posx = tapPosition.dx;
+                                currentColor = updateColor(posx);
                               });
                             }
                           },
@@ -231,7 +246,51 @@ class _GreyScaleState extends State<GreyScale> {
                             painter: Rectangle(posx),
                           ),
                         ),
+                        SizedBox(
+                          width: 10,
+                        ),
+                        GestureDetector(
+                          onTap: (() {
+                            setState(() {
+                              peekingColor = !peekingColor;
+                            });
+                          }),
+                          child: Container(
+                            width: 30,
+                            height: 30,
+                            padding: EdgeInsets.all(2),
+                            decoration: BoxDecoration(
+                              borderRadius:
+                                  BorderRadius.all(Radius.circular(5)),
+                              color: !peekingColor ? Colors.white : Colors.grey,
+                            ),
+                            child: Image.asset("assets/dropper.png"),
+                          ),
+                        ),
                       ],
+                    ),
+                  ),
+                  SizedBox(
+                    width: 10,
+                  ),
+                  Visibility(
+                    visible: peekingColor,
+                    child: Container(
+                      height: 40,
+                      padding: EdgeInsets.all(5),
+                      decoration: BoxDecoration(
+                        borderRadius: BorderRadius.all(Radius.circular(5)),
+                        color: blueTheme(notifier.darkTheme),
+                      ),
+                      alignment: Alignment.center,
+                      child: Text(
+                        peekingColorLabel(
+                          notifier.language,
+                        ),
+                        style: TextStyle(
+                          color: Colors.white,
+                        ),
+                      ),
                     ),
                   )
                 ],
@@ -241,6 +300,11 @@ class _GreyScaleState extends State<GreyScale> {
         ),
       );
     });
+  }
+
+  updateColor(double posx) {
+    int scaled = (posx / 500 * 255).toInt();
+    return Color.fromARGB(255, scaled, scaled, scaled);
   }
 
   Row selector(SettingsScreenNotifier notifier) {
@@ -298,24 +362,24 @@ class _GreyScaleState extends State<GreyScale> {
     );
   }
 
-  allToWhite() {}
-
   editPixel(
     int rowsCountIndex,
     int columnsCountIndex,
     int matrixRowsTextCountIndex,
     int matrixColumnsTextCountIndex,
   ) {
-    if (colorOptions == ColorOptions.black) {
+    if (peekingColor) {
       setState(() {
-        colors[rowsCountIndex][columnsCountIndex][matrixRowsTextCountIndex]
-            [matrixColumnsTextCountIndex] = Colors.black;
+        currentColor = colors[rowsCountIndex][columnsCountIndex]
+            [matrixRowsTextCountIndex][matrixColumnsTextCountIndex];
+
+        posx = currentColor.blue.toInt() / 255 * 500;
       });
       return;
     }
     setState(() {
       colors[rowsCountIndex][columnsCountIndex][matrixRowsTextCountIndex]
-          [matrixColumnsTextCountIndex] = Colors.white;
+          [matrixColumnsTextCountIndex] = currentColor;
     });
   }
 
@@ -405,7 +469,7 @@ class Rectangle extends CustomPainter {
 
     canvas.drawRect(rect, paint);
 
-    rect = Offset(posx - 2, -10) & Size(4, size.height + 20);
+    rect = Offset(posx - 2, -2) & Size(4, size.height + 4);
     canvas.drawRect(rect, Paint()..color = Colors.red);
   }
 

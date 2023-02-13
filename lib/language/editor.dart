@@ -10,3 +10,13 @@ allTo(int language, int blackOrWhite) {
       return es[blackOrWhite];
   }
 }
+
+// grey scale
+peekingColorLabel(int language) {
+  switch (language) {
+    case 0:
+      return "Peeking color";
+    case 1:
+      return "Seleccionando color";
+  }
+}

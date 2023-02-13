@@ -129,7 +129,12 @@ class _EditorState extends State<Editor> {
           child: RadioListTile<EditorOptions>(
             dense: false,
             contentPadding: EdgeInsets.zero,
-            title: Text(name),
+            title: Text(
+              name,
+              style: TextStyle(
+                color: Colors.white,
+              ),
+            ),
             value: val,
             activeColor: Colors.white,
             groupValue: editorOptionsSelected,
