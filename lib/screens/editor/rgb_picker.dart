@@ -41,8 +41,11 @@ class _RGB_PickerState extends State<RGB_Picker> {
   int rows = 1;
   double scale = 1;
 
-  double posx = 0;
-  double posy = 0;
+  double posxGrayScale = 0;
+  double posyGrayScale = 0;
+
+  double posxColorBar = 0;
+  double posyColorBar = 0;
 
   Color currentColor = Colors.white;
 
@@ -83,6 +86,7 @@ class _RGB_PickerState extends State<RGB_Picker> {
 
   @override
   Widget build(BuildContext context) {
+    print("$posxGrayScale    $posxColorBar");
     return Consumer<SettingsScreenNotifier>(
         builder: (context, notifier, child) {
       return Expanded(
@@ -188,29 +192,25 @@ class _RGB_PickerState extends State<RGB_Picker> {
                               GestureDetector(
                                 onPanUpdate: (details) {
                                   final tapPosition = details.localPosition;
-                                  if (tapPosition.dx > 0 &&
-                                      tapPosition.dx < 500) {
-                                    setState(() {
-                                      posx = tapPosition.dx;
-                                      currentColor = updateColor(posx);
-                                    });
-                                  }
+
+                                  updatePosxGrayScale(
+                                    tapPosition.dx,
+                                    tapPosition.dy,
+                                  );
                                 },
                                 onTapDown: (TapDownDetails details) {
                                   final tapPosition = details.localPosition;
-                                  if (tapPosition.dx > 0 &&
-                                      tapPosition.dx < 500) {
-                                    setState(() {
-                                      posx = tapPosition.dx;
-                                      currentColor = updateColor(posx);
-                                    });
-                                  }
+
+                                  updatePosxGrayScale(
+                                    tapPosition.dx,
+                                    tapPosition.dy,
+                                  );
                                 },
                                 child: CustomPaint(
                                   size: Size(200, 20),
                                   painter: Rectangle(
-                                    posx,
-                                    posy,
+                                    posxGrayScale,
+                                    posyGrayScale,
                                     gradient: true,
                                     color: currentColor,
                                   ),
@@ -224,25 +224,23 @@ class _RGB_PickerState extends State<RGB_Picker> {
                           GestureDetector(
                             onPanUpdate: (details) {
                               final tapPosition = details.localPosition;
-                              if (tapPosition.dx > 0 && tapPosition.dx < 500) {
-                                setState(() {
-                                  posx = tapPosition.dx;
-                                  currentColor = updateColor(posx);
-                                });
-                              }
+
+                              updatePosxColorBar(
+                                tapPosition.dx,
+                                tapPosition.dy,
+                              );
                             },
                             onTapDown: (TapDownDetails details) {
                               final tapPosition = details.localPosition;
-                              if (tapPosition.dx > 0 && tapPosition.dx < 500) {
-                                setState(() {
-                                  posx = tapPosition.dx;
-                                  currentColor = updateColor(posx);
-                                });
-                              }
+
+                              updatePosxColorBar(
+                                tapPosition.dx,
+                                tapPosition.dy,
+                              );
                             },
                             child: CustomPaint(
                               size: Size(200, 20),
-                              painter: Rectangle(posx, posy),
+                              painter: Rectangle(posxGrayScale, posyGrayScale),
                             ),
                           ),
                           SizedBox(
@@ -303,6 +301,54 @@ class _RGB_PickerState extends State<RGB_Picker> {
     });
   }
 
+  updatePosxGrayScale(double dx, double dy) {
+    if (dy < 0 || dy > 20) {
+      return;
+    }
+
+    if (dx < 0) {
+      setState(() {
+        posxGrayScale = 0;
+      });
+      return;
+    }
+
+    if (dx > 200) {
+      setState(() {
+        posxGrayScale = 200;
+      });
+      return;
+    }
+
+    setState(() {
+      posxGrayScale = dx;
+    });
+  }
+
+  updatePosxColorBar(double dx, double dy) {
+    if (dy < 0 || dy > 20 || posxColorBar == 0 || posxColorBar == 200) {
+      return;
+    }
+
+    if (dx < 0) {
+      setState(() {
+        posxColorBar = 0;
+      });
+      return;
+    }
+
+    if (dx > 200) {
+      setState(() {
+        posxColorBar = 200;
+      });
+      return;
+    }
+
+    setState(() {
+      posxColorBar = dx;
+    });
+  }
+
   void showColorPicker() {
     showDialog(
       context: context,
@@ -321,8 +367,13 @@ class _RGB_PickerState extends State<RGB_Picker> {
     );
   }
 
-  updateColor(double posx) {
-    int scaled = (posx / 500 * 255).toInt();
+  updateColorGreyScale(double posx) {
+    int scaled = (posx / 200 * 255).toInt();
+    return Color.fromARGB(255, scaled, scaled, scaled);
+  }
+
+  updateColorFromColorBar(double posx) {
+    int scaled = (posx / 200 * 255).toInt();
     return Color.fromARGB(255, scaled, scaled, scaled);
   }
 
@@ -392,7 +443,7 @@ class _RGB_PickerState extends State<RGB_Picker> {
         currentColor = colors[rowsCountIndex][columnsCountIndex]
             [matrixRowsTextCountIndex][matrixColumnsTextCountIndex];
 
-        posx = currentColor.blue.toInt() / 255 * 500;
+        posxGrayScale = currentColor.blue.toInt() / 255 * 500;
       });
       return;
     }
@@ -512,25 +563,6 @@ class Rectangle extends CustomPainter {
       ).createShader(rect);
 
       canvas.drawRect(rect, paint);
-
-      // for (double i = 0; i <= size.height; i += 1) {
-      //   int gray = ((size.height - i) / size.height * 255).toInt();
-      //   var rect = Offset(0, i) & Size(size.width, 1);
-      //   double percent = (size.height - i) / size.height * 255;
-
-      //   Paint paint = Paint();
-      //   paint.shader = LinearGradient(
-      //     begin: Alignment.centerLeft,
-      //     end: Alignment.centerRight,
-      //     tileMode: TileMode.mirror,
-      //     colors: [
-      //       Color.fromARGB(255, gray, gray, gray),
-      //       Color.fromARGB(255, percent.toInt(), percent.toInt(), 0)
-      //     ],
-      //   ).createShader(rect);
-
-      //   canvas.drawRect(rect, paint);
-      // }
 
       return;
     }
