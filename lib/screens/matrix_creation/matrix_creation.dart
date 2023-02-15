@@ -1,7 +1,6 @@
 // ignore_for_file: prefer_const_literals_to_create_immutables, prefer_const_constructors, must_be_immutable
 
 import 'dart:convert';
-import 'dart:ffi';
 import 'dart:io';
 
 import 'package:calculator/language/matrix_creation.dart';
@@ -55,8 +54,8 @@ class _MatrixCreationState extends State<MatrixCreation> {
   TextEditingController columnsText = TextEditingController();
   TextEditingController rowsText = TextEditingController();
 
-  final ScrollController _horizontal = ScrollController(),
-      _vertical = ScrollController();
+  final ScrollController horizontal = ScrollController(),
+      vertical = ScrollController();
 
   @override
   void initState() {

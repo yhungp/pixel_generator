@@ -5,7 +5,7 @@ import 'dart:io';
 
 import 'package:calculator/language/home.dart';
 import 'package:calculator/main.dart';
-import 'package:calculator/utils/prettyJSON.dart';
+import 'package:calculator/utils/pretty_json.dart';
 import 'package:calculator/widgets/generic_button.dart';
 import 'package:calculator/screens/home/widgets/file_information.dart';
 import 'package:calculator/screens/home/widgets/recent_container_home.dart';
@@ -16,7 +16,6 @@ import 'package:calculator/widgets/vertical_line.dart';
 import 'package:file_picker/file_picker.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
-import 'package:http/http.dart' as http;
 
 class HomePage extends StatefulWidget {
   Function setRoute;

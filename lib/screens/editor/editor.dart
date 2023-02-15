@@ -1,4 +1,4 @@
-// ignore_for_file: prefer_const_constructors
+// ignore_for_file: prefer_const_constructors, must_be_immutable
 
 import 'dart:convert';
 import 'dart:io';
@@ -8,8 +8,6 @@ import 'package:calculator/screens/editor/black_or_white.dart';
 import 'package:calculator/screens/editor/gray_scale.dart';
 import 'package:calculator/screens/editor/rgb_picker.dart';
 import 'package:calculator/styles/styles.dart';
-import 'package:calculator/widgets/array_of_matrix.dart';
-import 'package:calculator/widgets/scale_button.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 

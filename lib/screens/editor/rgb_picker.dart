@@ -4,7 +4,6 @@ import 'package:calculator/language/editor.dart';
 import 'package:calculator/main.dart';
 import 'package:calculator/screens/editor/widgets/matrix_painter.dart';
 import 'package:calculator/styles/styles.dart';
-import 'package:calculator/widgets/array_of_matrix.dart';
 import 'package:calculator/widgets/scale_button.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_colorpicker/flutter_colorpicker.dart';
@@ -784,59 +783,8 @@ class Rectangle extends CustomPainter {
         0,
       );
 
-      // print(Color(c));
-      // getColor(stops, colors, size.width);
-
-      // setColor(getColor(stops, colors, size.width));
       setColor(Color(c));
     }
-
-    // rect = Offset(posx - 2, -2) & Size(4, size.height + 4);
-    // canvas.drawRect(rect, Paint()..color = Colors.red);
-  }
-
-  getColor(List stops, List colors, double width) {
-    int counter = 0;
-
-    for (var stop in stops) {
-      if (posx / width <= stop) {
-        break;
-      }
-
-      counter += 1;
-    }
-
-    double percent = 0;
-
-    if (counter == stops.length - 1) {
-      print("object");
-    } else {
-      double distance = stops[counter + 1] - stops[counter];
-      double realPos = stops[counter] - posx / width;
-      percent = realPos / distance;
-    }
-
-    if (counter == colors.length - 1) {
-      return Colors.white;
-    }
-
-    Color start = colors[counter];
-    Color end = colors[counter + 1];
-
-    Color mid = middle(start, end, percent);
-    print("$percent, $mid, $start, $end");
-
-    return mid;
-  }
-
-  Color middle(Color colorStart, Color colorEnd, double percent) {
-    return Color.lerp(colorStart, colorEnd, 1 - percent)!;
-    // return Color.fromARGB(
-    //   255,
-    //   ((colorStart.red + colorEnd.red) / 2 * percent).toInt(),
-    //   ((colorStart.green + colorEnd.green) / 2 * percent).toInt(),
-    //   ((colorStart.blue + colorEnd.blue) / 2 * percent).toInt(),
-    // );
   }
 
   @override

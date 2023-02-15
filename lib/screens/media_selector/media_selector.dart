@@ -9,7 +9,6 @@ import 'package:calculator/screens/media_selector/widgets/file_picker_widget.dar
 import 'package:calculator/styles/styles.dart';
 import 'package:dart_vlc/dart_vlc.dart';
 import 'package:flutter/material.dart';
-import 'package:process_run/shell_run.dart';
 import 'package:provider/provider.dart';
 
 class MediaSelector extends StatefulWidget {

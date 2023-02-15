@@ -4,7 +4,6 @@ import 'package:calculator/language/editor.dart';
 import 'package:calculator/main.dart';
 import 'package:calculator/screens/editor/widgets/matrix_painter.dart';
 import 'package:calculator/styles/styles.dart';
-import 'package:calculator/widgets/array_of_matrix.dart';
 import 'package:calculator/widgets/scale_button.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';

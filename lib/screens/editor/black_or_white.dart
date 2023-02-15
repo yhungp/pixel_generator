@@ -2,8 +2,8 @@
 
 import 'package:calculator/language/editor.dart';
 import 'package:calculator/main.dart';
+import 'package:calculator/screens/editor/widgets/matrix_painter.dart';
 import 'package:calculator/styles/styles.dart';
-import 'package:calculator/widgets/array_of_matrix.dart';
 import 'package:calculator/widgets/scale_button.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
@@ -28,11 +28,6 @@ class BlackOrWhite extends StatefulWidget {
   State<BlackOrWhite> createState() => _BlackOrWhiteState();
 }
 
-enum ColorOptions {
-  black,
-  white,
-}
-
 class _BlackOrWhiteState extends State<BlackOrWhite> {
   int matrixColumns = 8;
   int matrixRows = 8;
@@ -40,9 +35,23 @@ class _BlackOrWhiteState extends State<BlackOrWhite> {
   int rows = 1;
   double scale = 1;
 
+  double posx = 0;
+  double posy = 0;
+
+  double posxColorBar = 0;
+  double posyColorBar = 0;
+
+  double posxMatrixPainter = 0;
+  double posyMatrixPainter = 0;
+
+  Color currentColor = Colors.white;
+
   List<List<List<List<Color>>>> colors = [];
 
-  ColorOptions colorOptions = ColorOptions.black;
+  bool peekingColor = false;
+  bool grayScaleTouched = false;
+  bool rgbScaleTouched = false;
+  bool matrixTouched = false;
 
   @override
   void initState() {
@@ -67,6 +76,26 @@ class _BlackOrWhiteState extends State<BlackOrWhite> {
     );
 
     super.initState();
+  }
+
+  checkIfCoordinatesOnRectangle(double posx, double posy) {
+    for (int i = 0; i < rows; i++) {
+      for (int j = 0; j < columns; j++) {
+        for (int x = 0; x < matrixRows; x++) {
+          for (int y = 0; y < matrixColumns; y++) {
+            double dx = (j + x) * 13 + 13.0 * j * matrixColumns - 5 * j;
+            double dy = (i + y) * 13 + 13.0 * i * matrixRows - 5 * i;
+
+            bool pixelTouched =
+                posx > dx && posx < dx + 10 && posy > dy && posy < dy + 10;
+
+            if (pixelTouched) {
+              editPixel(i, j, x, y);
+            }
+          }
+        }
+      }
+    }
   }
 
   @override
@@ -157,56 +186,98 @@ class _BlackOrWhiteState extends State<BlackOrWhite> {
                         ),
                       ),
                     ),
+                    SizedBox(
+                      width: 10,
+                    ),
+                    selector(
+                      notifier,
+                    ),
                   ],
                 ),
               ),
               Expanded(
-                child: Container(
-                  decoration: BoxDecoration(
-                    borderRadius: BorderRadius.all(Radius.circular(5)),
-                    color: blueTheme(notifier.darkTheme),
-                  ),
-                  padding: EdgeInsets.all(10),
-                  child: Column(
-                    children: [
-                      arrayOfMatrix(
-                        notifier,
-                        rows,
-                        columns,
-                        matrixRows,
-                        matrixColumns,
-                        scale,
-                        onClick: editPixel,
-                        colors: colors,
-                      ),
-                    ],
-                  ),
-                ),
-              ),
-              SizedBox(
-                height: 10,
-              ),
-              Container(
                 child: Row(
                   children: [
-                    Text(
-                      "Color:   ",
-                      style: TextStyle(
-                        fontSize: 20,
-                        color: textColorBlackOrWhite(
-                          notifier.darkTheme,
+                    Expanded(
+                      child: Container(
+                        decoration: BoxDecoration(
+                          borderRadius: BorderRadius.all(Radius.circular(5)),
+                          color: blueTheme(notifier.darkTheme),
                         ),
-                      ),
-                    ),
-                    SizedBox(
-                      width: 300,
-                      child: selector(
-                        notifier,
+                        padding: EdgeInsets.all(10),
+                        child: Column(
+                          mainAxisAlignment: MainAxisAlignment.start,
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            GestureDetector(
+                              onPanUpdate: (details) {
+                                final tapPosition = details.localPosition;
+
+                                setState(() {
+                                  posxMatrixPainter = tapPosition.dx;
+                                  posyMatrixPainter = tapPosition.dy;
+
+                                  checkIfCoordinatesOnRectangle(
+                                    posxMatrixPainter,
+                                    posyMatrixPainter,
+                                  );
+
+                                  matrixTouched = true;
+                                });
+                              },
+                              onTapDown: (TapDownDetails details) {
+                                final tapPosition = details.localPosition;
+
+                                setState(() {
+                                  posxMatrixPainter = tapPosition.dx;
+                                  posyMatrixPainter = tapPosition.dy;
+
+                                  checkIfCoordinatesOnRectangle(
+                                    posxMatrixPainter,
+                                    posyMatrixPainter,
+                                  );
+
+                                  matrixTouched = true;
+                                });
+                              },
+                              onPanEnd: (_) {
+                                setState(() {
+                                  matrixTouched = false;
+                                });
+                              },
+                              onTapUp: (_) {
+                                setState(() {
+                                  matrixTouched = false;
+                                });
+                              },
+                              child: CustomPaint(
+                                size: Size(
+                                  matrixColumns * 13.0 * columns +
+                                      (columns - 1) * 5,
+                                  matrixRows * 13.0 * rows + (rows - 1) * 5,
+                                ),
+                                painter: MatrixPainter(
+                                  posxMatrixPainter,
+                                  posyMatrixPainter,
+                                  false,
+                                  columns,
+                                  matrixColumns,
+                                  matrixRows,
+                                  rows,
+                                  matrixTouched,
+                                  currentColor,
+                                  colors,
+                                  editPixel,
+                                ),
+                              ),
+                            ),
+                          ],
+                        ),
                       ),
                     ),
                   ],
                 ),
-              )
+              ),
             ],
           ),
         ),
@@ -217,31 +288,31 @@ class _BlackOrWhiteState extends State<BlackOrWhite> {
   Row selector(SettingsScreenNotifier notifier) {
     List<Widget> widgets = [];
 
-    for (var val in ColorOptions.values) {
-      var name = val.name;
+    for (var val in ["black", "white"]) {
+      var name = val;
       name =
           name.substring(0, 1).toUpperCase() + name.substring(1, name.length);
 
+      final Color color = val == "black" ? Colors.black : Colors.white;
+
       widgets.add(
-        SizedBox(
-          width: 100,
-          child: RadioListTile<ColorOptions>(
-            dense: false,
-            contentPadding: EdgeInsets.zero,
-            title: Text(
-              name,
-              style: TextStyle(
-                color: Colors.white,
+        GestureDetector(
+          onTap: () {
+            setState(() {
+              currentColor = color;
+            });
+          },
+          child: Container(
+            decoration: BoxDecoration(
+              color: color,
+              border: Border.all(
+                color: color == currentColor ? Colors.grey : Colors.transparent,
+                width: 3,
               ),
             ),
-            value: val,
-            activeColor: Colors.white,
-            groupValue: colorOptions,
-            onChanged: (ColorOptions? value) {
-              setState(() {
-                colorOptions = value!;
-              });
-            },
+            width: 25,
+            height: 25,
+            margin: EdgeInsets.only(right: val == "black" ? 10 : 0),
           ),
         ),
       );
@@ -249,20 +320,20 @@ class _BlackOrWhiteState extends State<BlackOrWhite> {
 
     return Row(
       children: [
-        Expanded(
-          child: Container(
-            padding: EdgeInsets.all(5),
-            margin: EdgeInsets.all(5),
-            decoration: BoxDecoration(
-              color: blueTheme(notifier.darkTheme),
-              borderRadius: BorderRadius.all(
-                Radius.circular(5),
-              ),
+        Container(
+          alignment: Alignment.center,
+          height: 40,
+          padding: EdgeInsets.all(5),
+          // margin: EdgeInsets.only(left: 8),
+          decoration: BoxDecoration(
+            color: blueTheme(notifier.darkTheme),
+            borderRadius: BorderRadius.all(
+              Radius.circular(5),
             ),
-            child: Wrap(
-              alignment: WrapAlignment.spaceEvenly,
-              children: widgets,
-            ),
+          ),
+          child: Wrap(
+            alignment: WrapAlignment.spaceEvenly,
+            children: widgets,
           ),
         )
       ],
@@ -277,16 +348,9 @@ class _BlackOrWhiteState extends State<BlackOrWhite> {
     int matrixRowsTextCountIndex,
     int matrixColumnsTextCountIndex,
   ) {
-    if (colorOptions == ColorOptions.black) {
-      setState(() {
-        colors[rowsCountIndex][columnsCountIndex][matrixRowsTextCountIndex]
-            [matrixColumnsTextCountIndex] = Colors.black;
-      });
-      return;
-    }
     setState(() {
       colors[rowsCountIndex][columnsCountIndex][matrixRowsTextCountIndex]
-          [matrixColumnsTextCountIndex] = Colors.white;
+          [matrixColumnsTextCountIndex] = currentColor;
     });
   }
 

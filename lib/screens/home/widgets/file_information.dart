@@ -1,4 +1,4 @@
-// ignore_for_file: prefer_const_constructors
+// ignore_for_file: prefer_const_constructors, must_be_immutable
 
 import 'dart:io';
 
@@ -8,11 +8,13 @@ import 'package:calculator/utils/bytes_converter.dart';
 import 'package:flutter/material.dart';
 
 class FileInformation extends StatefulWidget {
-  FileInformation({
-    Key? key,
-    required this.darkTheme,
-    required this.fileName,
-    required this.language, required}) : super(key: key);
+  FileInformation(
+      {Key? key,
+      required this.darkTheme,
+      required this.fileName,
+      required this.language,
+      required})
+      : super(key: key);
 
   String fileName;
   bool darkTheme;
@@ -46,39 +48,38 @@ class _FileInformationState extends State<FileInformation> {
       crossAxisAlignment: CrossAxisAlignment.start,
       mainAxisAlignment: MainAxisAlignment.start,
       children: [
-        Text(fileLocation(language), style: TextStyle(color: textColor(darkTheme))),
+        Text(fileLocation(language),
+            style: TextStyle(color: textColor(darkTheme))),
         Text(widget.fileName, style: TextStyle(color: textColor(darkTheme))),
         Visibility(
-          visible: loadingInfo && !fileExist,
-          child: Container(
-            padding: EdgeInsets.all(5),
-            margin: EdgeInsets.only(top: 5),
-            decoration: BoxDecoration(
-              color: Colors.red,
-              borderRadius: BorderRadius.all(Radius.circular(20))
-            ),
-            child: Text(fileDoNotExist(language)),
-          )
-        ),
-
+            visible: loadingInfo && !fileExist,
+            child: Container(
+              padding: EdgeInsets.all(5),
+              margin: EdgeInsets.only(top: 5),
+              decoration: BoxDecoration(
+                  color: Colors.red,
+                  borderRadius: BorderRadius.all(Radius.circular(20))),
+              child: Text(fileDoNotExist(language)),
+            )),
         Visibility(
-          visible: loadingInfo && fileExist,
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              SizedBox(height: 10),
-              Text(fileSizeLabel(language), style: TextStyle(color: textColor(darkTheme))),
-              Text(formatBytes(fileSize, 2), style: TextStyle(color: textColor(darkTheme))),
-            ],
-          )
-        ),
+            visible: loadingInfo && fileExist,
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                SizedBox(height: 10),
+                Text(fileSizeLabel(language),
+                    style: TextStyle(color: textColor(darkTheme))),
+                Text(formatBytes(fileSize, 2),
+                    style: TextStyle(color: textColor(darkTheme))),
+              ],
+            )),
       ],
     );
   }
 
   checkFileInfo() async {
     File f = File(widget.fileName);
-    if (f.existsSync()){
+    if (f.existsSync()) {
       setState(() {
         fileSize = f.lengthSync();
         loadingInfo = true;
