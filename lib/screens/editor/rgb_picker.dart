@@ -57,7 +57,6 @@ class _RGB_PickerState extends State<RGB_Picker> {
   Color rgbColor = Colors.red;
 
   List<List<List<List<Color>>>> colors = [];
-  List<List<List<List<Rect>>>> rectangles = [];
 
   ColorOptions colorOptions = ColorOptions.black;
 
@@ -88,28 +87,8 @@ class _RGB_PickerState extends State<RGB_Picker> {
       ),
     );
 
-    // rectangles = List.generate(
-    //   rows,
-    //   (i) => List.generate(
-    //     columns,
-    //     (j) => List.generate(
-    //       matrixRows,
-    //       (x) => List.generate(
-    //         matrixColumns,
-    //         (y) => getOffset(i, j, x, y) & const Size(10, 10),
-    //       ),
-    //     ),
-    //   ),
-    // );
-
     super.initState();
   }
-
-  // getOffset(i, j, x, y) {
-  //   double dx = (j + x) * 13 + 13.0 * j * matrixColumns - 5 * j;
-  //   double dy = (i + y) * 13 + 13.0 * i * matrixRows - 5 * i;
-  //   return Offset(dx, dy);
-  // }
 
   checkIfCoordinatesOnRectangle(double posx, double posy) {
     for (int i = 0; i < rows; i++) {
@@ -435,16 +414,6 @@ class _RGB_PickerState extends State<RGB_Picker> {
                                 ),
                               ),
                             ),
-                            // arrayOfMatrix(
-                            //   notifier,
-                            //   rows,
-                            //   columns,
-                            //   matrixRows,
-                            //   matrixColumns,
-                            //   scale,
-                            //   onClick: editPixel,
-                            //   colors: colors,
-                            // ),
                           ],
                         ),
                       ),
