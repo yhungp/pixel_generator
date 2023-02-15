@@ -6,17 +6,17 @@ import 'package:flutter/material.dart';
 import 'package:path/path.dart' as p;
 
 class RecentContainerHomeWidget extends StatefulWidget {
-  RecentContainerHomeWidget(
-      {Key? key,
-      required this.darkTheme,
-      required this.fileName,
-      required this.openProject,
-      required this.editProject,
-      required this.index,
-      required this.setRecentSelected,
-      required this.language,
-      required this.notifier})
-      : super(key: key);
+  RecentContainerHomeWidget({
+    Key? key,
+    required this.darkTheme,
+    required this.fileName,
+    required this.openProject,
+    required this.editProject,
+    required this.index,
+    required this.setRecentSelected,
+    required this.language,
+    required this.notifier,
+  }) : super(key: key);
 
   String fileName;
   bool darkTheme;

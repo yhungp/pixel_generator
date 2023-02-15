@@ -54,8 +54,11 @@ class _EditorState extends State<Editor> {
   final ScrollController horizontal = ScrollController();
   final ScrollController vertical = ScrollController();
 
+  bool loading = true;
+
   @override
   void initState() {
+    filePath = widget.filePath;
     loadInfo();
 
     super.initState();
@@ -64,19 +67,27 @@ class _EditorState extends State<Editor> {
   @override
   Widget build(BuildContext context) {
     return Consumer<SettingsScreenNotifier>(
-        builder: (context, notifier, child) {
-      return Container(
-        height: double.infinity,
-        width: double.infinity,
-        color: blackTheme(notifier.darkTheme),
-        padding: const EdgeInsets.all(5.0),
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.start,
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [selector(notifier), editorSelector()],
-        ),
-      );
-    });
+      builder: (context, notifier, child) {
+        return Container(
+          height: double.infinity,
+          width: double.infinity,
+          color: blackTheme(notifier.darkTheme),
+          padding: const EdgeInsets.all(5.0),
+          child: loading
+              ? Center(
+                  child: Text("Loading"),
+                )
+              : Column(
+                  mainAxisAlignment: MainAxisAlignment.start,
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    selector(notifier),
+                    editorSelector(),
+                  ],
+                ),
+        );
+      },
+    );
   }
 
   editorSelector() {
@@ -219,12 +230,21 @@ class _EditorState extends State<Editor> {
           });
         }
 
-        setState(() {});
+        setState(() {
+          loading = false;
+        });
 
         return;
       } catch (e) {
+        setState(() {
+          loading = false;
+        });
         return;
       }
     }
+
+    setState(() {
+      loading = false;
+    });
   }
 }

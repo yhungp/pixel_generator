@@ -47,10 +47,10 @@ class MyApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return ChangeNotifierProvider(
-        create: (context) => SettingsScreenNotifier(),
-        builder: (context, provider) {
-          return Consumer<SettingsScreenNotifier>(
-              builder: (context, notifier, child) {
+      create: (context) => SettingsScreenNotifier(),
+      builder: (context, provider) {
+        return Consumer<SettingsScreenNotifier>(
+          builder: (context, notifier, child) {
             return MaterialApp(
               title: 'Flutter Demo',
               debugShowCheckedModeBanner: false,
@@ -67,8 +67,10 @@ class MyApp extends StatelessWidget {
                   title: titles[notifier.currentScreen][notifier.language]),
               // home: const MyHomePage(title: 'Pixel matrix generator'),
             );
-          });
-        });
+          },
+        );
+      },
+    );
   }
 }
 

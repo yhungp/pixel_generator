@@ -94,23 +94,27 @@ class _HomePageState extends State<HomePage> {
                     ),
                   ),
                   Expanded(
-                      child: recentProjectHistory.isEmpty
-                          ? Center(
-                              child: Text(
-                                  noRecentProjectsToShow(notifier.language),
-                                  textAlign: TextAlign.center,
-                                  style: TextStyle(
-                                      color: textColor(notifier.darkTheme))),
-                            )
-                          : ListView.builder(
-                              itemCount: recentProjectHistory.length,
-                              itemBuilder: (context, index) {
-                                return RecentLateralBarComponent(
-                                    darkTheme: notifier.darkTheme,
-                                    fileName: recentProjectHistory[index],
-                                    openProject: openProject);
-                              },
-                            ))
+                    child: recentProjectHistory.isEmpty
+                        ? Center(
+                            child: Text(
+                              noRecentProjectsToShow(notifier.language),
+                              textAlign: TextAlign.center,
+                              style: TextStyle(
+                                color: textColor(notifier.darkTheme),
+                              ),
+                            ),
+                          )
+                        : ListView.builder(
+                            itemCount: recentProjectHistory.length,
+                            itemBuilder: (context, index) {
+                              return RecentLateralBarComponent(
+                                darkTheme: notifier.darkTheme,
+                                fileName: recentProjectHistory[index],
+                                openProject: openProject,
+                              );
+                            },
+                          ),
+                  )
                 ],
               ),
             ),
@@ -122,24 +126,29 @@ class _HomePageState extends State<HomePage> {
                         mainAxisAlignment: MainAxisAlignment.center,
                         crossAxisAlignment: CrossAxisAlignment.center,
                         children: [
-                          Text(noRecentProjectsToShow(notifier.language),
-                              textAlign: TextAlign.center,
-                              style: TextStyle(
-                                  color: textColor(notifier.darkTheme))),
+                          Text(
+                            noRecentProjectsToShow(notifier.language),
+                            textAlign: TextAlign.center,
+                            style: TextStyle(
+                              color: textColor(notifier.darkTheme),
+                            ),
+                          ),
                           SizedBox(height: 10),
                           Row(
                             mainAxisAlignment: MainAxisAlignment.center,
                             crossAxisAlignment: CrossAxisAlignment.start,
                             children: [
                               GenericButton(
-                                  label: createNewProject(notifier.language),
-                                  func: newProject,
-                                  darkTheme: notifier.darkTheme),
+                                label: createNewProject(notifier.language),
+                                func: newProject,
+                                darkTheme: notifier.darkTheme,
+                              ),
                               SizedBox(width: 10),
                               GenericButton(
-                                  label: openExistingProject(notifier.language),
-                                  func: openProjectFromDialog,
-                                  darkTheme: notifier.darkTheme),
+                                label: openExistingProject(notifier.language),
+                                func: openProjectFromDialog,
+                                darkTheme: notifier.darkTheme,
+                              ),
                             ],
                           )
                         ],

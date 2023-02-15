@@ -2,6 +2,7 @@
 
 import 'package:calculator/language/editor.dart';
 import 'package:calculator/main.dart';
+import 'package:calculator/screens/editor/widgets/matrix_painter.dart';
 import 'package:calculator/styles/styles.dart';
 import 'package:calculator/widgets/array_of_matrix.dart';
 import 'package:calculator/widgets/scale_button.dart';
@@ -49,16 +50,21 @@ class _RGB_PickerState extends State<RGB_Picker> {
   double posxColorBar = 0;
   double posyColorBar = 0;
 
+  double posxMatrixPainter = 0;
+  double posyMatrixPainter = 0;
+
   Color currentColor = Colors.white;
   Color rgbColor = Colors.red;
 
   List<List<List<List<Color>>>> colors = [];
+  List<List<List<List<Rect>>>> rectangles = [];
 
   ColorOptions colorOptions = ColorOptions.black;
 
   bool peekingColor = false;
   bool grayScaleTouched = false;
   bool rgbScaleTouched = false;
+  bool matrixTouched = false;
 
   @override
   void initState() {
@@ -82,7 +88,47 @@ class _RGB_PickerState extends State<RGB_Picker> {
       ),
     );
 
+    // rectangles = List.generate(
+    //   rows,
+    //   (i) => List.generate(
+    //     columns,
+    //     (j) => List.generate(
+    //       matrixRows,
+    //       (x) => List.generate(
+    //         matrixColumns,
+    //         (y) => getOffset(i, j, x, y) & const Size(10, 10),
+    //       ),
+    //     ),
+    //   ),
+    // );
+
     super.initState();
+  }
+
+  // getOffset(i, j, x, y) {
+  //   double dx = (j + x) * 13 + 13.0 * j * matrixColumns - 5 * j;
+  //   double dy = (i + y) * 13 + 13.0 * i * matrixRows - 5 * i;
+  //   return Offset(dx, dy);
+  // }
+
+  checkIfCoordinatesOnRectangle(double posx, double posy) {
+    for (int i = 0; i < rows; i++) {
+      for (int j = 0; j < columns; j++) {
+        for (int x = 0; x < matrixRows; x++) {
+          for (int y = 0; y < matrixColumns; y++) {
+            double dx = (j + x) * 13 + 13.0 * j * matrixColumns - 5 * j;
+            double dy = (i + y) * 13 + 13.0 * i * matrixRows - 5 * i;
+
+            bool pixelTouched =
+                posx > dx && posx < dx + 10 && posy > dy && posy < dy + 10;
+
+            if (pixelTouched) {
+              editPixel(i, j, x, y, currentColor);
+            }
+          }
+        }
+      }
+    }
   }
 
   void changeColor(Color color) {
@@ -324,17 +370,81 @@ class _RGB_PickerState extends State<RGB_Picker> {
                         ),
                         padding: EdgeInsets.all(10),
                         child: Column(
+                          mainAxisAlignment: MainAxisAlignment.start,
+                          crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
-                            arrayOfMatrix(
-                              notifier,
-                              rows,
-                              columns,
-                              matrixRows,
-                              matrixColumns,
-                              scale,
-                              onClick: editPixel,
-                              colors: colors,
+                            GestureDetector(
+                              onPanUpdate: (details) {
+                                final tapPosition = details.localPosition;
+
+                                setState(() {
+                                  posxMatrixPainter = tapPosition.dx;
+                                  posyMatrixPainter = tapPosition.dy;
+
+                                  checkIfCoordinatesOnRectangle(
+                                    posxMatrixPainter,
+                                    posyMatrixPainter,
+                                  );
+
+                                  matrixTouched = true;
+                                });
+                              },
+                              onTapDown: (TapDownDetails details) {
+                                final tapPosition = details.localPosition;
+
+                                setState(() {
+                                  posxMatrixPainter = tapPosition.dx;
+                                  posyMatrixPainter = tapPosition.dy;
+
+                                  checkIfCoordinatesOnRectangle(
+                                    posxMatrixPainter,
+                                    posyMatrixPainter,
+                                  );
+
+                                  matrixTouched = true;
+                                });
+                              },
+                              onPanEnd: (_) {
+                                setState(() {
+                                  matrixTouched = false;
+                                });
+                              },
+                              onTapUp: (_) {
+                                setState(() {
+                                  matrixTouched = false;
+                                });
+                              },
+                              child: CustomPaint(
+                                size: Size(
+                                  matrixColumns * 13.0 * columns +
+                                      (columns - 1) * 5,
+                                  matrixRows * 13.0 * rows + (rows - 1) * 5,
+                                ),
+                                painter: MatrixPainter(
+                                  posxMatrixPainter,
+                                  posyMatrixPainter,
+                                  false,
+                                  columns,
+                                  matrixColumns,
+                                  matrixRows,
+                                  rows,
+                                  matrixTouched,
+                                  currentColor,
+                                  colors,
+                                  editPixel,
+                                ),
+                              ),
                             ),
+                            // arrayOfMatrix(
+                            //   notifier,
+                            //   rows,
+                            //   columns,
+                            //   matrixRows,
+                            //   matrixColumns,
+                            //   scale,
+                            //   onClick: editPixel,
+                            //   colors: colors,
+                            // ),
                           ],
                         ),
                       ),
@@ -493,24 +603,13 @@ class _RGB_PickerState extends State<RGB_Picker> {
   }
 
   editPixel(
-    int rowsCountIndex,
-    int columnsCountIndex,
-    int matrixRowsTextCountIndex,
-    int matrixColumnsTextCountIndex,
+    int rIndex,
+    int cIndex,
+    int mrIndex,
+    int mcIndex,
+    Color color,
   ) {
-    if (peekingColor) {
-      setState(() {
-        currentColor = colors[rowsCountIndex][columnsCountIndex]
-            [matrixRowsTextCountIndex][matrixColumnsTextCountIndex];
-
-        posxGrayScale = currentColor.blue.toInt() / 255 * 500;
-      });
-      return;
-    }
-    setState(() {
-      colors[rowsCountIndex][columnsCountIndex][matrixRowsTextCountIndex]
-          [matrixColumnsTextCountIndex] = currentColor;
-    });
+    colors[rIndex][cIndex][mrIndex][mcIndex] = color;
   }
 
   Row viewScale(SettingsScreenNotifier notifier) {
