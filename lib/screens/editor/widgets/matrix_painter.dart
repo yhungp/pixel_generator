@@ -38,13 +38,15 @@ class MatrixPainter extends CustomPainter {
         for (int x = 0; x < matrixRows; x++) {
           for (int y = 0; y < matrixColumns; y++) {
             double dx = showSpaceBetweenMatrix
-                ? (j + x) * 13 + 13.0 * j * matrixColumns - 5 * j
+                ? (j + x) * 13 * scale +
+                    13.0 * scale * j * matrixColumns -
+                    5 * j
                 : y * 13 * scale + 13.0 * scale * j * matrixColumns + posx;
             double dy = showSpaceBetweenMatrix
-                ? (i + y) * 13 + 13.0 * i * matrixRows - 5 * i
+                ? (i + y) * 13 * scale + 13.0 * scale * i * matrixRows - 5 * i
                 : x * 13 * scale + 13.0 * scale * i * matrixRows + posy;
 
-            var rect = Offset(dx, dy) & const Size(10, 10);
+            var rect = Offset(dx, dy) & Size(10 * scale, 10 * scale);
             Paint paint = Paint();
             paint.color = colors[i][j][x][y];
 
