@@ -20,3 +20,13 @@ peekingColorLabel(int language) {
       return "Seleccionando color";
   }
 }
+
+// grey scale
+peekingFileLabel(int language) {
+  switch (language) {
+    case 0:
+      return "Peek file";
+    case 1:
+      return "Seleccione un archivo";
+  }
+}

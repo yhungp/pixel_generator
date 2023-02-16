@@ -9,6 +9,7 @@ class MatrixPainter extends CustomPainter {
   int columns;
   int rows;
   bool matrixTouched;
+  bool showSpaceBetweenMatrix;
   Color color;
   List<List<List<List<Color>>>> colors;
   Function editPixel;
@@ -24,8 +25,9 @@ class MatrixPainter extends CustomPainter {
     this.matrixTouched,
     this.color,
     this.colors,
-    this.editPixel,
-  );
+    this.editPixel, {
+    this.showSpaceBetweenMatrix = true,
+  });
 
   empty() {}
 
@@ -35,8 +37,12 @@ class MatrixPainter extends CustomPainter {
       for (int j = 0; j < columns; j++) {
         for (int x = 0; x < matrixRows; x++) {
           for (int y = 0; y < matrixColumns; y++) {
-            double dx = (j + x) * 13 + 13.0 * j * matrixColumns - 5 * j;
-            double dy = (i + y) * 13 + 13.0 * i * matrixRows - 5 * i;
+            double dx = showSpaceBetweenMatrix
+                ? (j + x) * 13 + 13.0 * j * matrixColumns - 5 * j
+                : (j + 2 * x) * 13;
+            double dy = showSpaceBetweenMatrix
+                ? (i + y) * 13 + 13.0 * i * matrixRows - 5 * i
+                : (i + 2 * y) * 13;
 
             var rect = Offset(dx, dy) & const Size(10, 10);
             Paint paint = Paint();

@@ -5,6 +5,7 @@ import 'dart:io';
 
 import 'package:calculator/main.dart';
 import 'package:calculator/screens/editor/black_or_white.dart';
+import 'package:calculator/screens/editor/from_image.dart';
 import 'package:calculator/screens/editor/gray_scale.dart';
 import 'package:calculator/screens/editor/rgb_picker.dart';
 import 'package:calculator/styles/styles.dart';
@@ -108,6 +109,14 @@ class _EditorState extends State<Editor> {
         );
       case EditorOptions.rgbPicker:
         return RGB_Picker(
+          columns: columns,
+          matrixColumns: matrixColumns,
+          matrixRows: matrixRows,
+          rows: rows,
+          scale: scale,
+        );
+      case EditorOptions.fromImage:
+        return From_Image(
           columns: columns,
           matrixColumns: matrixColumns,
           matrixRows: matrixRows,
