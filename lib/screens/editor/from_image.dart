@@ -3,6 +3,7 @@
 import 'package:calculator/language/editor.dart';
 import 'package:calculator/main.dart';
 import 'package:calculator/screens/editor/widgets/matrix_painter.dart';
+import 'package:calculator/screens/editor/widgets/matrix_painter_with_scaler.dart';
 import 'package:calculator/styles/styles.dart';
 import 'package:calculator/widgets/scale_button.dart';
 import 'package:flutter/material.dart';
@@ -36,6 +37,8 @@ class _From_ImageState extends State<From_Image> {
   int matrixRows = 8;
   int columns = 1;
   int rows = 1;
+  int pointScaleTouched = 0;
+
   double scale = 1;
 
   late ui.Image imageFromFile;
@@ -57,7 +60,13 @@ class _From_ImageState extends State<From_Image> {
   bool peekingColor = false;
   bool grayScaleTouched = false;
   bool rgbScaleTouched = false;
-  bool matrixTouched = false;
+  bool matrixScaleTouched = false;
+
+  double prevX = 0;
+  double prevY = 0;
+
+  double deltaX = 0;
+  double deltaY = 0;
 
   @override
   void initState() {
@@ -82,26 +91,6 @@ class _From_ImageState extends State<From_Image> {
     );
 
     super.initState();
-  }
-
-  checkIfCoordinatesOnRectangle(double posx, double posy) {
-    for (int i = 0; i < rows; i++) {
-      for (int j = 0; j < columns; j++) {
-        for (int x = 0; x < matrixRows; x++) {
-          for (int y = 0; y < matrixColumns; y++) {
-            double dx = (j + x) * 13 + 13.0 * j * matrixColumns - 5 * j;
-            double dy = (i + y) * 13 + 13.0 * i * matrixRows - 5 * i;
-
-            bool pixelTouched =
-                posx > dx && posx < dx + 10 && posy > dy && posy < dy + 10;
-
-            if (pixelTouched) {
-              editPixel(i, j, x, y, currentColor);
-            }
-          }
-        }
-      }
-    }
   }
 
   void changeColor(Color color) {
@@ -204,44 +193,32 @@ class _From_ImageState extends State<From_Image> {
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
                             GestureDetector(
-                              onPanUpdate: (details) {
-                                final tapPosition = details.localPosition;
-
+                              onTapDown: (details) {
                                 setState(() {
-                                  posxMatrixPainter = tapPosition.dx;
-                                  posyMatrixPainter = tapPosition.dy;
-
-                                  checkIfCoordinatesOnRectangle(
-                                    posxMatrixPainter,
-                                    posyMatrixPainter,
-                                  );
-
-                                  matrixTouched = true;
+                                  prevX = details.localPosition.dx;
+                                  prevY = details.localPosition.dy;
                                 });
                               },
-                              onTapDown: (TapDownDetails details) {
-                                final tapPosition = details.localPosition;
+                              onPanUpdate: (details) {
+                                double newX = details.localPosition.dx;
+                                double newY = details.localPosition.dy;
+
+                                if (matrixScaleTouched) {}
 
                                 setState(() {
-                                  posxMatrixPainter = tapPosition.dx;
-                                  posyMatrixPainter = tapPosition.dy;
+                                  deltaX = newX - prevX;
+                                  deltaY = newY - prevY;
 
-                                  checkIfCoordinatesOnRectangle(
-                                    posxMatrixPainter,
-                                    posyMatrixPainter,
-                                  );
+                                  prevX = newX;
+                                  prevY = newY;
 
-                                  matrixTouched = true;
+                                  posxMatrixPainter += deltaX;
+                                  posyMatrixPainter += deltaY;
                                 });
                               },
                               onPanEnd: (_) {
                                 setState(() {
-                                  matrixTouched = false;
-                                });
-                              },
-                              onTapUp: (_) {
-                                setState(() {
-                                  matrixTouched = false;
+                                  matrixScaleTouched = false;
                                 });
                               },
                               child: CustomPaint(
@@ -250,19 +227,20 @@ class _From_ImageState extends State<From_Image> {
                                       (columns - 1) * 5,
                                   matrixRows * 13.0 * rows + (rows - 1) * 5,
                                 ),
-                                painter: MatrixPainter(
-                                    posxMatrixPainter,
-                                    posyMatrixPainter,
-                                    false,
-                                    columns,
-                                    matrixColumns,
-                                    matrixRows,
-                                    rows,
-                                    matrixTouched,
-                                    currentColor,
-                                    colors,
-                                    editPixel,
-                                    showSpaceBetweenMatrix: false),
+                                painter: MatrixPainterWithScaler(
+                                  posxMatrixPainter,
+                                  posyMatrixPainter,
+                                  false,
+                                  columns,
+                                  matrixColumns,
+                                  matrixRows,
+                                  rows,
+                                  matrixScaleTouched,
+                                  currentColor,
+                                  colors,
+                                  editPixel,
+                                  scale,
+                                ),
                               ),
                             ),
                           ],
@@ -276,6 +254,33 @@ class _From_ImageState extends State<From_Image> {
           ),
         ),
       );
+    });
+  }
+
+  bool isInsideRect(
+      double x1, double y1, double x2, double y2, double px, double py) {
+    return px >= x1 && px <= x2 && py >= y1 && py <= y2;
+  }
+
+  void _onHorizontalDragStartHandler(DragStartDetails details) {
+    setState(() {
+      posxMatrixPainter = details.localPosition.dx.floorToDouble();
+      posyMatrixPainter = details.localPosition.dy.floorToDouble();
+    });
+  }
+
+  /// Track starting point of a vertical gesture
+  void _onVerticalDragStartHandler(DragStartDetails details) {
+    setState(() {
+      posxMatrixPainter = details.localPosition.dx.floorToDouble();
+      posyMatrixPainter = details.localPosition.dy.floorToDouble();
+    });
+  }
+
+  void _onDragUpdateHandler(DragUpdateDetails details) {
+    setState(() {
+      posxMatrixPainter = details.localPosition.dx.floorToDouble();
+      posyMatrixPainter = details.localPosition.dy.floorToDouble();
     });
   }
 
