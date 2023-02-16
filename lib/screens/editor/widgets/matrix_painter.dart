@@ -4,6 +4,7 @@ class MatrixPainter extends CustomPainter {
   bool touched;
   double posx;
   double posy;
+  double scale;
   int matrixColumns;
   int matrixRows;
   int columns;
@@ -12,7 +13,6 @@ class MatrixPainter extends CustomPainter {
   bool showSpaceBetweenMatrix;
   Color color;
   List<List<List<List<Color>>>> colors;
-  Function editPixel;
 
   MatrixPainter(
     this.posx,
@@ -25,7 +25,7 @@ class MatrixPainter extends CustomPainter {
     this.matrixTouched,
     this.color,
     this.colors,
-    this.editPixel, {
+    this.scale, {
     this.showSpaceBetweenMatrix = true,
   });
 
@@ -39,26 +39,14 @@ class MatrixPainter extends CustomPainter {
           for (int y = 0; y < matrixColumns; y++) {
             double dx = showSpaceBetweenMatrix
                 ? (j + x) * 13 + 13.0 * j * matrixColumns - 5 * j
-                : (j + 2 * x) * 13;
+                : y * 13 * scale + 13.0 * scale * j * matrixColumns + posx;
             double dy = showSpaceBetweenMatrix
                 ? (i + y) * 13 + 13.0 * i * matrixRows - 5 * i
-                : (i + 2 * y) * 13;
+                : x * 13 * scale + 13.0 * scale * i * matrixRows + posy;
 
             var rect = Offset(dx, dy) & const Size(10, 10);
             Paint paint = Paint();
             paint.color = colors[i][j][x][y];
-
-            // if (matrixTouched) {
-            //   bool pixelTouched =
-            //       posx > dx && posx < dx + 10 && posy > dy && posy < dy + 10;
-
-            //   if (pixelTouched) {
-            //     print("touched  $i  $j  $x  $y");
-            //     editPixel(i, j, x, y, color);
-            //   } else {
-            //     print("");
-            //   }
-            // }
 
             canvas.drawRect(rect, paint);
           }

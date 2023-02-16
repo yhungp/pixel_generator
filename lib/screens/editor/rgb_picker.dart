@@ -409,7 +409,7 @@ class _RGB_PickerState extends State<RGB_Picker> {
                                   matrixTouched,
                                   currentColor,
                                   colors,
-                                  editPixel,
+                                  scale,
                                 ),
                               ),
                             ),

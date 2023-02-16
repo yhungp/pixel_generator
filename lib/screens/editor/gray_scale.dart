@@ -363,7 +363,7 @@ class _GreyScaleState extends State<GreyScale> {
                                   matrixTouched,
                                   currentColor,
                                   colors,
-                                  editPixel,
+                                  scale,
                                 ),
                               ),
                             ),

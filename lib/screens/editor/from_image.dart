@@ -3,11 +3,9 @@
 import 'package:calculator/language/editor.dart';
 import 'package:calculator/main.dart';
 import 'package:calculator/screens/editor/widgets/matrix_painter.dart';
-import 'package:calculator/screens/editor/widgets/matrix_painter_with_scaler.dart';
 import 'package:calculator/styles/styles.dart';
 import 'package:calculator/widgets/scale_button.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_colorpicker/flutter_colorpicker.dart';
 import 'package:provider/provider.dart';
 import 'dart:ui' as ui;
 import 'package:image/image.dart' as image;
@@ -33,6 +31,8 @@ class From_Image extends StatefulWidget {
 }
 
 class _From_ImageState extends State<From_Image> {
+  late ui.Image imageFromFile;
+
   int matrixColumns = 8;
   int matrixRows = 8;
   int columns = 1;
@@ -40,8 +40,6 @@ class _From_ImageState extends State<From_Image> {
   int pointScaleTouched = 0;
 
   double scale = 1;
-
-  late ui.Image imageFromFile;
 
   double posxGrayScale = 0;
   double posyGrayScale = 0;
@@ -52,6 +50,15 @@ class _From_ImageState extends State<From_Image> {
   double posxMatrixPainter = 0;
   double posyMatrixPainter = 0;
 
+  double prevX = 0;
+  double prevY = 0;
+
+  double deltaX = 0;
+  double deltaY = 0;
+
+  double matrixWidth = 0;
+  double matrixHeight = 0;
+
   Color currentColor = Colors.white;
   Color rgbColor = Colors.red;
 
@@ -61,12 +68,6 @@ class _From_ImageState extends State<From_Image> {
   bool grayScaleTouched = false;
   bool rgbScaleTouched = false;
   bool matrixScaleTouched = false;
-
-  double prevX = 0;
-  double prevY = 0;
-
-  double deltaX = 0;
-  double deltaY = 0;
 
   @override
   void initState() {
@@ -90,6 +91,10 @@ class _From_ImageState extends State<From_Image> {
       ),
     );
 
+    matrixWidth = matrixColumns * 13.0 * columns + (columns - 1) * 5 - 2;
+    matrixHeight =
+        posyMatrixPainter + matrixRows * 13.0 * rows + (rows - 1) * 5 - 2;
+
     super.initState();
   }
 
@@ -99,6 +104,7 @@ class _From_ImageState extends State<From_Image> {
 
   @override
   Widget build(BuildContext context) {
+    // scale = 0.6;
     return Consumer<SettingsScreenNotifier>(
         builder: (context, notifier, child) {
       return Expanded(
@@ -193,27 +199,10 @@ class _From_ImageState extends State<From_Image> {
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
                             GestureDetector(
-                              onTapDown: (details) {
-                                setState(() {
-                                  prevX = details.localPosition.dx;
-                                  prevY = details.localPosition.dy;
-                                });
-                              },
                               onPanUpdate: (details) {
-                                double newX = details.localPosition.dx;
-                                double newY = details.localPosition.dy;
-
-                                if (matrixScaleTouched) {}
-
                                 setState(() {
-                                  deltaX = newX - prevX;
-                                  deltaY = newY - prevY;
-
-                                  prevX = newX;
-                                  prevY = newY;
-
-                                  posxMatrixPainter += deltaX;
-                                  posyMatrixPainter += deltaY;
+                                  posxMatrixPainter += details.delta.dx;
+                                  posyMatrixPainter += details.delta.dy;
                                 });
                               },
                               onPanEnd: (_) {
@@ -223,11 +212,10 @@ class _From_ImageState extends State<From_Image> {
                               },
                               child: CustomPaint(
                                 size: Size(
-                                  matrixColumns * 13.0 * columns +
-                                      (columns - 1) * 5,
-                                  matrixRows * 13.0 * rows + (rows - 1) * 5,
+                                  1920,
+                                  600,
                                 ),
-                                painter: MatrixPainterWithScaler(
+                                painter: MatrixPainter(
                                   posxMatrixPainter,
                                   posyMatrixPainter,
                                   false,
@@ -238,8 +226,8 @@ class _From_ImageState extends State<From_Image> {
                                   matrixScaleTouched,
                                   currentColor,
                                   colors,
-                                  editPixel,
                                   scale,
+                                  showSpaceBetweenMatrix: false,
                                 ),
                               ),
                             ),
@@ -257,131 +245,6 @@ class _From_ImageState extends State<From_Image> {
     });
   }
 
-  bool isInsideRect(
-      double x1, double y1, double x2, double y2, double px, double py) {
-    return px >= x1 && px <= x2 && py >= y1 && py <= y2;
-  }
-
-  void _onHorizontalDragStartHandler(DragStartDetails details) {
-    setState(() {
-      posxMatrixPainter = details.localPosition.dx.floorToDouble();
-      posyMatrixPainter = details.localPosition.dy.floorToDouble();
-    });
-  }
-
-  /// Track starting point of a vertical gesture
-  void _onVerticalDragStartHandler(DragStartDetails details) {
-    setState(() {
-      posxMatrixPainter = details.localPosition.dx.floorToDouble();
-      posyMatrixPainter = details.localPosition.dy.floorToDouble();
-    });
-  }
-
-  void _onDragUpdateHandler(DragUpdateDetails details) {
-    setState(() {
-      posxMatrixPainter = details.localPosition.dx.floorToDouble();
-      posyMatrixPainter = details.localPosition.dy.floorToDouble();
-    });
-  }
-
-  setRgbColor(Color color) {
-    setState(() {
-      rgbColor = color;
-    });
-  }
-
-  setGrayScaleColor(Color color) {
-    setState(() {
-      currentColor = color;
-    });
-  }
-
-  updatePosxGrayScale(double dx, double dy) {
-    if (dy < 0 || dy > 20) {
-      return;
-    }
-
-    if (dx < 0) {
-      setState(() {
-        posxGrayScale = 0;
-      });
-      return;
-    }
-
-    if (dx > 200) {
-      setState(() {
-        posxGrayScale = 200;
-      });
-      return;
-    }
-
-    setState(() {
-      posxGrayScale = dx;
-    });
-  }
-
-  updatePosxColorBar(double dx, double dy) {
-    if (dy < 0 || dy > 20) {
-      return;
-    }
-
-    if (dx < 0) {
-      setState(() {
-        posxColorBar = 0;
-      });
-      return;
-    }
-
-    if (dx > 200) {
-      setState(() {
-        posxColorBar = 200;
-      });
-      return;
-    }
-
-    setState(() {
-      posxColorBar = dx;
-    });
-  }
-
-  void showColorPicker() {
-    showDialog(
-      context: context,
-      builder: (BuildContext context) {
-        return AlertDialog(
-          title: Text("Pick a color"),
-          content: SingleChildScrollView(
-            child: ColorPicker(
-              pickerColor: currentColor,
-              // paletteType: PaletteType.hueWheel,
-              onColorChanged: (Color value) => changeColor(value),
-            ),
-          ),
-        );
-      },
-    );
-  }
-
-  updateColorGreyScale(double posx) {
-    int scaled = (posx / 200 * 255).toInt();
-    return Color.fromARGB(255, scaled, scaled, scaled);
-  }
-
-  updateColorFromColorBar(double posx) {
-    int scaled = (posx / 200 * 255).toInt();
-    return Color.fromARGB(255, scaled, scaled, scaled);
-  }
-
-  editPixel(
-    int rIndex,
-    int cIndex,
-    int mrIndex,
-    int mcIndex,
-    Color color,
-  ) {
-    colors[rIndex][cIndex][mrIndex][mcIndex] = color;
-  }
-
   Row viewScale(SettingsScreenNotifier notifier) {
     return Row(
       children: [
@@ -395,7 +258,7 @@ class _From_ImageState extends State<From_Image> {
           alignment: Alignment.center,
           padding: EdgeInsets.all(10),
           child: Text(
-            "Zoom: ${scale >= 1 ? scale.toStringAsFixed(0) : scale}",
+            "Zoom: ${scale >= 2 ? scale.toStringAsFixed(0) : scale}",
             style: TextStyle(
               color: textColorMatrixCreation(
                 notifier.darkTheme,
@@ -413,14 +276,14 @@ class _From_ImageState extends State<From_Image> {
   }
 
   upScale() {
-    if (scale >= 1) {
+    if (scale >= 2) {
       setState(() {
         scale += 1;
         scale = double.parse(scale.toStringAsFixed(1));
       });
       return;
     }
-    if (scale <= 0.9) {
+    if (scale <= 1.9) {
       setState(() {
         scale += 0.1;
         scale = double.parse(scale.toStringAsFixed(1));
@@ -431,7 +294,7 @@ class _From_ImageState extends State<From_Image> {
   }
 
   downScale() {
-    if (scale > 1) {
+    if (scale > 2) {
       setState(() {
         scale -= 1;
         scale = double.parse(scale.toStringAsFixed(1));

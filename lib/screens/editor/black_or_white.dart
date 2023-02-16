@@ -267,7 +267,7 @@ class _BlackOrWhiteState extends State<BlackOrWhite> {
                                   matrixTouched,
                                   currentColor,
                                   colors,
-                                  editPixel,
+                                  scale,
                                 ),
                               ),
                             ),
