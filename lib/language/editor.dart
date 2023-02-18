@@ -25,7 +25,7 @@ peekingColorLabel(int language) {
 peekingFileLabel(int language) {
   switch (language) {
     case 0:
-      return "Peek file";
+      return "Peek a file";
     case 1:
       return "Seleccione un archivo";
   }

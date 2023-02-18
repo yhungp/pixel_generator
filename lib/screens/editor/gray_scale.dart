@@ -90,11 +90,15 @@ class _GreyScaleState extends State<GreyScale> {
       for (int j = 0; j < columns; j++) {
         for (int x = 0; x < matrixRows; x++) {
           for (int y = 0; y < matrixColumns; y++) {
-            double dx = (j + x) * 13 + 13.0 * j * matrixColumns - 5 * j;
-            double dy = (i + y) * 13 + 13.0 * i * matrixRows - 5 * i;
+            double dx =
+                (j + x) * 13 * scale + 13.0 * scale * j * matrixColumns - 5 * j;
+            double dy =
+                (i + y) * 13 * scale + 13.0 * scale * i * matrixRows - 5 * i;
 
-            bool pixelTouched =
-                posx > dx && posx < dx + 10 && posy > dy && posy < dy + 10;
+            bool pixelTouched = posx > dx &&
+                posx < dx + 10 * scale &&
+                posy > dy &&
+                posy < dy + 10 * scale;
 
             if (pixelTouched) {
               editPixel(i, j, x, y);
@@ -367,16 +371,6 @@ class _GreyScaleState extends State<GreyScale> {
                                 ),
                               ),
                             ),
-                            // arrayOfMatrix(
-                            //   notifier,
-                            //   rows,
-                            //   columns,
-                            //   matrixRows,
-                            //   matrixColumns,
-                            //   scale,
-                            //   onClick: editPixel,
-                            //   colors: colors,
-                            // ),
                           ],
                         ),
                       ),

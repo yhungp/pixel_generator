@@ -9,19 +9,26 @@ class ScaleButton extends StatelessWidget {
     required this.text,
     required this.darkTheme,
     required this.func,
+    required this.value,
+    this.height = 20,
+    this.width = 20,
   }) : super(key: key);
 
   String text;
   bool darkTheme;
   Function func;
 
+  double width = 0;
+  double height = 0;
+  double value;
+
   @override
   Widget build(BuildContext context) {
     return GestureDetector(
-      onTap: () => func(),
+      onTap: () => func(value),
       child: Container(
-        width: 20,
-        height: 20,
+        width: width,
+        height: height,
         alignment: Alignment.center,
         decoration: BoxDecoration(
             borderRadius: BorderRadius.all(Radius.circular(20)),

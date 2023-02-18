@@ -29,6 +29,13 @@ packages:
       url: "https://pub.dartlang.org"
     source: hosted
     version: "0.11.0"
+  bitmap:
+    dependency: "direct main"
+    description:
+      name: bitmap
+      url: "https://pub.dartlang.org"
+    source: hosted
+    version: "0.1.2"
   boolean_selector:
     dependency: transitive
     description:
