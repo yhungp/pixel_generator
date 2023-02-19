@@ -66,6 +66,8 @@ class _From_ImageState extends State<From_Image> {
   bool matrixScaleTouched = false;
   bool imagePeeked = false;
   bool sizeLoaded = false;
+  bool codeGenerated = false;
+  bool showCode = false;
 
   String filePeeked = "";
 
@@ -174,7 +176,7 @@ class _From_ImageState extends State<From_Image> {
     imageFromFile = await _loadImage(filePeeked);
   }
 
-  handleSavePressed() async {
+  handleSavePressed(SettingsScreenNotifier notifier) async {
     try {
       ui.PictureRecorder recorder = ui.PictureRecorder();
       Canvas canvas = Canvas(recorder);
@@ -200,9 +202,10 @@ class _From_ImageState extends State<From_Image> {
 
       painter.paint(canvas, size!);
 
-      ui.Image renderedImage = await recorder
-          .endRecording()
-          .toImage(size.width.floor(), size.height.floor());
+      ui.Image renderedImage = await recorder.endRecording().toImage(
+            size.width.floor(),
+            size.height.floor(),
+          );
 
       var pngBytes =
           await renderedImage.toByteData(format: ui.ImageByteFormat.png);
@@ -281,7 +284,25 @@ class _From_ImageState extends State<From_Image> {
       final Directory directory = await getApplicationDocumentsDirectory();
       final File file = File('${directory.path}/my_file.txt');
       await file.writeAsString("{\n\t${matrixValues.join(", ")}\n};");
-    } catch (_) {}
+
+      showAlertDialog(
+        "title",
+        generationProcess(notifier.language, true),
+      );
+
+      setState(() {
+        codeGenerated = true;
+      });
+    } catch (_) {
+      showAlertDialog(
+        "title",
+        generationProcess(notifier.language, false),
+      );
+
+      setState(() {
+        codeGenerated = true;
+      });
+    }
   }
 
   getHex(int val) {
@@ -291,17 +312,38 @@ class _From_ImageState extends State<From_Image> {
     return out;
   }
 
-  int abgrToArgb(int argbColor) {
-    int r = (argbColor >> 16) & 0xFF;
-    int b = argbColor & 0xFF;
-    return (argbColor & 0xFF00FF00) | (b << 16) | r;
+  showAlertDialog(String title, String msg) {
+    Widget okButton = TextButton(
+      child: Text("OK"),
+      onPressed: () {
+        Navigator.of(context).pop(); // dismiss dialog
+      },
+    );
+
+    AlertDialog alert = AlertDialog(
+      title: Text(title),
+      content: Text(msg),
+      actions: [
+        okButton,
+      ],
+    );
+
+    showDialog(
+      context: widgetKey.currentContext!,
+      builder: (BuildContext context) {
+        return alert;
+      },
+    );
+  }
+
+  showHideCode() {
+    setState(() {
+      showCode = !showCode;
+    });
   }
 
   @override
   Widget build(BuildContext context) {
-    // imagePeeked = false;
-    // SchedulerBinding.instance.addPostFrameCallback(postFrameCallback);
-
     return Consumer<SettingsScreenNotifier>(
         builder: (context, notifier, child) {
       return Expanded(
@@ -317,13 +359,22 @@ class _From_ImageState extends State<From_Image> {
                   ),
                   Expanded(child: Container()),
                   Visibility(
+                    visible: imagePeeked && codeGenerated,
+                    child: EditorButton(
+                      label: showCodeLabel(notifier.language, showCode),
+                      func: () => showHideCode(),
+                      darkTheme: notifier.darkTheme,
+                    ),
+                  ),
+                  SizedBox(width: 10),
+                  Visibility(
                     visible: imagePeeked,
                     child: EditorButton(
                       label: generateCode(notifier.language),
-                      func: handleSavePressed,
+                      func: () => handleSavePressed(notifier),
                       darkTheme: notifier.darkTheme,
                     ),
-                  )
+                  ),
                 ],
               ),
               SizedBox(

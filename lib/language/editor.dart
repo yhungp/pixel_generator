@@ -39,3 +39,23 @@ generateCode(int language) {
       return "Generar el código";
   }
 }
+
+generationProcess(int language, bool sucess) {
+  switch (language) {
+    case 0:
+      return sucess ? "Code generated successfully" : "Error generating code";
+    case 1:
+      return sucess
+          ? "Código generado correctamente"
+          : "Error al generar el código";
+  }
+}
+
+showCodeLabel(int language, bool showCode) {
+  switch (language) {
+    case 0:
+      return showCode ? "Show code" : "Hide code";
+    case 1:
+      return showCode ? "Mostrar código" : "Ocultar código";
+  }
+}
