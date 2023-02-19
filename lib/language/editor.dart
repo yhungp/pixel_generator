@@ -30,3 +30,12 @@ peekingFileLabel(int language) {
       return "Seleccione un archivo";
   }
 }
+
+generateCode(int language) {
+  switch (language) {
+    case 0:
+      return "Generate code";
+    case 1:
+      return "Generar el código";
+  }
+}

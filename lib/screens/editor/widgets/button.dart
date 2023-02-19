@@ -3,8 +3,8 @@
 import 'package:calculator/styles/styles.dart';
 import 'package:flutter/material.dart';
 
-class GenericButton extends StatelessWidget {
-  GenericButton({
+class EditorButton extends StatelessWidget {
+  EditorButton({
     Key? key,
     required this.label,
     required this.func,
@@ -18,7 +18,7 @@ class GenericButton extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return GestureDetector(
-      onTap: () => func(context),
+      onTap: () => func(),
       child: Container(
         margin: EdgeInsets.only(top: 5),
         padding: EdgeInsets.all(10),
