@@ -66,3 +66,21 @@ copyToClipBoard(int language) {
       return "Copiar al portapapeles";
   }
 }
+
+addBrightnessControl(int language) {
+  switch (language) {
+    case 0:
+      return "Add brightness control";
+    case 1:
+      return "Agregar control de brillo";
+  }
+}
+
+addBrightnessValue(int language) {
+  switch (language) {
+    case 0:
+      return "Start value";
+    case 1:
+      return "Valor inicial";
+  }
+}

@@ -3,6 +3,7 @@
 import 'package:calculator/language/editor.dart';
 import 'package:calculator/main.dart';
 import 'package:calculator/screens/editor/widgets/button.dart';
+import 'package:calculator/screens/editor/widgets/editor_text_tield.dart';
 import 'package:calculator/styles/styles.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
@@ -37,6 +38,11 @@ class _ShowHideCodeWidgetState extends State<ShowHideCodeWidget> {
   late int matrixRows;
   late int matrixColumns;
 
+  bool enableBrightnessControl = false;
+
+  TextEditingController brightnessPin = TextEditingController();
+  TextEditingController brightnessValue = TextEditingController();
+
   @override
   void initState() {
     notifier = widget.notifier;
@@ -45,6 +51,8 @@ class _ShowHideCodeWidgetState extends State<ShowHideCodeWidget> {
     columns = widget.columns;
     matrixRows = widget.matrixRows;
     matrixColumns = widget.matrixColumns;
+
+    brightnessPin.text = "3";
 
     super.initState();
   }
@@ -71,8 +79,10 @@ class _ShowHideCodeWidgetState extends State<ShowHideCodeWidget> {
         child: Column(
           children: [
             Row(
-              mainAxisAlignment: MainAxisAlignment.end,
+              mainAxisAlignment: MainAxisAlignment.start,
               children: [
+                enableBrightnessWidget(),
+                Expanded(child: Container()),
                 EditorButton(
                   label: copyToClipBoard(notifier.language),
                   func: () async {
@@ -108,13 +118,111 @@ class _ShowHideCodeWidgetState extends State<ShowHideCodeWidget> {
     );
   }
 
-  String pixelMatrix(
-    List<String> values,
-    int rows,
-    int columns,
-    int matrixRows,
-    int matrixColumns,
-  ) {
+  Row enableBrightnessWidget() {
+    return Row(
+      children: [
+        SizedBox(
+          width: 40,
+          height: 40,
+          child: Switch(
+            onChanged: toggleSwitch,
+            value: enableBrightnessControl,
+            activeColor: Colors.white,
+            inactiveThumbColor: Colors.black,
+            materialTapTargetSize: MaterialTapTargetSize.shrinkWrap,
+          ),
+        ),
+        SizedBox(
+          width: 10,
+        ),
+        Text(
+          addBrightnessControl(notifier.language),
+          style: TextStyle(color: Colors.white),
+        ),
+        SizedBox(
+          width: 20,
+        ),
+        Visibility(
+          visible: enableBrightnessControl,
+          child: Container(
+            decoration: BoxDecoration(
+              borderRadius: BorderRadius.all(Radius.circular(5)),
+              color: buttonOnHome(!notifier.darkTheme),
+            ),
+            padding: EdgeInsets.all(5),
+            child: Row(
+              children: [
+                Text(
+                  "Pin",
+                  style: TextStyle(
+                    color: Colors.white,
+                  ),
+                ),
+                SizedBox(
+                  width: 10,
+                ),
+                editorTextField(
+                  brightnessPin,
+                  notifier,
+                  onPinValueChange,
+                ),
+                SizedBox(
+                  width: 50,
+                ),
+                Text(
+                  addBrightnessValue(notifier.language),
+                  style: TextStyle(
+                    color: Colors.white,
+                  ),
+                ),
+                SizedBox(
+                  width: 10,
+                ),
+                editorTextField(
+                  brightnessValue,
+                  notifier,
+                  onBrightnessValueChange,
+                ),
+              ],
+            ),
+          ),
+        ),
+      ],
+    );
+  }
+
+  onPinValueChange() {
+    if (brightnessPin.text == "") {
+      brightnessPin.text = "3";
+      brightnessPin.selection = TextSelection.fromPosition(TextPosition(offset: brightnessPin.text.length));
+    }
+  }
+
+  onBrightnessValueChange() {
+    if (brightnessValue.text == "") {
+      brightnessValue.text = "255";
+      brightnessValue.selection = TextSelection.fromPosition(TextPosition(offset: brightnessValue.text.length));
+      return;
+    }
+    if (int.parse(brightnessValue.text) < 0) {
+      brightnessValue.text = "0";
+      brightnessValue.selection = TextSelection.fromPosition(TextPosition(offset: brightnessValue.text.length));
+      return;
+    }
+    if (int.parse(brightnessValue.text) > 255) {
+      brightnessValue.text = "255";
+      brightnessValue.selection = TextSelection.fromPosition(TextPosition(offset: brightnessValue.text.length));
+      return;
+    }
+  }
+
+  void toggleSwitch(bool value) {
+    setState(() {
+      enableBrightnessControl = !enableBrightnessControl;
+    });
+  }
+
+  String pixelMatrix(List<String> values, int rows, int columns, int matrixRows, int matrixColumns) {
     List<List<String>> chunks = [];
     int chunkSize = matrixColumns;
     for (var i = 0; i < values.length; i += chunkSize) {

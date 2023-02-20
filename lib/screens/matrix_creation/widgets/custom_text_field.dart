@@ -33,8 +33,7 @@ class CustomTextField extends StatelessWidget {
         Container(
           padding: EdgeInsets.fromLTRB(10, 10, 5, 10),
           margin: EdgeInsets.fromLTRB(5, 5, 0, 5),
-          decoration:
-              BoxDecoration(borderRadius: BorderRadius.all(Radius.circular(5))),
+          decoration: BoxDecoration(borderRadius: BorderRadius.all(Radius.circular(5))),
           width: 150,
           child: TextField(
             style: TextStyle(color: Colors.white),
@@ -45,17 +44,15 @@ class CustomTextField extends StatelessWidget {
             ],
             controller: controller,
             decoration: InputDecoration(
+              focusedBorder: OutlineInputBorder(
+                borderSide: BorderSide(color: Colors.white, width: 1),
+              ),
               border: OutlineInputBorder(),
               labelText: 'Matrix columns',
-              labelStyle:
-                  TextStyle(color: matrixValuesTextField(notifier.darkTheme)),
-              hintStyle:
-                  TextStyle(color: matrixValuesTextField(notifier.darkTheme)),
+              labelStyle: TextStyle(color: matrixValuesTextField(notifier.darkTheme)),
+              hintStyle: TextStyle(color: matrixValuesTextField(notifier.darkTheme)),
               enabledBorder: OutlineInputBorder(
-                borderSide: BorderSide(
-                    width: 1,
-                    color: matrixValuesTextField(
-                        notifier.darkTheme)), //<-- SEE HERE
+                borderSide: BorderSide(width: 1, color: matrixValuesTextField(notifier.darkTheme)), //<-- SEE HERE
               ),
               // focusColor: Colors.black,
             ),
