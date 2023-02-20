@@ -45,17 +45,24 @@ generationProcess(int language, bool sucess) {
     case 0:
       return sucess ? "Code generated successfully" : "Error generating code";
     case 1:
-      return sucess
-          ? "Código generado correctamente"
-          : "Error al generar el código";
+      return sucess ? "Código generado correctamente" : "Error al generar el código";
   }
 }
 
 showCodeLabel(int language, bool showCode) {
   switch (language) {
     case 0:
-      return showCode ? "Show code" : "Hide code";
+      return !showCode ? "Show code" : "Hide code";
     case 1:
-      return showCode ? "Mostrar código" : "Ocultar código";
+      return !showCode ? "Mostrar código" : "Ocultar código";
+  }
+}
+
+copyToClipBoard(int language) {
+  switch (language) {
+    case 0:
+      return "Copy to clipboard";
+    case 1:
+      return "Copiar al portapapeles";
   }
 }

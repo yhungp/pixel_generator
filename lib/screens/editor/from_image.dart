@@ -10,6 +10,7 @@ import 'package:calculator/main.dart';
 import 'package:calculator/screens/editor/widgets/button.dart';
 import 'package:calculator/screens/editor/widgets/matrix_painter.dart';
 import 'package:calculator/screens/editor/widgets/scale_button.dart';
+import 'package:calculator/screens/editor/widgets/show_hide_code.dart';
 import 'package:calculator/styles/styles.dart';
 import 'package:calculator/widgets/generic_button.dart';
 import 'package:file_picker/file_picker.dart';
@@ -81,7 +82,7 @@ class _From_ImageState extends State<From_Image> {
 
   Size oldSize = Size(0, 0);
 
-  List<List<List<List<String>>>> pixels = [];
+  List<String> pixels = [];
 
   @override
   void initState() {
@@ -92,17 +93,8 @@ class _From_ImageState extends State<From_Image> {
     rows = widget.rows;
 
     pixels = List.generate(
-      rows,
-      (index) => List.generate(
-        columns,
-        (index) => List.generate(
-          matrixRows,
-          (index) => List.generate(
-            matrixColumns,
-            (index) => "",
-          ),
-        ),
-      ),
+      rows * columns * matrixRows * matrixColumns,
+      (index) => "",
     );
 
     colors = List.generate(
@@ -120,11 +112,9 @@ class _From_ImageState extends State<From_Image> {
     );
 
     matrixWidth = matrixColumns * 13.0 * columns + (columns - 1) * 5 - 2;
-    matrixHeight =
-        posyMatrixPainter + matrixRows * 13.0 * rows + (rows - 1) * 5 - 2;
+    matrixHeight = posyMatrixPainter + matrixRows * 13.0 * rows + (rows - 1) * 5 - 2;
 
-    timer =
-        Timer.periodic(Duration(milliseconds: 40), (Timer t) => updateSize());
+    timer = Timer.periodic(Duration(milliseconds: 40), (Timer t) => updateSize());
 
     super.initState();
   }
@@ -207,8 +197,7 @@ class _From_ImageState extends State<From_Image> {
             size.height.floor(),
           );
 
-      var pngBytes =
-          await renderedImage.toByteData(format: ui.ImageByteFormat.png);
+      var pngBytes = await renderedImage.toByteData(format: ui.ImageByteFormat.png);
 
       image.Image img = image.decodeImage(pngBytes!.buffer.asUint8List())!;
 
@@ -244,7 +233,7 @@ class _From_ImageState extends State<From_Image> {
         }
       }
 
-      List matrixValues = [];
+      List<String> matrixValues = [];
       for (int r = 0; r < rows; r++) {
         for (int c = 0; c < columns; c++) {
           bool invert = false;
@@ -292,6 +281,7 @@ class _From_ImageState extends State<From_Image> {
 
       setState(() {
         codeGenerated = true;
+        pixels = matrixValues;
       });
     } catch (_) {
       showAlertDialog(
@@ -344,8 +334,7 @@ class _From_ImageState extends State<From_Image> {
 
   @override
   Widget build(BuildContext context) {
-    return Consumer<SettingsScreenNotifier>(
-        builder: (context, notifier, child) {
+    return Consumer<SettingsScreenNotifier>(builder: (context, notifier, child) {
       return Expanded(
         child: Container(
           padding: EdgeInsets.all(5),
@@ -438,101 +427,105 @@ class _From_ImageState extends State<From_Image> {
               Expanded(
                 child: Row(
                   children: [
-                    Expanded(
-                      child: Container(
-                        decoration: BoxDecoration(
-                          borderRadius: BorderRadius.all(Radius.circular(5)),
-                          color: blueTheme(notifier.darkTheme),
-                        ),
-                        padding: EdgeInsets.all(10),
-                        child: Column(
-                          mainAxisAlignment: MainAxisAlignment.start,
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            !imagePeeked
-                                ? Expanded(
-                                    key: widgetKey,
-                                    child: Center(
-                                      child: Text(
-                                        peekingFileLabel(
-                                          notifier.language,
-                                        ),
-                                        style: TextStyle(
-                                          fontSize: 30,
-                                          color: Colors.white,
-                                        ),
-                                      ),
-                                    ),
-                                  )
-                                : Expanded(
-                                    // key: widgetKey,
-                                    child: Listener(
-                                      onPointerSignal: (pointerSignal) {
-                                        if (pointerSignal
-                                            is PointerScrollEvent) {
-                                          // do something when scrolled
-                                          setState(() {
-                                            if (pointerSignal.scrollDelta.dy <
-                                                0) {
-                                              scale += 0.01;
-                                            } else {
-                                              scale -= 0.01;
-                                            }
-                                          });
-                                        }
-                                      },
-                                      child: GestureDetector(
-                                        onPanUpdate: (details) {
-                                          setState(() {
-                                            posxMatrixPainter +=
-                                                details.delta.dx;
-                                            posyMatrixPainter +=
-                                                details.delta.dy;
-                                          });
-                                        },
-                                        onPanEnd: (_) {
-                                          setState(() {
-                                            matrixScaleTouched = false;
-                                          });
-                                        },
-                                        child: Container(
-                                          padding: EdgeInsets.zero,
+                    showCode
+                        ? ShowHideCodeWidget(
+                            notifier: notifier,
+                            values: pixels,
+                            rows: rows,
+                            columns: columns,
+                            matrixRows: matrixRows,
+                            matrixColumns: matrixColumns,
+                          )
+                        : Expanded(
+                            child: Container(
+                              decoration: BoxDecoration(
+                                borderRadius: BorderRadius.all(Radius.circular(5)),
+                                color: blueTheme(notifier.darkTheme),
+                              ),
+                              padding: EdgeInsets.all(10),
+                              child: Column(
+                                mainAxisAlignment: MainAxisAlignment.start,
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  !imagePeeked
+                                      ? Expanded(
                                           key: widgetKey,
-                                          width: double.infinity,
-                                          height: double.infinity,
-                                          child: !sizeLoaded
-                                              ? Text("data")
-                                              : CustomPaint(
-                                                  size: Size(
-                                                    oldSize.width,
-                                                    oldSize.height,
-                                                  ),
-                                                  painter: MatrixPainter(
-                                                    posxMatrixPainter,
-                                                    posyMatrixPainter,
-                                                    false,
-                                                    columns,
-                                                    matrixColumns,
-                                                    matrixRows,
-                                                    rows,
-                                                    matrixScaleTouched,
-                                                    currentColor,
-                                                    colors,
-                                                    scale,
-                                                    showSpaceBetweenMatrix:
-                                                        false,
-                                                    image: imageFromFile,
-                                                    imagePeeked: imagePeeked,
-                                                  ),
-                                                ),
+                                          child: Center(
+                                            child: Text(
+                                              peekingFileLabel(
+                                                notifier.language,
+                                              ),
+                                              style: TextStyle(
+                                                fontSize: 30,
+                                                color: Colors.white,
+                                              ),
+                                            ),
+                                          ),
+                                        )
+                                      : Expanded(
+                                          // key: widgetKey,
+                                          child: Listener(
+                                            onPointerSignal: (pointerSignal) {
+                                              if (pointerSignal is PointerScrollEvent) {
+                                                // do something when scrolled
+                                                setState(() {
+                                                  if (pointerSignal.scrollDelta.dy < 0) {
+                                                    scale += 0.01;
+                                                  } else {
+                                                    scale -= 0.01;
+                                                  }
+                                                });
+                                              }
+                                            },
+                                            child: GestureDetector(
+                                              onPanUpdate: (details) {
+                                                setState(() {
+                                                  posxMatrixPainter += details.delta.dx;
+                                                  posyMatrixPainter += details.delta.dy;
+                                                });
+                                              },
+                                              onPanEnd: (_) {
+                                                setState(() {
+                                                  matrixScaleTouched = false;
+                                                });
+                                              },
+                                              child: Container(
+                                                padding: EdgeInsets.zero,
+                                                key: widgetKey,
+                                                width: double.infinity,
+                                                height: double.infinity,
+                                                child: !sizeLoaded
+                                                    ? Text("data")
+                                                    : CustomPaint(
+                                                        size: Size(
+                                                          oldSize.width,
+                                                          oldSize.height,
+                                                        ),
+                                                        painter: MatrixPainter(
+                                                          posxMatrixPainter,
+                                                          posyMatrixPainter,
+                                                          false,
+                                                          columns,
+                                                          matrixColumns,
+                                                          matrixRows,
+                                                          rows,
+                                                          matrixScaleTouched,
+                                                          currentColor,
+                                                          colors,
+                                                          scale,
+                                                          showSpaceBetweenMatrix: false,
+                                                          image: imageFromFile,
+                                                          imagePeeked: imagePeeked,
+                                                        ),
+                                                      ),
+                                              ),
+                                            ),
+                                          ),
                                         ),
-                                      ),
-                                    ),
-                                  ),
-                          ],
-                        ),
-                      ),
-                    ),
+                                ],
+                              ),
+                            ),
+                          ),
                   ],
                 ),
               ),
