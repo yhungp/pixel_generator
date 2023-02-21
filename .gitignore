@@ -1,5 +1,7 @@
 todo.txt
 test/test.txt
+.vscode/
+
 # Miscellaneous
 *.class
 *.log
