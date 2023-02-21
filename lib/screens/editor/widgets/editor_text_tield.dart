@@ -8,8 +8,9 @@ import 'package:flutter/services.dart';
 SizedBox editorTextField(
   TextEditingController brightnessPin,
   SettingsScreenNotifier notifier,
-  Function function,
-) {
+  Function function, {
+  bool allowLetters = false,
+}) {
   return SizedBox(
     width: 60,
     height: 30,
@@ -17,10 +18,12 @@ SizedBox editorTextField(
       style: TextStyle(color: Colors.white, fontSize: 12),
       textAlign: TextAlign.center,
       keyboardType: TextInputType.number,
-      inputFormatters: <TextInputFormatter>[
-        FilteringTextInputFormatter.allow(RegExp(r'[0-9]')),
-        FilteringTextInputFormatter.digitsOnly
-      ],
+      inputFormatters: allowLetters
+          ? <TextInputFormatter>[]
+          : <TextInputFormatter>[
+              FilteringTextInputFormatter.allow(RegExp(r'[0-9]')),
+              FilteringTextInputFormatter.digitsOnly
+            ],
       cursorColor: Colors.white,
       controller: brightnessPin,
       decoration: InputDecoration(

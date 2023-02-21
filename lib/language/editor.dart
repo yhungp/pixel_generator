@@ -84,3 +84,12 @@ addBrightnessValue(int language) {
       return "Valor inicial";
   }
 }
+
+maxAdcValueLabel(int language) {
+  switch (language) {
+    case 0:
+      return "Max. ADC value";
+    case 1:
+      return "Máximo valor del ADC";
+  }
+}

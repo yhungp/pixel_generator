@@ -42,6 +42,7 @@ class _ShowHideCodeWidgetState extends State<ShowHideCodeWidget> {
 
   TextEditingController brightnessPin = TextEditingController();
   TextEditingController brightnessValue = TextEditingController();
+  TextEditingController maxAdcValue = TextEditingController();
 
   @override
   void initState() {
@@ -52,7 +53,9 @@ class _ShowHideCodeWidgetState extends State<ShowHideCodeWidget> {
     matrixRows = widget.matrixRows;
     matrixColumns = widget.matrixColumns;
 
-    brightnessPin.text = "3";
+    brightnessPin.text = "A0";
+    brightnessValue.text = "255";
+    maxAdcValue.text = "1023";
 
     super.initState();
   }
@@ -105,7 +108,10 @@ class _ShowHideCodeWidgetState extends State<ShowHideCodeWidget> {
                         Text(
                           text,
                           overflow: TextOverflow.ellipsis,
-                          style: TextStyle(color: Colors.white),
+                          style: TextStyle(
+                            color: Colors.white,
+                            fontFamily: "SourceCodeProRegular",
+                          ),
                         )
                     ],
                   )
@@ -152,6 +158,9 @@ class _ShowHideCodeWidgetState extends State<ShowHideCodeWidget> {
             padding: EdgeInsets.all(5),
             child: Row(
               children: [
+                SizedBox(
+                  width: 5,
+                ),
                 Text(
                   "Pin",
                   style: TextStyle(
@@ -159,15 +168,11 @@ class _ShowHideCodeWidgetState extends State<ShowHideCodeWidget> {
                   ),
                 ),
                 SizedBox(
-                  width: 10,
+                  width: 5,
                 ),
-                editorTextField(
-                  brightnessPin,
-                  notifier,
-                  onPinValueChange,
-                ),
+                editorTextField(brightnessPin, notifier, onPinValueChange, allowLetters: true),
                 SizedBox(
-                  width: 50,
+                  width: 30,
                 ),
                 Text(
                   addBrightnessValue(notifier.language),
@@ -176,12 +181,32 @@ class _ShowHideCodeWidgetState extends State<ShowHideCodeWidget> {
                   ),
                 ),
                 SizedBox(
-                  width: 10,
+                  width: 5,
                 ),
                 editorTextField(
                   brightnessValue,
                   notifier,
                   onBrightnessValueChange,
+                ),
+                SizedBox(
+                  width: 30,
+                ),
+                Text(
+                  maxAdcValueLabel(notifier.language),
+                  style: TextStyle(
+                    color: Colors.white,
+                  ),
+                ),
+                SizedBox(
+                  width: 5,
+                ),
+                editorTextField(
+                  maxAdcValue,
+                  notifier,
+                  onAdcValueChange,
+                ),
+                SizedBox(
+                  width: 5,
                 ),
               ],
             ),
@@ -192,26 +217,41 @@ class _ShowHideCodeWidgetState extends State<ShowHideCodeWidget> {
   }
 
   onPinValueChange() {
-    if (brightnessPin.text == "") {
-      brightnessPin.text = "3";
+    setState(() {});
+    if (["", "3"].contains(brightnessPin.text)) {
+      brightnessPin.text = "A0";
       brightnessPin.selection = TextSelection.fromPosition(TextPosition(offset: brightnessPin.text.length));
     }
   }
 
   onBrightnessValueChange() {
+    setState(() {});
     if (brightnessValue.text == "") {
       brightnessValue.text = "255";
       brightnessValue.selection = TextSelection.fromPosition(TextPosition(offset: brightnessValue.text.length));
+      setState(() {});
       return;
     }
     if (int.parse(brightnessValue.text) < 0) {
       brightnessValue.text = "0";
       brightnessValue.selection = TextSelection.fromPosition(TextPosition(offset: brightnessValue.text.length));
+      setState(() {});
       return;
     }
     if (int.parse(brightnessValue.text) > 255) {
       brightnessValue.text = "255";
       brightnessValue.selection = TextSelection.fromPosition(TextPosition(offset: brightnessValue.text.length));
+      setState(() {});
+      return;
+    }
+  }
+
+  onAdcValueChange() {
+    setState(() {});
+    if (maxAdcValue.text == "") {
+      maxAdcValue.text = "1023";
+      maxAdcValue.selection = TextSelection.fromPosition(TextPosition(offset: maxAdcValue.text.length));
+      setState(() {});
       return;
     }
   }
@@ -231,27 +271,62 @@ class _ShowHideCodeWidgetState extends State<ShowHideCodeWidget> {
 
     int currentValue = rows * columns * matrixRows * matrixColumns * 35;
 
+    var addSpaces = enableBrightnessControl ? "       " : "";
+
     var outText = "#include <FastLED.h>\n\n";
-    outText += "#define RGB_PIN             3\n";
-    outText += "#define RGB_LED_NUM         512\n";
-    outText += "#define BRIGHTNESS          255\n";
-    outText += "#define CHIP_SET            WS2812B\n";
-    outText += "#define COLOR_CODE          GRB\n\n";
+    outText += "#define RGB_PIN       ${addSpaces}3\n";
+    outText += "#define RGB_LED_NUM   ${addSpaces}512\n";
+    outText += "#define BRIGHTNESS    $addSpaces${!enableBrightnessControl ? "255" : brightnessValue.text}\n";
+    outText += "#define CHIP_SET      ${addSpaces}WS2812B\n";
+    outText += "#define COLOR_CODE    ${addSpaces}GRB\n\n";
     outText += "CRGB LEDs[RGB_LED_NUM];\n";
+
+    if (enableBrightnessControl) {
+      outText += "\nint BRIGHTNESS_CONTROL_PIN = ${brightnessPin.text};\n";
+      outText += "int BRIGHTNESS_PIN_VALUE   = 0;\n";
+      outText += "int DELAY_COUNTER          = 0;\n";
+      outText += "bool BRIGHTNESS_HAS_CHANGE = false;\n";
+    }
 
     // add color codes
     outText += "\nconst long pixels[] PROGMEM = {\n  ${List.generate(
       rows * matrixRows * columns,
       (index) => chunks[index].join(", "),
-    ).join(",\n  ")}";
-    outText += "\n};\n\n";
+    ).join(",\n  ")}\n";
+    outText += "};\n\n";
 
     outText += "void showImage(void) {\n";
+    outText += "  delay(${!enableBrightnessControl ? 200 : 1});\n\n";
+
+    if (enableBrightnessControl) {
+      outText += "  DELAY_COUNTER += 1;\n\n";
+      outText += "  if(DELAY_COUNTER % 20 == 0) {\n";
+      outText += "    int val = map(analogRead( BRIGHTNESS_CONTROL_PIN ), 0, ${maxAdcValue.text}, 0, 255);\n";
+      outText += "    if (val != BRIGHTNESS_PIN_VALUE) {\n";
+      outText += "      BRIGHTNESS_PIN_VALUE = val;\n";
+      outText += "      BRIGHTNESS_HAS_CHANGE = true;\n";
+      outText += "      FastLED.setBrightness(BRIGHTNESS_PIN_VALUE);\n";
+      outText += "    }\n";
+      outText += "  }\n\n";
+      outText += "  if(DELAY_COUNTER != 40) {\n";
+      outText += "    return;\n";
+      outText += "  }\n\n";
+      outText += "  DELAY_COUNTER = 0;\n\n";
+      outText += "  if(!BRIGHTNESS_HAS_CHANGE) {\n";
+      outText += "    return;\n";
+      outText += "  }\n\n";
+    }
+
     outText += "  for (int i = 0; i < RGB_LED_NUM; i++) {\n";
     outText += "    LEDs[i] = pgm_read_dword(&(pixels[i]));\n";
     outText += "  }\n";
     outText += "  FastLED.show();\n";
-    outText += "  delay(200);\n";
+
+    if (enableBrightnessControl) {
+      outText += "  BRIGHTNESS_HAS_CHANGE = false;\n";
+      outText += "  Serial.println(\"Change\");\n";
+    }
+
     outText += "}\n\n";
 
     outText += "void setup() {\n";
