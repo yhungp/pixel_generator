@@ -30,6 +30,7 @@ def thread_function():
     global reset
     global play_pause
     global frame_counter
+    global video_frame_counter
     
     while True:
         if reset:
@@ -80,10 +81,15 @@ def postVideo():
         video_frame_counter = int(cam.get(cv2.CAP_PROP_FRAME_COUNT))
         fps = cam.get(cv2.CAP_PROP_FPS)
 
-        resp = jsonify(success=True)
+        resp = jsonify(
+            {
+                "success": True,
+                "fps": fps
+            }
+        )
         return resp
 
-@app.route('/set_current_frame', methods = ['POST', 'GET'])
+@app.route('/set_current_frame', methods = ['POST'])
 def set_current_frame():
     global video
     global cam
@@ -123,27 +129,33 @@ def get_current_frame_index():
 
     return json.dumps({'frame_counter': frame_counter})
 
-@app.route('/play_pause')
+@app.route('/play_pause', methods = ['POST'])
 def play_pause_call():
     global play_pause
     global reset
 
-    reset = False
-    play_pause = not play_pause
-    
-    resp = jsonify(success=True)
-    return resp
-    
-
-@app.route('/stop_video')
+    if request.method == 'POST':
+        play_pause = request.json['play_pause']
+        reset = False
+        
+        resp = jsonify(
+            {
+                "success": True,
+                "play_pause": play_pause
+            }
+        )
+        return resp
+ 
+@app.route('/stop_video', methods = ['POST'])
 def stop_video():
     global reset
     global play_pause
 
-    reset = True
-    play_pause = False
-    
-    resp = jsonify(success=True)
-    return resp
+    if request.method == 'POST':
+        reset = True
+        play_pause = False
+        
+        resp = jsonify(success=True)
+        return resp
 
-app.run()
+app.run(debug=True)

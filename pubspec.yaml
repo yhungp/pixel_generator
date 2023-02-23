@@ -44,6 +44,7 @@ dependencies:
   flutter_colorpicker: ^1.0.3
   bitmap: ^0.1.0
   video_thumbnail: ^0.5.3
+  dio: ^5.0.0
   
   # opencv_4: ^1.0.0
   # flutter_vlc_player: ^7.0.0

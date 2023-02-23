@@ -6,6 +6,7 @@ import 'dart:io';
 import 'package:calculator/main.dart';
 import 'package:calculator/screens/editor/black_or_white.dart';
 import 'package:calculator/screens/editor/from_image.dart';
+import 'package:calculator/screens/editor/from_video.dart';
 import 'package:calculator/screens/editor/gray_scale.dart';
 import 'package:calculator/screens/editor/rgb_picker.dart';
 import 'package:calculator/styles/styles.dart';
@@ -123,6 +124,14 @@ class _EditorState extends State<Editor> {
           rows: rows,
           scale: scale,
         );
+      case EditorOptions.fromVideo:
+        return From_Video(
+          columns: columns,
+          matrixColumns: matrixColumns,
+          matrixRows: matrixRows,
+          rows: rows,
+          scale: scale,
+        );
       default:
         return Container();
     }
@@ -133,8 +142,7 @@ class _EditorState extends State<Editor> {
 
     for (var val in EditorOptions.values) {
       var name = val.name;
-      name =
-          name.substring(0, 1).toUpperCase() + name.substring(1, name.length);
+      name = name.substring(0, 1).toUpperCase() + name.substring(1, name.length);
 
       final beforeCapitalLetter = RegExp(r"(?=[A-Z])");
       var parts = name.split(beforeCapitalLetter);
@@ -143,8 +151,7 @@ class _EditorState extends State<Editor> {
 
       name = parts.join(" ");
       name = name.toLowerCase();
-      name =
-          name.substring(0, 1).toUpperCase() + name.substring(1, name.length);
+      name = name.substring(0, 1).toUpperCase() + name.substring(1, name.length);
 
       if (name.startsWith("Rgb")) {
         name = name.replaceFirst("Rgb", "RGB");
@@ -203,22 +210,19 @@ class _EditorState extends State<Editor> {
 
         Map recent = jsonDecode(contents);
 
-        if (recent.containsKey("matrix_columns") &&
-            recent["matrix_columns"].runtimeType == int) {
+        if (recent.containsKey("matrix_columns") && recent["matrix_columns"].runtimeType == int) {
           setState(() {
             matrixColumns = recent["matrix_columns"];
           });
         }
 
-        if (recent.containsKey("matrix_rows") &&
-            recent["matrix_rows"].runtimeType == int) {
+        if (recent.containsKey("matrix_rows") && recent["matrix_rows"].runtimeType == int) {
           setState(() {
             matrixRows = recent["matrix_rows"];
           });
         }
 
-        if (recent.containsKey("matrix_columns") &&
-            recent["columns"].runtimeType == int) {
+        if (recent.containsKey("matrix_columns") && recent["columns"].runtimeType == int) {
           setState(() {
             columns = recent["columns"];
           });
@@ -230,8 +234,7 @@ class _EditorState extends State<Editor> {
           });
         }
 
-        if (recent.containsKey("video") &&
-            recent["video"].runtimeType == String) {
+        if (recent.containsKey("video") && recent["video"].runtimeType == String) {
           setState(() {
             filePath = recent["video"];
           });
