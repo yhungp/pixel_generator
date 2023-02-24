@@ -2,6 +2,7 @@
 
 import 'dart:async';
 import 'dart:io';
+import 'dart:math';
 import 'dart:typed_data';
 
 import 'package:bitmap/bitmap.dart';
@@ -12,7 +13,10 @@ import 'package:calculator/screens/editor/widgets/button.dart';
 import 'package:calculator/screens/editor/widgets/matrix_painter.dart';
 import 'package:calculator/screens/editor/widgets/scale_button.dart';
 import 'package:calculator/screens/editor/widgets/show_hide_code.dart';
+import 'package:calculator/screens/editor/widgets/video_control.dart';
+import 'package:calculator/screens/editor/widgets/video_control_button.dart';
 import 'package:calculator/styles/styles.dart';
+import 'package:dart_vlc/dart_vlc.dart';
 import 'package:file_picker/file_picker.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
@@ -20,6 +24,7 @@ import 'package:provider/provider.dart';
 import 'dart:ui' as ui;
 import 'package:path_provider/path_provider.dart';
 import 'package:image/image.dart' as image;
+import 'package:process_run/shell.dart';
 
 class From_Video extends StatefulWidget {
   int matrixColumns;
@@ -69,6 +74,8 @@ class _From_VideoState extends State<From_Video> {
   bool codeGenerated = false;
   bool showCode = false;
   bool playPause = false;
+  bool videoLoaded = false;
+  bool newVideoLoaded = false;
 
   String filePeeked = "";
 
@@ -85,13 +92,26 @@ class _From_VideoState extends State<From_Video> {
 
   List<String> pixels = [];
 
+  final random = Random();
+
+  late Player player;
+
+  late Media file;
+
+  List<Media> medias = <Media>[];
+
   @override
   void initState() {
+    DartVLC.initialize();
+
     scale = widget.scale;
     matrixColumns = widget.matrixColumns;
     matrixRows = widget.matrixRows;
     columns = widget.columns;
     rows = widget.rows;
+
+    var procId = random.nextInt(1000000) + 1000000;
+    player = Player(id: procId);
 
     pixels = List.generate(
       rows * columns * matrixRows * matrixColumns,
@@ -115,17 +135,285 @@ class _From_VideoState extends State<From_Video> {
     matrixWidth = matrixColumns * 13.0 * columns + (columns - 1) * 5 - 2;
     matrixHeight = posyMatrixPainter + matrixRows * 13.0 * rows + (rows - 1) * 5 - 2;
 
-    timer = Timer.periodic(Duration(milliseconds: 40), (Timer t) => updateSize());
+    timer = Timer.periodic(Duration(milliseconds: 100), (Timer t) => updateSize());
     // timer2 = Timer.periodic(Duration(milliseconds: 100), (Timer t) => loadImage());
 
-    startServer();
+    // startServer();
 
     super.initState();
   }
 
+  @override
+  void dispose() {
+    player.dispose();
+    medias.clear();
+    player.open(
+      Playlist(
+        medias: medias,
+      ),
+      autoStart: false,
+    );
+    player.setVolume(0);
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    player.setVolume(0);
+    return Consumer<SettingsScreenNotifier>(builder: (context, notifier, child) {
+      return Expanded(
+        child: Container(
+          padding: EdgeInsets.all(5),
+          child: Column(
+            children: [
+              Row(
+                children: [
+                  Padding(
+                    padding: const EdgeInsets.all(5),
+                    child: viewScale(notifier),
+                  ),
+                  Expanded(child: Container()),
+                  Visibility(
+                    visible: imagePeeked && codeGenerated,
+                    child: EditorButton(
+                      label: showCodeLabel(notifier.language, showCode),
+                      func: () => showHideCode(),
+                      darkTheme: notifier.darkTheme,
+                    ),
+                  ),
+                  SizedBox(width: 10),
+                  Visibility(
+                    visible: imagePeeked,
+                    child: EditorButton(
+                      label: generateCode(notifier.language),
+                      func: () => handleSavePressed(notifier),
+                      darkTheme: notifier.darkTheme,
+                    ),
+                  ),
+                ],
+              ),
+              SizedBox(
+                height: 10,
+              ),
+              Padding(
+                padding: const EdgeInsets.only(bottom: 10),
+                child: Row(
+                  children: [
+                    Expanded(
+                      child: Container(
+                        decoration: BoxDecoration(
+                          borderRadius: BorderRadius.all(Radius.circular(5)),
+                          color: blueTheme(notifier.darkTheme),
+                        ),
+                        padding: EdgeInsets.all(5),
+                        // margin: EdgeInsets.only(right: 10),
+                        child: Row(
+                          mainAxisAlignment: MainAxisAlignment.start,
+                          children: [
+                            Expanded(
+                              child: Container(
+                                alignment: Alignment.centerLeft,
+                                height: 30,
+                                padding: EdgeInsets.all(5),
+                                decoration: BoxDecoration(
+                                  color: currentColor,
+                                  borderRadius: BorderRadius.all(
+                                    Radius.circular(4),
+                                  ),
+                                ),
+                                child: Text(
+                                  filePeeked,
+                                ),
+                              ),
+                            ),
+                            SizedBox(
+                              width: 10,
+                            ),
+                            GestureDetector(
+                              onTap: () => peekFile(),
+                              child: Container(
+                                width: 30,
+                                height: 30,
+                                decoration: BoxDecoration(
+                                  color: currentColor,
+                                  borderRadius: BorderRadius.all(
+                                    Radius.circular(4),
+                                  ),
+                                ),
+                                child: Icon(Icons.file_open_outlined),
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+              Expanded(
+                child: Row(
+                  children: [
+                    showCode
+                        ? ShowHideCodeWidget(
+                            notifier: notifier,
+                            values: pixels,
+                            rows: rows,
+                            columns: columns,
+                            matrixRows: matrixRows,
+                            matrixColumns: matrixColumns,
+                          )
+                        : Expanded(
+                            child: Container(
+                              decoration: BoxDecoration(
+                                borderRadius: BorderRadius.all(Radius.circular(5)),
+                                color: blueTheme(notifier.darkTheme),
+                              ),
+                              padding: EdgeInsets.all(10),
+                              child: Column(
+                                mainAxisAlignment: MainAxisAlignment.start,
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  !imagePeeked
+                                      ? Expanded(
+                                          key: widgetKey,
+                                          child: Center(
+                                            child: Text(
+                                              peekingFileLabel(
+                                                notifier.language,
+                                              ),
+                                              style: TextStyle(
+                                                fontSize: 30,
+                                                color: Colors.white,
+                                              ),
+                                            ),
+                                          ),
+                                        )
+                                      : Expanded(
+                                          key: widgetKey,
+                                          child: Center(
+                                            child: GestureDetector(
+                                              onTap: () => playPauseVideo(),
+                                              child: Video(
+                                                player: player,
+                                                width: oldSize.width,
+                                                height: oldSize.height,
+                                                scale: 1.0, // default
+                                                showControls: false, // default
+                                              ),
+                                            ),
+                                          ),
+                                        ),
+                                  // : Expanded(
+                                  //     child: Column(
+                                  //       children: [
+                                  //         // Expanded(child: Image.memory(imageBytes)),
+                                  //         Expanded(
+                                  //           // key: widgetKey,
+                                  //           child: Listener(
+                                  //             onPointerSignal: (pointerSignal) {
+                                  //               if (pointerSignal is PointerScrollEvent) {
+                                  //                 // do something when scrolled
+                                  //                 setState(() {
+                                  //                   if (pointerSignal.scrollDelta.dy < 0) {
+                                  //                     scale += 0.01;
+                                  //                   } else {
+                                  //                     scale -= 0.01;
+                                  //                   }
+                                  //                 });
+                                  //               }
+                                  //             },
+                                  //             child: GestureDetector(
+                                  //               onPanUpdate: (details) {
+                                  //                 setState(() {
+                                  //                   posxMatrixPainter += details.delta.dx;
+                                  //                   posyMatrixPainter += details.delta.dy;
+                                  //                 });
+                                  //               },
+                                  //               onPanEnd: (_) {
+                                  //                 setState(() {
+                                  //                   matrixScaleTouched = false;
+                                  //                 });
+                                  //               },
+                                  //               child: Container(
+                                  //                 padding: EdgeInsets.zero,
+                                  //                 key: widgetKey,
+                                  //                 width: double.infinity,
+                                  //                 height: double.infinity,
+                                  //                 child: !sizeLoaded
+                                  //                     ? Text("data")
+                                  //                     : CustomPaint(
+                                  //                         size: Size(
+                                  //                           oldSize.width,
+                                  //                           oldSize.height,
+                                  //                         ),
+                                  //                         painter: MatrixPainter(
+                                  //                           posxMatrixPainter,
+                                  //                           posyMatrixPainter,
+                                  //                           false,
+                                  //                           columns,
+                                  //                           matrixColumns,
+                                  //                           matrixRows,
+                                  //                           rows,
+                                  //                           matrixScaleTouched,
+                                  //                           currentColor,
+                                  //                           colors,
+                                  //                           scale,
+                                  //                           showSpaceBetweenMatrix: false,
+                                  //                           image: imageFromFile,
+                                  //                           imagePeeked: imagePeeked,
+                                  //                         ),
+                                  //                       ),
+                                  //               ),
+                                  //             ),
+                                  //           ),
+                                  //         ),
+                                  //       ],
+                                  //     ),
+                                  //   ),
+                                  SizedBox(height: 10),
+                                  Visibility(
+                                    visible: imagePeeked,
+                                    child: VideoControlWidget(
+                                      notifier: notifier,
+                                      playPauseVideo: playPauseVideo,
+                                      playPause: playPause,
+                                      player: player,
+                                      width: oldSize.width,
+                                    ),
+                                  )
+                                ],
+                              ),
+                            ),
+                          ),
+                  ],
+                ),
+              ),
+            ],
+          ),
+        ),
+      );
+    });
+  }
+
+  playPauseVideo() {
+    setState(() {
+      playPause = !playPause;
+
+      if (playPause) {
+        player.play();
+        return;
+      }
+      player.pause();
+    });
+  }
+
+  execScriptAndGetFrames() async {
+    var shell = Shell();
+    await shell.run("python3 assets/test.py");
+  }
+
   startServer() async {
-    var result = await Process.run('python3', ["assets/server.py"]);
-    print(result.stdout);
+    await Process.run('python3', ["assets/server.py"]);
   }
 
   updateSize() async {
@@ -134,57 +422,25 @@ class _From_VideoState extends State<From_Video> {
       if (context == null) return;
 
       Size newSize = context.size!;
+
+      if (newVideoLoaded) {
+        setState(() {
+          oldSize = Size(newSize.width, newSize.height);
+          newVideoLoaded = false;
+        });
+        return;
+      }
+
       if (oldSize == newSize) return;
 
-      oldSize = newSize;
-
-      // resized = bmp.applyBatch([
-      //   BitmapResize.to(
-      //     // width: oldSize.width.toInt(),
-      //     height: oldSize.height.toInt(),
-      //   )
-      // ]);
-
-      // if (oldSize.width / bmp.width < oldSize.height / bmp.height) {
-      //   resized = bmp.applyBatch([
-      //     BitmapResize.to(
-      //       width: oldSize.width.toInt(),
-      //       // height: oldSize.height.toInt(),
-      //     )
-      //   ]);
-      // }
-
-      // // imageBytes = bmp.buildHeaded();
-
-      // imageFromFile = await decodeImageFromList(resized.buildHeaded());
-      imageFromFile = await decodeImageFromList(imageBytes);
-
       setState(() {
-        sizeLoaded = true;
+        oldSize = Size(newSize.width, newSize.height);
       });
     }
   }
 
   void changeColor(Color color) {
     setState(() => currentColor = color);
-  }
-
-  loadImage() async {
-    if (!playPause || !imagePeeked) {
-      return;
-    }
-    imageFromFile = await _loadImage(filePeeked);
-
-    // try {
-    //   bmp = Bitmap.fromHeadful(
-    //     imageFromFile.width,
-    //     imageFromFile.height,
-    //     imageBytes,
-    //   );
-
-    //   print(bmp.width);
-    // } catch (_) {}
-    setState(() {});
   }
 
   handleSavePressed(SettingsScreenNotifier notifier) async {
@@ -353,239 +609,6 @@ class _From_VideoState extends State<From_Video> {
     });
   }
 
-  @override
-  Widget build(BuildContext context) {
-    return Consumer<SettingsScreenNotifier>(builder: (context, notifier, child) {
-      return Expanded(
-        child: Container(
-          padding: EdgeInsets.all(5),
-          child: Column(
-            children: [
-              Row(
-                children: [
-                  Padding(
-                    padding: const EdgeInsets.all(5),
-                    child: viewScale(notifier),
-                  ),
-                  Expanded(child: Container()),
-                  Visibility(
-                    visible: imagePeeked && codeGenerated,
-                    child: EditorButton(
-                      label: showCodeLabel(notifier.language, showCode),
-                      func: () => showHideCode(),
-                      darkTheme: notifier.darkTheme,
-                    ),
-                  ),
-                  SizedBox(width: 10),
-                  Visibility(
-                    visible: imagePeeked,
-                    child: EditorButton(
-                      label: generateCode(notifier.language),
-                      func: () => handleSavePressed(notifier),
-                      darkTheme: notifier.darkTheme,
-                    ),
-                  ),
-                ],
-              ),
-              SizedBox(
-                height: 10,
-              ),
-              Padding(
-                padding: const EdgeInsets.only(bottom: 10),
-                child: Row(
-                  children: [
-                    Expanded(
-                      child: Container(
-                        decoration: BoxDecoration(
-                          borderRadius: BorderRadius.all(Radius.circular(5)),
-                          color: blueTheme(notifier.darkTheme),
-                        ),
-                        padding: EdgeInsets.all(5),
-                        // margin: EdgeInsets.only(right: 10),
-                        child: Row(
-                          mainAxisAlignment: MainAxisAlignment.start,
-                          children: [
-                            Expanded(
-                              child: Container(
-                                alignment: Alignment.centerLeft,
-                                height: 30,
-                                padding: EdgeInsets.all(5),
-                                decoration: BoxDecoration(
-                                  color: currentColor,
-                                  borderRadius: BorderRadius.all(
-                                    Radius.circular(4),
-                                  ),
-                                ),
-                                child: Text(
-                                  filePeeked,
-                                ),
-                              ),
-                            ),
-                            SizedBox(
-                              width: 10,
-                            ),
-                            GestureDetector(
-                              onTap: () => peekFile(),
-                              child: Container(
-                                width: 30,
-                                height: 30,
-                                decoration: BoxDecoration(
-                                  color: currentColor,
-                                  borderRadius: BorderRadius.all(
-                                    Radius.circular(4),
-                                  ),
-                                ),
-                                child: Icon(Icons.file_open_outlined),
-                              ),
-                            ),
-                          ],
-                        ),
-                      ),
-                    ),
-                  ],
-                ),
-              ),
-              Expanded(
-                child: Row(
-                  children: [
-                    showCode
-                        ? ShowHideCodeWidget(
-                            notifier: notifier,
-                            values: pixels,
-                            rows: rows,
-                            columns: columns,
-                            matrixRows: matrixRows,
-                            matrixColumns: matrixColumns,
-                          )
-                        : Expanded(
-                            child: Container(
-                              decoration: BoxDecoration(
-                                borderRadius: BorderRadius.all(Radius.circular(5)),
-                                color: blueTheme(notifier.darkTheme),
-                              ),
-                              padding: EdgeInsets.all(10),
-                              child: Column(
-                                mainAxisAlignment: MainAxisAlignment.start,
-                                crossAxisAlignment: CrossAxisAlignment.start,
-                                children: [
-                                  !imagePeeked
-                                      ? Expanded(
-                                          key: widgetKey,
-                                          child: Center(
-                                            child: Text(
-                                              peekingFileLabel(
-                                                notifier.language,
-                                              ),
-                                              style: TextStyle(
-                                                fontSize: 30,
-                                                color: Colors.white,
-                                              ),
-                                            ),
-                                          ),
-                                        )
-                                      : Expanded(
-                                          child: Column(
-                                            children: [
-                                              // Expanded(child: Image.memory(imageBytes)),
-                                              Expanded(
-                                                // key: widgetKey,
-                                                child: Listener(
-                                                  onPointerSignal: (pointerSignal) {
-                                                    if (pointerSignal is PointerScrollEvent) {
-                                                      // do something when scrolled
-                                                      setState(() {
-                                                        if (pointerSignal.scrollDelta.dy < 0) {
-                                                          scale += 0.01;
-                                                        } else {
-                                                          scale -= 0.01;
-                                                        }
-                                                      });
-                                                    }
-                                                  },
-                                                  child: GestureDetector(
-                                                    onPanUpdate: (details) {
-                                                      setState(() {
-                                                        posxMatrixPainter += details.delta.dx;
-                                                        posyMatrixPainter += details.delta.dy;
-                                                      });
-                                                    },
-                                                    onPanEnd: (_) {
-                                                      setState(() {
-                                                        matrixScaleTouched = false;
-                                                      });
-                                                    },
-                                                    child: Container(
-                                                      padding: EdgeInsets.zero,
-                                                      key: widgetKey,
-                                                      width: double.infinity,
-                                                      height: double.infinity,
-                                                      child: !sizeLoaded
-                                                          ? Text("data")
-                                                          : CustomPaint(
-                                                              size: Size(
-                                                                oldSize.width,
-                                                                oldSize.height,
-                                                              ),
-                                                              painter: MatrixPainter(
-                                                                posxMatrixPainter,
-                                                                posyMatrixPainter,
-                                                                false,
-                                                                columns,
-                                                                matrixColumns,
-                                                                matrixRows,
-                                                                rows,
-                                                                matrixScaleTouched,
-                                                                currentColor,
-                                                                colors,
-                                                                scale,
-                                                                showSpaceBetweenMatrix: false,
-                                                                image: imageFromFile,
-                                                                imagePeeked: imagePeeked,
-                                                              ),
-                                                            ),
-                                                    ),
-                                                  ),
-                                                ),
-                                              ),
-                                            ],
-                                          ),
-                                        ),
-                                ],
-                              ),
-                            ),
-                          ),
-                  ],
-                ),
-              ),
-              GestureDetector(
-                onTap: () async {
-                  playPause = !playPause;
-                  var result = await setPlayPause(playPause);
-                  setState(() {
-                    playPause = result["play_pause"];
-                  });
-                },
-                child: Container(
-                  height: 40,
-                  width: 40,
-                  margin: EdgeInsets.only(top: 10),
-                  alignment: Alignment.center,
-                  decoration: BoxDecoration(
-                    color: blueTheme(notifier.darkTheme),
-                    borderRadius: BorderRadius.all(
-                      Radius.circular(20),
-                    ),
-                  ),
-                  child: Icon(playPause ? Icons.pause : Icons.play_arrow),
-                ),
-              )
-            ],
-          ),
-        ),
-      );
-    });
-  }
-
   peekFile() async {
     FilePickerResult? result = await FilePicker.platform.pickFiles(
       type: FileType.custom,
@@ -595,36 +618,10 @@ class _From_VideoState extends State<From_Video> {
     if (result != null && result.files.single.path != null) {
       var video = result.files.single.path ?? "";
 
-      var post = await postVideo(video);
-
-      if (post["code"] == 200 && post["success"]) {
-        int milliseconds = (1 / post["fps"] * 1000).toInt();
-        timer2 = Timer.periodic(
-          Duration(
-            milliseconds: milliseconds,
-          ),
-          (Timer t) => loadImage(),
-        );
-        // filePeeked = result.files.single.path ?? "";
-        // imagePeeked = true;
-        // setVideoFrame();
-        // setState(() {});
-        try {
-          var image = await _loadImage(filePeeked);
-          imageFromFile = image;
-          imagePeeked = true;
-          setState(() {});
-        } catch (e) {
-          print(e);
-        }
-      }
-
-      // try {
-      //   var image = await _loadImage(filePeeked);
-      //   imageFromFile = image;
-      //   imagePeeked = true;
-      //   setState(() {});
-      // } catch (e) {}
+      setVideoPath(video);
+      imagePeeked = true;
+      newVideoLoaded = true;
+      setState(() {});
     }
   }
 
@@ -644,28 +641,6 @@ class _From_VideoState extends State<From_Video> {
     resized = bmp;
 
     return i;
-
-    // if (!imagePeeked) {
-    //   return i;
-    // }
-
-    // resized = bmp.applyBatch([
-    //   BitmapResize.to(
-    //     // width: oldSize.width.toInt(),
-    //     height: oldSize.height.toInt(),
-    //   )
-    // ]);
-
-    // if (oldSize.width / bmp.width < oldSize.height / bmp.height) {
-    //   resized = bmp.applyBatch([
-    //     BitmapResize.to(
-    //       width: oldSize.width.toInt(),
-    //       // height: oldSize.height.toInt(),
-    //     )
-    //   ]);
-    // }
-
-    // return await decodeImageFromList(resized.buildHeaded());
   }
 
   Row viewScale(SettingsScreenNotifier notifier) {
@@ -726,5 +701,31 @@ class _From_VideoState extends State<From_Video> {
         scale -= scaleValue;
       });
     }
+  }
+
+  setVideoPath(String video) {
+    try {
+      medias.clear();
+
+      file = Media.file(
+        File(
+          video,
+        ),
+      );
+
+      medias.add(file);
+
+      player.open(
+        Playlist(
+          medias: medias,
+        ),
+        autoStart: false,
+      );
+      player.setVolume(0);
+
+      setState(() {
+        videoLoaded = true;
+      });
+    } catch (_) {}
   }
 }

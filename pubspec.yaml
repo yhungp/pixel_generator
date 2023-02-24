@@ -84,6 +84,8 @@ flutter:
     - assets/dark-sun.png
     - assets/white-moon.png
     - assets/dropper.png
+    - assets/server.py
+    - assets/test.py
 
   fonts:
     - family: SourceCodeProRegular
