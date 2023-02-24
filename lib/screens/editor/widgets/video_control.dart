@@ -35,7 +35,8 @@ class _VideoControlWidgetState extends State<VideoControlWidget> {
   PositionState position = PositionState();
 
   late double width;
-  double posx = 0;
+  double posxStart = 0;
+  double posxEnd = 0;
 
   @override
   void initState() {
@@ -43,6 +44,7 @@ class _VideoControlWidgetState extends State<VideoControlWidget> {
     playPauseVideo = widget.playPauseVideo;
     playPause = widget.playPause;
     player = widget.player;
+
     super.initState();
   }
 
@@ -56,7 +58,7 @@ class _VideoControlWidgetState extends State<VideoControlWidget> {
       (position) {
         setState(
           () => {
-            posx = position.position!.inMilliseconds / position.duration!.inMilliseconds,
+            posxStart = position.position!.inMilliseconds / position.duration!.inMilliseconds,
           },
         );
       },
@@ -93,7 +95,20 @@ class _VideoControlWidgetState extends State<VideoControlWidget> {
             child: Stack(
               children: [
                 Positioned(
-                  left: posx * (width - 20),
+                  left: posxStart * (width - 20),
+                  top: 2.5,
+                  child: Container(
+                    width: 10,
+                    height: 10,
+                    margin: EdgeInsets.symmetric(horizontal: 5),
+                    decoration: BoxDecoration(
+                      color: blueTheme(!notifier.darkTheme),
+                      borderRadius: BorderRadius.all(Radius.circular(5)),
+                    ),
+                  ),
+                ),
+                Positioned(
+                  left: (1 - posxEnd) * (width - 20),
                   top: 2.5,
                   child: Container(
                     width: 10,
@@ -109,7 +124,7 @@ class _VideoControlWidgetState extends State<VideoControlWidget> {
                   left: 0,
                   top: 5,
                   child: Container(
-                    width: posx * (width - 20),
+                    width: posxStart * (width - 20),
                     height: 5,
                     margin: EdgeInsets.symmetric(horizontal: 5),
                     decoration: BoxDecoration(
@@ -150,7 +165,7 @@ class _VideoControlWidgetState extends State<VideoControlWidget> {
                 });
               },
               darkTheme: notifier.darkTheme,
-              icon: !playPause ? Icons.pause : Icons.play_arrow,
+              icon: playPause ? Icons.pause : Icons.play_arrow,
             ),
             SizedBox(width: 10),
             Expanded(
@@ -192,28 +207,34 @@ class _VideoControlWidgetState extends State<VideoControlWidget> {
   }
 
   setPlayerPosition(double localx) {
-    if (localx > width - 10) {
-      setState(() {
-        posx = 1;
-        var millis = (player.position.duration!.inMilliseconds).toInt() - 1;
-        player.seek(Duration(milliseconds: millis));
-      });
-      return;
-    }
+    try {
+      if (localx > (1 - posxEnd) * (width - 20) - 5 && localx < (1 - posxEnd) * (width - 20) + 5) {
+        print("end");
+      }
 
-    if (localx > 10) {
-      setState(() {
-        posx = (localx - 12.5) / (width - 20);
-        var millis = (player.position.duration!.inMilliseconds).toInt();
-        millis = (millis * posx).toInt();
-        player.seek(Duration(milliseconds: millis));
-      });
-      return;
-    }
+      if (localx > width - 10) {
+        setState(() {
+          posxStart = 1;
+          var millis = (player.position.duration!.inMilliseconds).toInt() - 1;
+          player.seek(Duration(milliseconds: millis));
+        });
+        return;
+      }
 
-    setState(() {
-      posx = 0;
-      player.seek(Duration(seconds: 0));
-    });
+      if (localx > 10) {
+        setState(() {
+          posxStart = (localx - 12.5) / (width - 20);
+          var millis = (player.position.duration!.inMilliseconds).toInt();
+          millis = (millis * posxStart).toInt();
+          player.seek(Duration(milliseconds: millis));
+        });
+        return;
+      }
+
+      setState(() {
+        posxStart = 0;
+        player.seek(Duration(seconds: 0));
+      });
+    } catch (_) {}
   }
 }
