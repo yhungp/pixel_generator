@@ -46,7 +46,8 @@ class _VideoControlWidgetState extends State<VideoControlWidget> {
   double playerPosHover = 0;
 
   bool picked = false;
-  bool hover = true;
+  bool hover = false;
+
   int selected = 0;
 
   @override
@@ -88,7 +89,16 @@ class _VideoControlWidgetState extends State<VideoControlWidget> {
     player.playbackStream.listen((playback) {
       setState(() {
         playPause = playback.isPlaying;
+
+        if (!playPause && picked) {
+          widget.player.play();
+          player.play();
+        }
       });
+    });
+
+    player.errorStream.listen((event) {
+      setState(() {});
     });
     // player?.generateStream?.listen((general) {
     //   setState(() => general = general);
@@ -118,6 +128,7 @@ class _VideoControlWidgetState extends State<VideoControlWidget> {
           onPanEnd: ((details) {
             setState(() {
               picked = false;
+              selected = -1;
             });
           }),
           child: Container(
@@ -402,6 +413,7 @@ class _VideoControlWidgetState extends State<VideoControlWidget> {
               player.seek(Duration(milliseconds: millis));
             } catch (e) {
               player.seek(Duration(milliseconds: 0));
+              player.play();
             }
             limitSet = false;
             return;
@@ -439,6 +451,15 @@ class _VideoControlWidgetState extends State<VideoControlWidget> {
           widget.setPosEnd(posxEnd);
           break;
         }
+
+        if (value < posxStart) {
+          selected = 1;
+          posxEnd = 1 - posxStart;
+          posxStart = value;
+          widget.setPosStart(posxStart);
+          return;
+        }
+
         posxEnd = 1 - value;
         playerPos = posxStart;
         widget.setPosEnd(posxEnd);
@@ -450,6 +471,15 @@ class _VideoControlWidgetState extends State<VideoControlWidget> {
           widget.setPosStart(posxStart);
           break;
         }
+
+        if (value > 1 - posxEnd) {
+          selected = 0;
+          posxStart = 1 - posxEnd;
+          posxEnd = 1 - value;
+          widget.setPosEnd(posxEnd);
+          return;
+        }
+
         posxStart = value;
         playerPos = value;
         widget.setPosStart(posxStart);
