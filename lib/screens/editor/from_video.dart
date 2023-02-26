@@ -13,12 +13,10 @@ import 'package:calculator/screens/editor/widgets/button.dart';
 import 'package:calculator/screens/editor/widgets/matrix_painter.dart';
 import 'package:calculator/screens/editor/widgets/scale_button.dart';
 import 'package:calculator/screens/editor/widgets/show_hide_code.dart';
-import 'package:calculator/screens/editor/widgets/video_control.dart';
-import 'package:calculator/screens/editor/widgets/video_control_button.dart';
+import 'package:calculator/screens/editor/widgets/video_control/video_control.dart';
 import 'package:calculator/styles/styles.dart';
 import 'package:dart_vlc/dart_vlc.dart';
 import 'package:file_picker/file_picker.dart';
-import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'dart:ui' as ui;
@@ -59,9 +57,10 @@ class _From_VideoState extends State<From_Video> {
 
   double posxMatrixPainter = 0;
   double posyMatrixPainter = 0;
-
   double matrixWidth = 0;
   double matrixHeight = 0;
+  double posxStart = 0;
+  double posxEnd = 0;
 
   Color currentColor = Colors.white;
   Color rgbColor = Colors.red;
@@ -136,9 +135,12 @@ class _From_VideoState extends State<From_Video> {
     matrixHeight = posyMatrixPainter + matrixRows * 13.0 * rows + (rows - 1) * 5 - 2;
 
     timer = Timer.periodic(Duration(milliseconds: 100), (Timer t) => updateSize());
-    // timer2 = Timer.periodic(Duration(milliseconds: 100), (Timer t) => loadImage());
 
-    // startServer();
+    player.playbackStream.listen((playback) {
+      setState(() {
+        playPause = playback.isPlaying;
+      });
+    });
 
     super.initState();
   }
@@ -147,13 +149,6 @@ class _From_VideoState extends State<From_Video> {
   void dispose() {
     player.dispose();
     medias.clear();
-    player.open(
-      Playlist(
-        medias: medias,
-      ),
-      autoStart: false,
-    );
-    player.setVolume(0);
     super.dispose();
   }
 
@@ -292,13 +287,15 @@ class _From_VideoState extends State<From_Video> {
                                           key: widgetKey,
                                           child: Center(
                                             child: GestureDetector(
-                                              onTap: () => playPauseVideo(),
+                                              onTap: () {
+                                                playPauseVideo();
+                                              },
                                               child: Video(
                                                 player: player,
-                                                width: oldSize.width,
-                                                height: oldSize.height,
-                                                scale: 1.0, // default
-                                                showControls: false, // default
+                                                width: oldSize.width > 0 ? oldSize.width - 1 : 600,
+                                                height: oldSize.height > 0 ? oldSize.height - 1 : 400,
+                                                scale: 1.0,
+                                                showControls: false,
                                               ),
                                             ),
                                           ),
@@ -379,6 +376,8 @@ class _From_VideoState extends State<From_Video> {
                                       playPause: playPause,
                                       player: player,
                                       width: oldSize.width,
+                                      setPosStart: setPosStart,
+                                      setPosEnd: setPosEnd,
                                     ),
                                   )
                                 ],
@@ -400,10 +399,25 @@ class _From_VideoState extends State<From_Video> {
       playPause = !playPause;
 
       if (playPause) {
+        var millis = (player.position.duration!.inMilliseconds * posxStart).toInt();
+        player.seek(Duration(milliseconds: millis));
+
         player.play();
         return;
       }
       player.pause();
+    });
+  }
+
+  setPosStart(double start) {
+    setState(() {
+      posxStart = start;
+    });
+  }
+
+  setPosEnd(double end) {
+    setState(() {
+      posxEnd = end;
     });
   }
 
@@ -705,7 +719,15 @@ class _From_VideoState extends State<From_Video> {
 
   setVideoPath(String video) {
     try {
-      medias.clear();
+      if (medias.isNotEmpty) {
+        try {
+          player.dispose();
+          var procId = random.nextInt(1000000) + 1000000;
+          player = Player(id: procId);
+        } catch (_) {}
+
+        medias.clear();
+      }
 
       file = Media.file(
         File(
@@ -725,6 +747,7 @@ class _From_VideoState extends State<From_Video> {
 
       setState(() {
         videoLoaded = true;
+        playPause = false;
       });
     } catch (_) {}
   }
