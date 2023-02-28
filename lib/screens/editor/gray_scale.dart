@@ -90,15 +90,10 @@ class _GreyScaleState extends State<GreyScale> {
       for (int j = 0; j < columns; j++) {
         for (int x = 0; x < matrixRows; x++) {
           for (int y = 0; y < matrixColumns; y++) {
-            double dx =
-                (j + x) * 13 * scale + 13.0 * scale * j * matrixColumns - 5 * j;
-            double dy =
-                (i + y) * 13 * scale + 13.0 * scale * i * matrixRows - 5 * i;
+            double dx = (j + x) * 13 * scale + 13.0 * scale * j * matrixColumns - 5 * j;
+            double dy = (i + y) * 13 * scale + 13.0 * scale * i * matrixRows - 5 * i;
 
-            bool pixelTouched = posx > dx &&
-                posx < dx + 10 * scale &&
-                posy > dy &&
-                posy < dy + 10 * scale;
+            bool pixelTouched = posx > dx && posx < dx + 10 * scale && posy > dy && posy < dy + 10 * scale;
 
             if (pixelTouched) {
               editPixel(i, j, x, y);
@@ -111,17 +106,16 @@ class _GreyScaleState extends State<GreyScale> {
 
   @override
   Widget build(BuildContext context) {
-    return Consumer<SettingsScreenNotifier>(
-        builder: (context, notifier, child) {
+    return Consumer<SettingsScreenNotifier>(builder: (context, notifier, child) {
       return Expanded(
         child: Container(
           padding: EdgeInsets.all(5),
           child: Column(
             children: [
-              Padding(
-                padding: const EdgeInsets.all(5),
-                child: viewScale(notifier),
-              ),
+              // Padding(
+              //   padding: const EdgeInsets.all(5),
+              //   child: viewScale(notifier),
+              // ),
               Padding(
                 padding: const EdgeInsets.only(bottom: 10),
                 child: Row(
@@ -239,8 +233,7 @@ class _GreyScaleState extends State<GreyScale> {
                             width: 30,
                             height: 30,
                             decoration: BoxDecoration(
-                              borderRadius:
-                                  BorderRadius.all(Radius.circular(5)),
+                              borderRadius: BorderRadius.all(Radius.circular(5)),
                               color: currentColor,
                             ),
                           ),
@@ -258,10 +251,8 @@ class _GreyScaleState extends State<GreyScale> {
                               height: 30,
                               padding: EdgeInsets.all(2),
                               decoration: BoxDecoration(
-                                borderRadius:
-                                    BorderRadius.all(Radius.circular(5)),
-                                color:
-                                    !peekingColor ? Colors.white : Colors.grey,
+                                borderRadius: BorderRadius.all(Radius.circular(5)),
+                                color: !peekingColor ? Colors.white : Colors.grey,
                               ),
                               child: Image.asset("assets/dropper.png"),
                             ),
@@ -352,8 +343,7 @@ class _GreyScaleState extends State<GreyScale> {
                               },
                               child: CustomPaint(
                                 size: Size(
-                                  matrixColumns * 13.0 * columns +
-                                      (columns - 1) * 5,
+                                  matrixColumns * 13.0 * columns + (columns - 1) * 5,
                                   matrixRows * 13.0 * rows + (rows - 1) * 5,
                                 ),
                                 painter: MatrixPainter(
@@ -367,7 +357,7 @@ class _GreyScaleState extends State<GreyScale> {
                                   matrixTouched,
                                   currentColor,
                                   colors,
-                                  scale,
+                                  widget.scale,
                                 ),
                               ),
                             ),
@@ -395,8 +385,7 @@ class _GreyScaleState extends State<GreyScale> {
 
     for (var val in ColorOptions.values) {
       var name = val.name;
-      name =
-          name.substring(0, 1).toUpperCase() + name.substring(1, name.length);
+      name = name.substring(0, 1).toUpperCase() + name.substring(1, name.length);
 
       widgets.add(
         SizedBox(
@@ -452,8 +441,7 @@ class _GreyScaleState extends State<GreyScale> {
     int matrixColumnsTextCountIndex,
   ) {
     if (peekingColor) {
-      currentColor = colors[rowsCountIndex][columnsCountIndex]
-          [matrixRowsTextCountIndex][matrixColumnsTextCountIndex];
+      currentColor = colors[rowsCountIndex][columnsCountIndex][matrixRowsTextCountIndex][matrixColumnsTextCountIndex];
 
       posx = currentColor.blue.toInt() / 255 * 500;
       setState(() {
@@ -461,8 +449,7 @@ class _GreyScaleState extends State<GreyScale> {
       });
       return;
     }
-    colors[rowsCountIndex][columnsCountIndex][matrixRowsTextCountIndex]
-        [matrixColumnsTextCountIndex] = currentColor;
+    colors[rowsCountIndex][columnsCountIndex][matrixRowsTextCountIndex][matrixColumnsTextCountIndex] = currentColor;
   }
 
   Row viewScale(SettingsScreenNotifier notifier) {

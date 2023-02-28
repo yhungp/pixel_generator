@@ -342,10 +342,10 @@ class _From_ImageState extends State<From_Image> {
             children: [
               Row(
                 children: [
-                  Padding(
-                    padding: const EdgeInsets.all(5),
-                    child: viewScale(notifier),
-                  ),
+                  // Padding(
+                  //   padding: const EdgeInsets.all(5),
+                  //   child: viewScale(notifier),
+                  // ),
                   Expanded(child: Container()),
                   Visibility(
                     visible: imagePeeked && codeGenerated,
@@ -365,9 +365,6 @@ class _From_ImageState extends State<From_Image> {
                     ),
                   ),
                 ],
-              ),
-              SizedBox(
-                height: 10,
               ),
               Padding(
                 padding: const EdgeInsets.only(bottom: 10),
@@ -512,7 +509,7 @@ class _From_ImageState extends State<From_Image> {
                                                           matrixScaleTouched,
                                                           currentColor,
                                                           colors,
-                                                          scale,
+                                                          widget.scale,
                                                           showSpaceBetweenMatrix: false,
                                                           image: imageFromFile,
                                                           imagePeeked: imagePeeked,

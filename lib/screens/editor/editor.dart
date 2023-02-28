@@ -9,6 +9,7 @@ import 'package:calculator/screens/editor/from_image.dart';
 import 'package:calculator/screens/editor/from_video.dart';
 import 'package:calculator/screens/editor/gray_scale.dart';
 import 'package:calculator/screens/editor/rgb_picker.dart';
+import 'package:calculator/screens/editor/widgets/scale_button.dart';
 import 'package:calculator/styles/styles.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
@@ -81,7 +82,9 @@ class _EditorState extends State<Editor> {
                   mainAxisAlignment: MainAxisAlignment.start,
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    selector(notifier),
+                    Row(
+                      children: [selector(notifier), SizedBox(width: 10), viewScale(notifier)],
+                    ),
                     editorSelector(),
                   ],
                 ),
@@ -137,68 +140,193 @@ class _EditorState extends State<Editor> {
     }
   }
 
-  Row selector(SettingsScreenNotifier notifier) {
-    List<Widget> widgets = [];
+  getMenuItemName(EditorOptions val) {
+    var name = val.name;
+    name = name.substring(0, 1).toUpperCase() + name.substring(1, name.length);
 
-    for (var val in EditorOptions.values) {
-      var name = val.name;
-      name = name.substring(0, 1).toUpperCase() + name.substring(1, name.length);
+    final beforeCapitalLetter = RegExp(r"(?=[A-Z])");
+    var parts = name.split(beforeCapitalLetter);
 
-      final beforeCapitalLetter = RegExp(r"(?=[A-Z])");
-      var parts = name.split(beforeCapitalLetter);
+    if (parts.isNotEmpty && parts[0].isEmpty) parts = parts.sublist(1);
 
-      if (parts.isNotEmpty && parts[0].isEmpty) parts = parts.sublist(1);
+    name = parts.join(" ");
+    name = name.toLowerCase();
+    name = name.substring(0, 1).toUpperCase() + name.substring(1, name.length);
 
-      name = parts.join(" ");
-      name = name.toLowerCase();
-      name = name.substring(0, 1).toUpperCase() + name.substring(1, name.length);
-
-      if (name.startsWith("Rgb")) {
-        name = name.replaceFirst("Rgb", "RGB");
-      }
-
-      widgets.add(
-        SizedBox(
-          width: 200,
-          child: RadioListTile<EditorOptions>(
-            dense: false,
-            contentPadding: EdgeInsets.zero,
-            title: Text(
-              name,
-              style: TextStyle(
-                color: Colors.white,
-              ),
-            ),
-            value: val,
-            activeColor: Colors.white,
-            groupValue: editorOptionsSelected,
-            onChanged: (EditorOptions? value) {
-              setState(() {
-                editorOptionsSelected = value!;
-              });
-            },
-          ),
-        ),
-      );
+    if (name.startsWith("Rgb")) {
+      name = name.replaceFirst("Rgb", "RGB");
     }
 
+    return name;
+  }
+
+  Row selector(SettingsScreenNotifier notifier) {
     return Row(
       children: [
-        Expanded(
-          child: Container(
-            padding: EdgeInsets.all(5),
-            margin: EdgeInsets.all(5),
-            decoration: BoxDecoration(
-              color: blueTheme(notifier.darkTheme),
-              borderRadius: BorderRadius.all(
-                Radius.circular(5),
-              ),
-            ),
-            child: Wrap(children: widgets),
+        Container(
+          decoration: BoxDecoration(
+            color: blueTheme(notifier.darkTheme),
+            borderRadius: BorderRadius.all(Radius.circular(5)),
           ),
-        )
+          padding: EdgeInsets.fromLTRB(10, 5, 10, 5),
+          margin: EdgeInsets.all(5),
+          child: DropdownButton<EditorOptions>(
+            value: editorOptionsSelected,
+            dropdownColor: blueTheme(notifier.darkTheme),
+            icon: Icon(
+              Icons.arrow_drop_down,
+              color: Colors.white, // <-- SEE HERE
+            ),
+            style: const TextStyle(
+              color: Colors.white,
+            ),
+            onChanged: (newValue) {
+              setState(() {
+                editorOptionsSelected = newValue!;
+              });
+            },
+            items: EditorOptions.values.map((EditorOptions option) {
+              return DropdownMenuItem<EditorOptions>(
+                value: option,
+                child: Text(
+                  getMenuItemName(option),
+                  style: const TextStyle(
+                    color: Colors.white,
+                  ),
+                  // option.name.toString(),
+                ),
+              );
+            }).toList(),
+          ),
+        ),
       ],
     );
+
+    // List<Widget> widgets = [];
+
+    // for (var val in EditorOptions.values) {
+    //   var name = val.name;
+    //   name = name.substring(0, 1).toUpperCase() + name.substring(1, name.length);
+
+    //   final beforeCapitalLetter = RegExp(r"(?=[A-Z])");
+    //   var parts = name.split(beforeCapitalLetter);
+
+    //   if (parts.isNotEmpty && parts[0].isEmpty) parts = parts.sublist(1);
+
+    //   name = parts.join(" ");
+    //   name = name.toLowerCase();
+    //   name = name.substring(0, 1).toUpperCase() + name.substring(1, name.length);
+
+    //   if (name.startsWith("Rgb")) {
+    //     name = name.replaceFirst("Rgb", "RGB");
+    //   }
+
+    //   widgets.add(
+    //     SizedBox(
+    //       width: 150,
+    //       child: RadioListTile<EditorOptions>(
+    //         visualDensity: const VisualDensity(
+    //           horizontal: VisualDensity.minimumDensity,
+    //           vertical: VisualDensity.minimumDensity,
+    //         ),
+    //         dense: false,
+    //         contentPadding: EdgeInsets.zero,
+    //         title: Text(
+    //           name,
+    //           style: TextStyle(
+    //             color: Colors.white,
+    //           ),
+    //         ),
+    //         value: val,
+    //         activeColor: Colors.white,
+    //         groupValue: editorOptionsSelected,
+    //         onChanged: (EditorOptions? value) {
+    //           setState(() {
+    //             editorOptionsSelected = value!;
+    //           });
+    //         },
+    //       ),
+    //     ),
+    //   );
+    // }
+
+    // return Row(
+    //   children: [
+    //     Expanded(
+    //       child: Container(
+    //         padding: EdgeInsets.all(5),
+    //         margin: EdgeInsets.all(5),
+    //         decoration: BoxDecoration(
+    //           color: blueTheme(notifier.darkTheme),
+    //           borderRadius: BorderRadius.all(
+    //             Radius.circular(5),
+    //           ),
+    //         ),
+    //         child: Wrap(children: widgets),
+    //       ),
+    //     )
+    //   ],
+    // );
+  }
+
+  Row viewScale(SettingsScreenNotifier notifier) {
+    return Row(
+      children: [
+        for (double value in [1, 0.1, 0.01])
+          Row(
+            children: [
+              ScaleButton(
+                text: "- $value",
+                darkTheme: notifier.darkTheme,
+                func: downScale,
+                width: 50,
+                value: value,
+              ),
+              SizedBox(width: 5),
+            ],
+          ),
+        Container(
+          width: 100,
+          alignment: Alignment.center,
+          padding: EdgeInsets.all(10),
+          child: Text(
+            "Zoom: ${scale.toStringAsFixed(2)}",
+            style: TextStyle(
+              color: textColorMatrixCreation(
+                notifier.darkTheme,
+              ),
+            ),
+          ),
+        ),
+        for (double value in [0.01, 0.1, 1])
+          Row(
+            children: [
+              ScaleButton(
+                text: "+ $value",
+                darkTheme: notifier.darkTheme,
+                func: upScale,
+                width: 50,
+                value: value,
+              ),
+              SizedBox(width: 5),
+            ],
+          ),
+      ],
+    );
+  }
+
+  upScale(double scaleValue) {
+    setState(() {
+      scale += scaleValue;
+    });
+  }
+
+  downScale(double scaleValue) {
+    if (scale - scaleValue > 0) {
+      setState(() {
+        scale -= scaleValue;
+      });
+    }
   }
 
   loadInfo() async {

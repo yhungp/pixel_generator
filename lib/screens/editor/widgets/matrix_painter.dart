@@ -20,6 +20,7 @@ class MatrixPainter extends CustomPainter {
   bool showSpaceBetweenMatrix;
   bool imagePeeked;
   bool showmatrix;
+  bool showOnlyPixels;
   Color color;
   List<List<List<List<Color>>>> colors;
   ui.Image? image;
@@ -40,12 +41,44 @@ class MatrixPainter extends CustomPainter {
     this.image,
     this.imagePeeked = false,
     this.showmatrix = true,
+    this.showOnlyPixels = false,
   });
 
   empty() {}
 
   @override
   void paint(Canvas canvas, Size size) async {
+    if (showOnlyPixels) {
+      final Path path = Path();
+      path.fillType = PathFillType.evenOdd;
+      path.addRect(Rect.fromLTWH(0, 0, size.width, size.height));
+
+      for (int i = 0; i < rows; i++) {
+        for (int j = 0; j < columns; j++) {
+          for (int x = 0; x < matrixRows; x++) {
+            for (int y = 0; y < matrixColumns; y++) {
+              double dx = showSpaceBetweenMatrix
+                  ? (j + x) * 13 * scale + 13.0 * scale * j * matrixColumns - 5 * j
+                  : y * 13 * scale + 13.0 * scale * j * matrixColumns + posx;
+              double dy = showSpaceBetweenMatrix
+                  ? (i + y) * 13 * scale + 13.0 * scale * i * matrixRows - 5 * i
+                  : x * 13 * scale + 13.0 * scale * i * matrixRows + posy;
+
+              path.addRRect(
+                RRect.fromRectAndRadius(
+                  Rect.fromCircle(center: Offset(dx + 5, dy + 5), radius: 5 * scale),
+                  Radius.circular(0),
+                ),
+              );
+            }
+          }
+        }
+      }
+
+      canvas.drawPath(path, Paint()..color = Colors.black);
+      return;
+    }
+
     if (imagePeeked && image != null) {
       canvas.drawImage(
           image!,
@@ -62,9 +95,7 @@ class MatrixPainter extends CustomPainter {
           for (int x = 0; x < matrixRows; x++) {
             for (int y = 0; y < matrixColumns; y++) {
               double dx = showSpaceBetweenMatrix
-                  ? (j + x) * 13 * scale +
-                      13.0 * scale * j * matrixColumns -
-                      5 * j
+                  ? (j + x) * 13 * scale + 13.0 * scale * j * matrixColumns - 5 * j
                   : y * 13 * scale + 13.0 * scale * j * matrixColumns + posx;
               double dy = showSpaceBetweenMatrix
                   ? (i + y) * 13 * scale + 13.0 * scale * i * matrixRows - 5 * i

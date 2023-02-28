@@ -17,6 +17,7 @@ import 'package:calculator/screens/editor/widgets/video_control/video_control.da
 import 'package:calculator/styles/styles.dart';
 import 'package:dart_vlc/dart_vlc.dart';
 import 'package:file_picker/file_picker.dart';
+import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'dart:ui' as ui;
@@ -163,10 +164,6 @@ class _From_VideoState extends State<From_Video> {
             children: [
               Row(
                 children: [
-                  Padding(
-                    padding: const EdgeInsets.all(5),
-                    child: viewScale(notifier),
-                  ),
                   Expanded(child: Container()),
                   Visibility(
                     visible: imagePeeked && codeGenerated,
@@ -187,8 +184,11 @@ class _From_VideoState extends State<From_Video> {
                   ),
                 ],
               ),
-              SizedBox(
-                height: 10,
+              Visibility(
+                visible: videoLoaded,
+                child: SizedBox(
+                  height: 10,
+                ),
               ),
               Padding(
                 padding: const EdgeInsets.only(bottom: 10),
@@ -283,90 +283,7 @@ class _From_VideoState extends State<From_Video> {
                                             ),
                                           ),
                                         )
-                                      : Expanded(
-                                          key: widgetKey,
-                                          child: Center(
-                                            child: GestureDetector(
-                                              onTap: () {
-                                                playPauseVideo();
-                                              },
-                                              child: Video(
-                                                player: player,
-                                                width: oldSize.width > 0 ? oldSize.width - 1 : 600,
-                                                height: oldSize.height > 0 ? oldSize.height - 1 : 400,
-                                                scale: 1.0,
-                                                showControls: false,
-                                              ),
-                                            ),
-                                          ),
-                                        ),
-                                  // : Expanded(
-                                  //     child: Column(
-                                  //       children: [
-                                  //         // Expanded(child: Image.memory(imageBytes)),
-                                  //         Expanded(
-                                  //           // key: widgetKey,
-                                  //           child: Listener(
-                                  //             onPointerSignal: (pointerSignal) {
-                                  //               if (pointerSignal is PointerScrollEvent) {
-                                  //                 // do something when scrolled
-                                  //                 setState(() {
-                                  //                   if (pointerSignal.scrollDelta.dy < 0) {
-                                  //                     scale += 0.01;
-                                  //                   } else {
-                                  //                     scale -= 0.01;
-                                  //                   }
-                                  //                 });
-                                  //               }
-                                  //             },
-                                  //             child: GestureDetector(
-                                  //               onPanUpdate: (details) {
-                                  //                 setState(() {
-                                  //                   posxMatrixPainter += details.delta.dx;
-                                  //                   posyMatrixPainter += details.delta.dy;
-                                  //                 });
-                                  //               },
-                                  //               onPanEnd: (_) {
-                                  //                 setState(() {
-                                  //                   matrixScaleTouched = false;
-                                  //                 });
-                                  //               },
-                                  //               child: Container(
-                                  //                 padding: EdgeInsets.zero,
-                                  //                 key: widgetKey,
-                                  //                 width: double.infinity,
-                                  //                 height: double.infinity,
-                                  //                 child: !sizeLoaded
-                                  //                     ? Text("data")
-                                  //                     : CustomPaint(
-                                  //                         size: Size(
-                                  //                           oldSize.width,
-                                  //                           oldSize.height,
-                                  //                         ),
-                                  //                         painter: MatrixPainter(
-                                  //                           posxMatrixPainter,
-                                  //                           posyMatrixPainter,
-                                  //                           false,
-                                  //                           columns,
-                                  //                           matrixColumns,
-                                  //                           matrixRows,
-                                  //                           rows,
-                                  //                           matrixScaleTouched,
-                                  //                           currentColor,
-                                  //                           colors,
-                                  //                           scale,
-                                  //                           showSpaceBetweenMatrix: false,
-                                  //                           image: imageFromFile,
-                                  //                           imagePeeked: imagePeeked,
-                                  //                         ),
-                                  //                       ),
-                                  //               ),
-                                  //             ),
-                                  //           ),
-                                  //         ),
-                                  //       ],
-                                  //     ),
-                                  //   ),
+                                      : videoPlayer(),
                                   SizedBox(height: 10),
                                   Visibility(
                                     visible: imagePeeked,
@@ -392,6 +309,100 @@ class _From_VideoState extends State<From_Video> {
         ),
       );
     });
+  }
+
+  Expanded videoPlayer() {
+    return Expanded(
+      key: widgetKey,
+      child: Stack(
+        children: [
+          Center(
+            child: GestureDetector(
+              child: Video(
+                player: player,
+                width: oldSize.width > 0 ? oldSize.width - 1 : 600,
+                height: oldSize.height > 0 ? oldSize.height - 1 : 400,
+                scale: 1.0,
+                showControls: false,
+              ),
+            ),
+          ),
+          SizedBox(
+            width: oldSize.width > 0 ? oldSize.width - 1 : 600,
+            height: oldSize.height > 0 ? oldSize.height - 1 : 400,
+            child: Column(
+              children: [
+                Expanded(
+                  child: Listener(
+                    onPointerSignal: (pointerSignal) {
+                      if (pointerSignal is PointerScrollEvent) {
+                        // do something when scrolled
+                        setState(() {
+                          if (pointerSignal.scrollDelta.dy < 0) {
+                            scale += 0.01;
+                          } else {
+                            scale -= 0.01;
+                          }
+                        });
+                      }
+                    },
+                    child: GestureDetector(
+                      onTap: () {
+                        playPauseVideo();
+                      },
+                      onPanUpdate: (details) {
+                        setState(() {
+                          posxMatrixPainter += details.delta.dx;
+                          posyMatrixPainter += details.delta.dy;
+                        });
+                      },
+                      onPanEnd: (_) {
+                        setState(() {
+                          matrixScaleTouched = false;
+                        });
+                      },
+                      child: Container(
+                        padding: EdgeInsets.zero,
+                        width: double.infinity,
+                        height: double.infinity,
+                        child: !videoLoaded
+                            ? Text(
+                                "data",
+                                style: TextStyle(
+                                  color: Colors.white,
+                                ),
+                              )
+                            : CustomPaint(
+                                size: Size(
+                                  oldSize.width,
+                                  oldSize.height,
+                                ),
+                                painter: MatrixPainter(
+                                  posxMatrixPainter,
+                                  posyMatrixPainter,
+                                  false,
+                                  columns,
+                                  matrixColumns,
+                                  matrixRows,
+                                  rows,
+                                  matrixScaleTouched,
+                                  currentColor,
+                                  colors,
+                                  widget.scale,
+                                  showSpaceBetweenMatrix: false,
+                                  showOnlyPixels: true,
+                                ),
+                              ),
+                      ),
+                    ),
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ],
+      ),
+    );
   }
 
   playPauseVideo() {
@@ -746,6 +757,7 @@ class _From_VideoState extends State<From_Video> {
       player.setVolume(0);
 
       setState(() {
+        filePeeked = video;
         videoLoaded = true;
         playPause = false;
       });

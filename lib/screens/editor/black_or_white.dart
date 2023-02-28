@@ -83,15 +83,10 @@ class _BlackOrWhiteState extends State<BlackOrWhite> {
       for (int j = 0; j < columns; j++) {
         for (int x = 0; x < matrixRows; x++) {
           for (int y = 0; y < matrixColumns; y++) {
-            double dx =
-                (j + x) * 13 * scale + 13.0 * scale * j * matrixColumns - 5 * j;
-            double dy =
-                (i + y) * 13 * scale + 13.0 * scale * i * matrixRows - 5 * i;
+            double dx = (j + x) * 13 * scale + 13.0 * scale * j * matrixColumns - 5 * j;
+            double dy = (i + y) * 13 * scale + 13.0 * scale * i * matrixRows - 5 * i;
 
-            bool pixelTouched = posx > dx &&
-                posx < dx + 10 * scale &&
-                posy > dy &&
-                posy < dy + 10 * scale;
+            bool pixelTouched = posx > dx && posx < dx + 10 * scale && posy > dy && posy < dy + 10 * scale;
 
             if (pixelTouched) {
               editPixel(i, j, x, y);
@@ -104,17 +99,16 @@ class _BlackOrWhiteState extends State<BlackOrWhite> {
 
   @override
   Widget build(BuildContext context) {
-    return Consumer<SettingsScreenNotifier>(
-        builder: (context, notifier, child) {
+    return Consumer<SettingsScreenNotifier>(builder: (context, notifier, child) {
       return Expanded(
         child: Container(
           padding: EdgeInsets.all(5),
           child: Column(
             children: [
-              Padding(
-                padding: const EdgeInsets.all(5),
-                child: viewScale(notifier),
-              ),
+              // Padding(
+              //   padding: const EdgeInsets.all(5),
+              //   child: viewScale(notifier),
+              // ),
               Padding(
                 padding: const EdgeInsets.only(bottom: 10),
                 child: Row(
@@ -256,8 +250,7 @@ class _BlackOrWhiteState extends State<BlackOrWhite> {
                               },
                               child: CustomPaint(
                                 size: Size(
-                                  matrixColumns * 13.0 * columns +
-                                      (columns - 1) * 5,
+                                  matrixColumns * 13.0 * columns + (columns - 1) * 5,
                                   matrixRows * 13.0 * rows + (rows - 1) * 5,
                                 ),
                                 painter: MatrixPainter(
@@ -271,7 +264,7 @@ class _BlackOrWhiteState extends State<BlackOrWhite> {
                                   matrixTouched,
                                   currentColor,
                                   colors,
-                                  scale,
+                                  widget.scale,
                                 ),
                               ),
                             ),
@@ -294,8 +287,7 @@ class _BlackOrWhiteState extends State<BlackOrWhite> {
 
     for (var val in ["black", "white"]) {
       var name = val;
-      name =
-          name.substring(0, 1).toUpperCase() + name.substring(1, name.length);
+      name = name.substring(0, 1).toUpperCase() + name.substring(1, name.length);
 
       final Color color = val == "black" ? Colors.black : Colors.white;
 
@@ -353,8 +345,7 @@ class _BlackOrWhiteState extends State<BlackOrWhite> {
     int matrixColumnsTextCountIndex,
   ) {
     setState(() {
-      colors[rowsCountIndex][columnsCountIndex][matrixRowsTextCountIndex]
-          [matrixColumnsTextCountIndex] = currentColor;
+      colors[rowsCountIndex][columnsCountIndex][matrixRowsTextCountIndex][matrixColumnsTextCountIndex] = currentColor;
     });
   }
 
