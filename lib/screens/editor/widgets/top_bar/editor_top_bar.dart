@@ -169,7 +169,7 @@ Row selector(
                 height: 30,
                 alignment: Alignment.center,
                 decoration: BoxDecoration(
-                  color: Color.fromARGB(255, 255, 0, 0),
+                  color: Color.fromARGB(200, 255, 0, 0),
                   borderRadius: BorderRadius.horizontal(left: Radius.circular(5)),
                 ),
                 child: Text(
@@ -183,7 +183,7 @@ Row selector(
                 width: 20,
                 height: 30,
                 alignment: Alignment.center,
-                color: Color.fromARGB(255, 0, 255, 0),
+                color: Color.fromARGB(150, 0, 255, 0),
                 child: Text(
                   "G",
                   style: TextStyle(
@@ -196,7 +196,7 @@ Row selector(
                 height: 30,
                 alignment: Alignment.center,
                 decoration: BoxDecoration(
-                  color: Color.fromARGB(255, 0, 0, 255),
+                  color: Color.fromARGB(150, 0, 0, 255),
                   borderRadius: BorderRadius.horizontal(right: Radius.circular(5)),
                 ),
                 child: Text(

@@ -20,6 +20,8 @@ class EditorButton extends StatelessWidget {
     return GestureDetector(
       onTap: () => func(),
       child: Container(
+        height: 40,
+        alignment: Alignment.center,
         padding: EdgeInsets.all(10),
         decoration: BoxDecoration(
           borderRadius: BorderRadius.all(Radius.circular(5)),

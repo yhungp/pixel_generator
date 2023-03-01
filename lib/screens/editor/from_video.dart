@@ -31,6 +31,8 @@ class From_Video extends StatefulWidget {
   int columns;
   int rows;
   double scale;
+  Function upScale;
+  Function downScale;
 
   From_Video({
     Key? key,
@@ -39,6 +41,8 @@ class From_Video extends StatefulWidget {
     required this.matrixRows,
     required this.rows,
     required this.scale,
+    required this.upScale,
+    required this.downScale,
   }) : super(key: key);
 
   @override
@@ -162,34 +166,6 @@ class _From_VideoState extends State<From_Video> {
           padding: EdgeInsets.all(5),
           child: Column(
             children: [
-              Row(
-                children: [
-                  Expanded(child: Container()),
-                  Visibility(
-                    visible: imagePeeked && codeGenerated,
-                    child: EditorButton(
-                      label: showCodeLabel(notifier.language, showCode),
-                      func: () => showHideCode(),
-                      darkTheme: notifier.darkTheme,
-                    ),
-                  ),
-                  SizedBox(width: 10),
-                  Visibility(
-                    visible: imagePeeked,
-                    child: EditorButton(
-                      label: generateCode(notifier.language),
-                      func: () => handleSavePressed(notifier),
-                      darkTheme: notifier.darkTheme,
-                    ),
-                  ),
-                ],
-              ),
-              Visibility(
-                visible: videoLoaded,
-                child: SizedBox(
-                  height: 10,
-                ),
-              ),
               Padding(
                 padding: const EdgeInsets.only(bottom: 10),
                 child: Row(
@@ -242,6 +218,37 @@ class _From_VideoState extends State<From_Video> {
                         ),
                       ),
                     ),
+                    Visibility(
+                      visible: imagePeeked || codeGenerated,
+                      child: Row(
+                        children: [
+                          SizedBox(width: 5),
+                          SizedBox(height: 40, child: VerticalDivider(color: Colors.white)),
+                          SizedBox(width: 5),
+                          Visibility(
+                            visible: imagePeeked && codeGenerated,
+                            child: EditorButton(
+                              label: showCodeLabel(notifier.language, showCode),
+                              func: () => showHideCode(),
+                              darkTheme: notifier.darkTheme,
+                            ),
+                          ),
+                          SizedBox(width: imagePeeked && codeGenerated ? 10 : 0),
+                          Visibility(
+                            visible: imagePeeked,
+                            child: Row(
+                              children: [
+                                EditorButton(
+                                  label: generateCode(notifier.language),
+                                  func: () => handleSavePressed(notifier),
+                                  darkTheme: notifier.darkTheme,
+                                ),
+                              ],
+                            ),
+                          ),
+                        ],
+                      ),
+                    )
                   ],
                 ),
               ),
@@ -339,9 +346,9 @@ class _From_VideoState extends State<From_Video> {
                         // do something when scrolled
                         setState(() {
                           if (pointerSignal.scrollDelta.dy < 0) {
-                            scale += 0.01;
+                            widget.upScale(0.01);
                           } else {
-                            scale -= 0.01;
+                            widget.downScale(0.01);
                           }
                         });
                       }

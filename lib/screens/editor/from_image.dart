@@ -12,7 +12,6 @@ import 'package:calculator/screens/editor/widgets/matrix_painter.dart';
 import 'package:calculator/screens/editor/widgets/scale_button.dart';
 import 'package:calculator/screens/editor/widgets/show_hide_code.dart';
 import 'package:calculator/styles/styles.dart';
-import 'package:calculator/widgets/generic_button.dart';
 import 'package:file_picker/file_picker.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
@@ -20,7 +19,6 @@ import 'package:provider/provider.dart';
 import 'dart:ui' as ui;
 import 'package:path_provider/path_provider.dart';
 import 'package:image/image.dart' as image;
-import 'package:video_thumbnail/video_thumbnail.dart';
 
 class From_Image extends StatefulWidget {
   int matrixColumns;
@@ -28,6 +26,8 @@ class From_Image extends StatefulWidget {
   int columns;
   int rows;
   double scale;
+  Function upScale;
+  Function downScale;
 
   From_Image({
     Key? key,
@@ -36,6 +36,8 @@ class From_Image extends StatefulWidget {
     required this.matrixRows,
     required this.rows,
     required this.scale,
+    required this.upScale,
+    required this.downScale,
   }) : super(key: key);
 
   @override
@@ -342,28 +344,7 @@ class _From_ImageState extends State<From_Image> {
             children: [
               Row(
                 children: [
-                  // Padding(
-                  //   padding: const EdgeInsets.all(5),
-                  //   child: viewScale(notifier),
-                  // ),
                   Expanded(child: Container()),
-                  Visibility(
-                    visible: imagePeeked && codeGenerated,
-                    child: EditorButton(
-                      label: showCodeLabel(notifier.language, showCode),
-                      func: () => showHideCode(),
-                      darkTheme: notifier.darkTheme,
-                    ),
-                  ),
-                  SizedBox(width: 10),
-                  Visibility(
-                    visible: imagePeeked,
-                    child: EditorButton(
-                      label: generateCode(notifier.language),
-                      func: () => handleSavePressed(notifier),
-                      darkTheme: notifier.darkTheme,
-                    ),
-                  ),
                 ],
               ),
               Padding(
@@ -418,6 +399,33 @@ class _From_ImageState extends State<From_Image> {
                         ),
                       ),
                     ),
+                    Visibility(
+                      visible: imagePeeked || codeGenerated,
+                      child: Row(
+                        children: [
+                          SizedBox(width: 5),
+                          SizedBox(height: 40, child: VerticalDivider(color: Colors.white)),
+                          SizedBox(width: 5),
+                          Visibility(
+                            visible: imagePeeked && codeGenerated,
+                            child: EditorButton(
+                              label: showCodeLabel(notifier.language, showCode),
+                              func: () => showHideCode(),
+                              darkTheme: notifier.darkTheme,
+                            ),
+                          ),
+                          SizedBox(width: imagePeeked && codeGenerated ? 10 : 0),
+                          Visibility(
+                            visible: imagePeeked,
+                            child: EditorButton(
+                              label: generateCode(notifier.language),
+                              func: () => handleSavePressed(notifier),
+                              darkTheme: notifier.darkTheme,
+                            ),
+                          ),
+                        ],
+                      ),
+                    )
                   ],
                 ),
               ),
@@ -451,6 +459,7 @@ class _From_ImageState extends State<From_Image> {
                                             child: Text(
                                               peekingFileLabel(
                                                 notifier.language,
+                                                videoOrImage: false,
                                               ),
                                               style: TextStyle(
                                                 fontSize: 30,
@@ -467,9 +476,9 @@ class _From_ImageState extends State<From_Image> {
                                                 // do something when scrolled
                                                 setState(() {
                                                   if (pointerSignal.scrollDelta.dy < 0) {
-                                                    scale += 0.01;
+                                                    widget.upScale(0.01);
                                                   } else {
-                                                    scale -= 0.01;
+                                                    widget.downScale(0.01);
                                                   }
                                                 });
                                               }

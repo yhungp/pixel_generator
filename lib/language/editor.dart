@@ -22,12 +22,13 @@ peekingColorLabel(int language) {
 }
 
 // grey scale
-peekingFileLabel(int language) {
+peekingFileLabel(int language, {bool videoOrImage = true}) {
+  // videoOrImage -> true: video   false: image
   switch (language) {
     case 0:
-      return "Peek a file";
+      return "Peek a${videoOrImage ? " video" : "n image"} file ";
     case 1:
-      return "Seleccione un archivo";
+      return "Seleccione un archivo de ${videoOrImage ? "video" : "imagen"}";
   }
 }
 

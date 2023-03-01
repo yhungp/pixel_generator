@@ -137,6 +137,8 @@ class _EditorState extends State<Editor> {
           matrixRows: matrixRows,
           rows: rows,
           scale: scale,
+          upScale: upScale,
+          downScale: downScale,
         );
       case EditorOptions.fromVideo:
         return From_Video(
@@ -145,6 +147,8 @@ class _EditorState extends State<Editor> {
           matrixRows: matrixRows,
           rows: rows,
           scale: scale,
+          upScale: upScale,
+          downScale: downScale,
         );
       default:
         return Container();
@@ -154,6 +158,7 @@ class _EditorState extends State<Editor> {
   setEditorOption(EditorOptions val) {
     setState(() {
       editorOptionsSelected = val;
+      scale = 1;
     });
   }
 
