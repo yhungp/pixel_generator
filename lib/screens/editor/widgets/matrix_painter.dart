@@ -2,6 +2,7 @@
 
 import 'dart:io';
 
+import 'package:calculator/styles/styles.dart';
 import 'package:flutter/material.dart';
 import 'dart:ui' as ui;
 
@@ -21,6 +22,7 @@ class MatrixPainter extends CustomPainter {
   bool imagePeeked;
   bool showmatrix;
   bool showOnlyPixels;
+  bool darkTheme;
   Color color;
   List<List<List<List<Color>>>> colors;
   ui.Image? image;
@@ -42,6 +44,7 @@ class MatrixPainter extends CustomPainter {
     this.imagePeeked = false,
     this.showmatrix = true,
     this.showOnlyPixels = false,
+    this.darkTheme = false,
   });
 
   empty() {}
@@ -51,7 +54,7 @@ class MatrixPainter extends CustomPainter {
     if (showOnlyPixels) {
       final Path path = Path();
       path.fillType = PathFillType.evenOdd;
-      path.addRect(Rect.fromLTWH(0, 0, size.width, size.height));
+      path.addRect(Rect.fromLTWH(0, 0, size.width + 1, size.height + 1));
 
       for (int i = 0; i < rows; i++) {
         for (int j = 0; j < columns; j++) {
@@ -75,7 +78,7 @@ class MatrixPainter extends CustomPainter {
         }
       }
 
-      canvas.drawPath(path, Paint()..color = Colors.black);
+      canvas.drawPath(path, Paint()..color = blueTheme(darkTheme));
       return;
     }
 

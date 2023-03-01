@@ -80,6 +80,7 @@ class _From_VideoState extends State<From_Video> {
   bool playPause = false;
   bool videoLoaded = false;
   bool newVideoLoaded = false;
+  bool showOnlyPixels = false;
 
   String filePeeked = "";
 
@@ -290,7 +291,7 @@ class _From_VideoState extends State<From_Video> {
                                             ),
                                           ),
                                         )
-                                      : videoPlayer(),
+                                      : videoPlayer(notifier),
                                   SizedBox(height: 10),
                                   Visibility(
                                     visible: imagePeeked,
@@ -318,10 +319,11 @@ class _From_VideoState extends State<From_Video> {
     });
   }
 
-  Expanded videoPlayer() {
+  Expanded videoPlayer(SettingsScreenNotifier notifier) {
     return Expanded(
       key: widgetKey,
       child: Stack(
+        alignment: Alignment.topRight,
         children: [
           Center(
             child: GestureDetector(
@@ -385,26 +387,58 @@ class _From_VideoState extends State<From_Video> {
                                   oldSize.height,
                                 ),
                                 painter: MatrixPainter(
-                                  posxMatrixPainter,
-                                  posyMatrixPainter,
-                                  false,
-                                  columns,
-                                  matrixColumns,
-                                  matrixRows,
-                                  rows,
-                                  matrixScaleTouched,
-                                  currentColor,
-                                  colors,
-                                  widget.scale,
-                                  showSpaceBetweenMatrix: false,
-                                  showOnlyPixels: true,
-                                ),
+                                    posxMatrixPainter,
+                                    posyMatrixPainter,
+                                    false,
+                                    columns,
+                                    matrixColumns,
+                                    matrixRows,
+                                    rows,
+                                    matrixScaleTouched,
+                                    currentColor,
+                                    colors,
+                                    widget.scale,
+                                    showSpaceBetweenMatrix: false,
+                                    showOnlyPixels: showOnlyPixels,
+                                    darkTheme: notifier.darkTheme),
                               ),
                       ),
                     ),
                   ),
                 ),
               ],
+            ),
+          ),
+          GestureDetector(
+            onTap: () => setState(() {
+              showOnlyPixels = !showOnlyPixels;
+            }),
+            child: Container(
+              height: 40,
+              width: 40,
+              margin: EdgeInsets.all(10),
+              decoration: BoxDecoration(
+                borderRadius: BorderRadius.all(Radius.circular(20)),
+                color: Colors.grey,
+              ),
+              child: Stack(
+                alignment: Alignment.center,
+                children: [
+                  Visibility(
+                    visible: !showOnlyPixels,
+                    child: Transform(
+                      alignment: FractionalOffset.center, // set transform origin
+                      transform: Matrix4.rotationZ(0.5),
+                      child: Container(
+                        color: Colors.black,
+                        width: 2,
+                        height: 30,
+                      ),
+                    ),
+                  ),
+                  Icon(Icons.video_call),
+                ],
+              ),
             ),
           ),
         ],
@@ -475,134 +509,7 @@ class _From_VideoState extends State<From_Video> {
     setState(() => currentColor = color);
   }
 
-  handleSavePressed(SettingsScreenNotifier notifier) async {
-    try {
-      ui.PictureRecorder recorder = ui.PictureRecorder();
-      Canvas canvas = Canvas(recorder);
-
-      var painter = MatrixPainter(
-        0,
-        0,
-        false,
-        columns,
-        matrixColumns,
-        matrixRows,
-        rows,
-        matrixScaleTouched,
-        currentColor,
-        colors,
-        scale,
-        showSpaceBetweenMatrix: false,
-        image: imageFromFile,
-        imagePeeked: imagePeeked,
-        showmatrix: false,
-      );
-      var size = widgetKey.currentContext!.size;
-
-      painter.paint(canvas, size!);
-
-      ui.Image renderedImage = await recorder.endRecording().toImage(
-            size.width.floor(),
-            size.height.floor(),
-          );
-
-      var pngBytes = await renderedImage.toByteData(format: ui.ImageByteFormat.png);
-
-      image.Image img = image.decodeImage(pngBytes!.buffer.asUint8List())!;
-
-      var left = posxMatrixPainter.toInt() + 1;
-      var top = posyMatrixPainter.toInt() + 1;
-      var w = columns * matrixColumns * 13 * scale;
-      var h = rows * matrixRows * 13 * scale;
-
-      image.Image cropResize = image.copyResize(
-        image.copyCrop(
-          img,
-          left,
-          top,
-          w.toInt(),
-          h.toInt(),
-        ),
-        width: columns * matrixColumns,
-        height: rows * matrixRows,
-      );
-
-      List<image.Image> images = [];
-      for (int r = 0; r < rows; r++) {
-        for (int c = 0; c < columns; c++) {
-          image.Image im = image.copyCrop(
-            cropResize,
-            c * matrixColumns,
-            r * matrixRows,
-            matrixColumns,
-            matrixRows,
-          );
-
-          images.add(im);
-        }
-      }
-
-      List<String> matrixValues = [];
-      for (int r = 0; r < rows; r++) {
-        for (int c = 0; c < columns; c++) {
-          bool invert = false;
-          image.Image im = images[r * (rows - 1) + c];
-          final decodedBytes = im.getBytes(format: image.Format.rgb);
-
-          List<String> values = [];
-          int loopLimit = matrixColumns * matrixRows;
-          for (int x = 0; x < loopLimit; x++) {
-            int red = decodedBytes[x * 3];
-            int green = decodedBytes[x * 3 + 1];
-            int blue = decodedBytes[x * 3 + 2];
-
-            values.add("0x${getHex(red)}${getHex(green)}${getHex(blue)}");
-          }
-
-          for (int mr = 0; mr < matrixRows; mr++) {
-            var row = values.sublist(
-              mr * matrixColumns,
-              mr * matrixColumns + matrixColumns,
-            );
-
-            if (!invert) {
-              matrixValues.addAll(row);
-              invert = true;
-              continue;
-            }
-
-            row = row.reversed.toList();
-            matrixValues.addAll(row);
-
-            invert = false;
-          }
-        }
-      }
-
-      final Directory directory = await getApplicationDocumentsDirectory();
-      final File file = File('${directory.path}/my_file.txt');
-      await file.writeAsString("{\n\t${matrixValues.join(", ")}\n};");
-
-      showAlertDialog(
-        "title",
-        generationProcess(notifier.language, true),
-      );
-
-      setState(() {
-        codeGenerated = true;
-        pixels = matrixValues;
-      });
-    } catch (_) {
-      showAlertDialog(
-        "title",
-        generationProcess(notifier.language, false),
-      );
-
-      setState(() {
-        codeGenerated = true;
-      });
-    }
-  }
+  handleSavePressed(SettingsScreenNotifier notifier) async {}
 
   getHex(int val) {
     String out = val.toRadixString(16);
@@ -660,79 +567,6 @@ class _From_VideoState extends State<From_Video> {
   Future<Uint8List> setVideoFrame() async {
     var response = await getFrame();
     return Uint8List.fromList(response['bytes']);
-  }
-
-  Future<ui.Image> _loadImage(String imageAssetPath) async {
-    Uint8List bytes = await setVideoFrame();
-    imageBytes = bytes;
-
-    ui.Image i = await decodeImageFromList(bytes);
-
-    bmp = Bitmap.fromHeadless(i.width, i.height, bytes);
-
-    resized = bmp;
-
-    return i;
-  }
-
-  Row viewScale(SettingsScreenNotifier notifier) {
-    return Row(
-      children: [
-        for (double value in [1, 0.1, 0.01])
-          Row(
-            children: [
-              ScaleButton(
-                text: "- $value",
-                darkTheme: notifier.darkTheme,
-                func: downScale,
-                width: 50,
-                value: value,
-              ),
-              SizedBox(width: 5),
-            ],
-          ),
-        Container(
-          width: 100,
-          alignment: Alignment.center,
-          padding: EdgeInsets.all(10),
-          child: Text(
-            "Zoom: ${scale.toStringAsFixed(2)}",
-            style: TextStyle(
-              color: textColorMatrixCreation(
-                notifier.darkTheme,
-              ),
-            ),
-          ),
-        ),
-        for (double value in [0.01, 0.1, 1])
-          Row(
-            children: [
-              ScaleButton(
-                text: "+ $value",
-                darkTheme: notifier.darkTheme,
-                func: upScale,
-                width: 50,
-                value: value,
-              ),
-              SizedBox(width: 5),
-            ],
-          ),
-      ],
-    );
-  }
-
-  upScale(double scaleValue) {
-    setState(() {
-      scale += scaleValue;
-    });
-  }
-
-  downScale(double scaleValue) {
-    if (scale - scaleValue > 0) {
-      setState(() {
-        scale -= scaleValue;
-      });
-    }
   }
 
   setVideoPath(String video) {

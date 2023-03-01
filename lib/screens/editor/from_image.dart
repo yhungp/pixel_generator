@@ -522,6 +522,7 @@ class _From_ImageState extends State<From_Image> {
                                                           showSpaceBetweenMatrix: false,
                                                           image: imageFromFile,
                                                           imagePeeked: imagePeeked,
+                                                          darkTheme: notifier.darkTheme,
                                                         ),
                                                       ),
                                               ),
