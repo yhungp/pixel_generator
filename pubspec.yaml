@@ -41,10 +41,12 @@ dependencies:
   image: ^3.2.2
   file_picker: ^4.3.0
   ffmpeg_kit_flutter: ^5.1.0
+  # ffmpeg:
   flutter_colorpicker: ^1.0.3
   bitmap: ^0.1.0
   video_thumbnail: ^0.5.3
   dio: ^5.0.0
+  # ffmpeg_cli: ^0.1.0
   
   # opencv_4: ^1.0.0
   # flutter_vlc_player: ^7.0.0
@@ -85,7 +87,7 @@ flutter:
     - assets/white-moon.png
     - assets/dropper.png
     - assets/server.py
-    - assets/test.py
+    - assets/generator.py
 
   fonts:
     - family: SourceCodeProRegular
