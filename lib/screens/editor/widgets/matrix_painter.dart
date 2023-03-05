@@ -79,17 +79,43 @@ class MatrixPainter extends CustomPainter {
       }
 
       canvas.drawPath(path, Paint()..color = blueTheme(darkTheme));
+
+      double w = (columns * matrixColumns - 1) * 13 * scale + 10 * scale;
+      double h = (rows * matrixRows - 1) * 13 * scale + 10 * scale;
+
+      for (int i = 1; i < rows * matrixRows; i++) {
+        double dy = i * 13 * scale + posy - 3 * scale;
+        var rect = Offset(posx, dy) & Size(w, 3 * scale);
+
+        Paint paint = Paint();
+        paint.color = Colors.grey;
+
+        canvas.drawRect(rect, paint);
+      }
+
+      for (int i = 1; i < columns * matrixColumns; i++) {
+        double dx = i * 13 * scale + posx - 3 * scale;
+
+        var rect = Offset(dx, posy) & Size(3 * scale, h);
+
+        Paint paint = Paint();
+        paint.color = Colors.grey;
+
+        canvas.drawRect(rect, paint);
+      }
+
       return;
     }
 
     if (imagePeeked && image != null) {
       canvas.drawImage(
-          image!,
-          Offset(
-            (size.width - image!.width) / 2,
-            (size.height - image!.height) / 2,
-          ),
-          ui.Paint());
+        image!,
+        Offset(
+          (size.width - image!.width) / 2,
+          (size.height - image!.height) / 2,
+        ),
+        ui.Paint(),
+      );
     }
 
     if (showmatrix) {

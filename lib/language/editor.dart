@@ -94,3 +94,57 @@ maxAdcValueLabel(int language) {
       return "Máximo valor del ADC";
   }
 }
+
+fromVideoFpsSelectorLable(int language) {
+  switch (language) {
+    case 0:
+      return "FPS to show:";
+    case 1:
+      return "FPS a mostrar:";
+  }
+}
+
+ouputMatrixInformationTable(int language) {
+  switch (language) {
+    case 0:
+      return "Matrix information";
+    case 1:
+      return "Información de la matriz";
+  }
+}
+
+ouputVideoInformationTable(int language) {
+  switch (language) {
+    case 0:
+      return "Video information";
+    case 1:
+      return "Información del video";
+  }
+}
+
+ouputStartAndEnd(int language) {
+  switch (language) {
+    case 0:
+      return "Start and end";
+    case 1:
+      return "Inicio y fin";
+  }
+}
+
+ouputGenerateFramesButton(int language) {
+  switch (language) {
+    case 0:
+      return "Generate frames";
+    case 1:
+      return "Generar frames";
+  }
+}
+
+ouputCreateCodeButton(int language) {
+  switch (language) {
+    case 0:
+      return "Create code";
+    case 1:
+      return "Crear código";
+  }
+}

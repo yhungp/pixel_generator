@@ -11,7 +11,6 @@ import 'package:calculator/main.dart';
 import 'package:calculator/screens/editor/api_calls/api_calls.dart';
 import 'package:calculator/screens/editor/widgets/button.dart';
 import 'package:calculator/screens/editor/widgets/matrix_painter.dart';
-import 'package:calculator/screens/editor/widgets/scale_button.dart';
 import 'package:calculator/screens/editor/widgets/show_hide_code.dart';
 import 'package:calculator/screens/editor/widgets/video_control/video_control.dart';
 import 'package:calculator/screens/editor/widgets/video_output/video_output.dart';
@@ -22,8 +21,6 @@ import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'dart:ui' as ui;
-import 'package:path_provider/path_provider.dart';
-import 'package:image/image.dart' as image;
 import 'package:process_run/shell.dart';
 
 class From_Video extends StatefulWidget {
@@ -265,6 +262,14 @@ class _From_VideoState extends State<From_Video> {
                             columns: columns,
                             matrixRows: matrixRows,
                             matrixColumns: matrixColumns,
+                            scale: widget.scale,
+                            posx: posxMatrixPainter,
+                            posy: posyMatrixPainter,
+                            size: oldSize,
+                            video: filePeeked,
+                            posxStart: posxStart,
+                            posxEnd: 1 - posxEnd,
+                            duration: player.position.duration!.inMilliseconds,
                           )
                         : showCode
                             ? ShowHideCodeWidget(
@@ -397,20 +402,21 @@ class _From_VideoState extends State<From_Video> {
                                   oldSize.height,
                                 ),
                                 painter: MatrixPainter(
-                                    posxMatrixPainter,
-                                    posyMatrixPainter,
-                                    false,
-                                    columns,
-                                    matrixColumns,
-                                    matrixRows,
-                                    rows,
-                                    matrixScaleTouched,
-                                    currentColor,
-                                    colors,
-                                    widget.scale,
-                                    showSpaceBetweenMatrix: false,
-                                    showOnlyPixels: showOnlyPixels,
-                                    darkTheme: notifier.darkTheme),
+                                  posxMatrixPainter,
+                                  posyMatrixPainter,
+                                  false,
+                                  columns,
+                                  matrixColumns,
+                                  matrixRows,
+                                  rows,
+                                  matrixScaleTouched,
+                                  currentColor,
+                                  colors,
+                                  widget.scale,
+                                  showSpaceBetweenMatrix: false,
+                                  showOnlyPixels: showOnlyPixels,
+                                  darkTheme: notifier.darkTheme,
+                                ),
                               ),
                       ),
                     ),

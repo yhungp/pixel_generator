@@ -1,7 +1,5 @@
-import json
 from optparse import OptionParser
-import cv2, time, os
-import numpy as np
+import cv2, os, sys
 
 parser = OptionParser()
  
@@ -56,7 +54,13 @@ parser.add_option("-p", "--fps",
 cam = cv2.VideoCapture(options.filename)
 
 video_fps = cam.get(cv2.CAP_PROP_FPS)
-step = int(int(options.fps) / video_fps * 1000)
+
+rate = 1 / video_fps
+
+if video_fps > int(options.fps):
+    rate = 1 / float(options.fps)
+
+step = int(rate * 1000)
 
 base_name = options.base_name
 temp_dir = options.temp

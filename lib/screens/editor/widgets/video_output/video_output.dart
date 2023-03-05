@@ -3,12 +3,16 @@
 import 'dart:io';
 import 'dart:typed_data';
 
+import 'package:calculator/language/editor.dart';
 import 'package:calculator/main.dart';
 import 'package:calculator/styles/styles.dart';
+import 'package:calculator/utils/epoch_to_time.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:process_run/shell.dart';
 import 'package:path_provider/path_provider.dart';
 import 'dart:math';
+import 'dart:ui' as ui;
 
 class VideoOutputConfiguration extends StatefulWidget {
   SettingsScreenNotifier notifier;
@@ -17,6 +21,17 @@ class VideoOutputConfiguration extends StatefulWidget {
   int columns;
   int matrixRows;
   int matrixColumns;
+  int duration;
+
+  double scale;
+  double posx;
+  double posy;
+  double posxStart;
+  double posxEnd;
+
+  String video;
+
+  Size size;
 
   VideoOutputConfiguration({
     Key? key,
@@ -26,6 +41,14 @@ class VideoOutputConfiguration extends StatefulWidget {
     required this.rows,
     required this.notifier,
     required this.values,
+    required this.video,
+    required this.scale,
+    required this.posx,
+    required this.posy,
+    required this.size,
+    required this.posxStart,
+    required this.posxEnd,
+    required this.duration,
   }) : super(key: key);
 
   @override
@@ -40,6 +63,20 @@ class _VideoOutputConfigurationState extends State<VideoOutputConfiguration> {
   late int matrixRows;
   late int matrixColumns;
 
+  late double scale;
+  late double posx;
+  late double posy;
+
+  late Size size;
+
+  double fps = 0;
+
+  int height = 0;
+  int width = 0;
+  int startMillis = 0;
+  int endMillis = 0;
+
+  String duration = "";
   String temp = "";
 
   bool generating = true;
@@ -48,16 +85,25 @@ class _VideoOutputConfigurationState extends State<VideoOutputConfiguration> {
 
   @override
   void initState() {
+    // initialize variables
     notifier = widget.notifier;
     values = widget.values;
     rows = widget.rows;
     columns = widget.columns;
     matrixRows = widget.matrixRows;
     matrixColumns = widget.matrixColumns;
+    scale = widget.scale;
+    posx = widget.posx;
+    posy = widget.posy;
+    size = widget.size;
+    startMillis = (widget.posxStart * widget.duration).toInt();
+    endMillis = (widget.posxEnd * widget.duration).toInt();
+    fpsController.text = "5";
 
     temp = "temp_${getRandomString(15)}";
 
-    generateVideoFrames();
+    // generateVideoFrames();
+    getVideoInfo();
 
     super.initState();
   }
@@ -83,20 +129,64 @@ class _VideoOutputConfigurationState extends State<VideoOutputConfiguration> {
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               Row(
+                crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  informationTable(matrixData()),
+                  informationTable(matrixData(), ouputMatrixInformationTable(notifier.language)),
+                  informationTable(videoInfo(), ouputVideoInformationTable(notifier.language)),
+                  informationTable(startEnd(), ouputStartAndEnd(notifier.language)),
                 ],
               ),
+              fpsTextField(),
               generating
                   ? Expanded(
                       child: Center(
-                        child: Text(
-                          "Generating",
+                        child: TextButton(
+                          onPressed: () => generateVideoFrames(),
+                          child: Container(
+                            padding: EdgeInsets.all(10),
+                            decoration: BoxDecoration(
+                              color: Colors.white,
+                              borderRadius: BorderRadius.all(Radius.circular(5)),
+                            ),
+                            child: Text(
+                              ouputGenerateFramesButton(notifier.language),
+                              style: TextStyle(color: Colors.grey),
+                            ),
+                          ),
                         ),
                       ),
                     )
                   : Expanded(
-                      child: listOfImages(),
+                      child: Padding(
+                        padding: EdgeInsets.all(10),
+                        child: Column(
+                          children: [
+                            Expanded(
+                              child: listOfImages(),
+                            ),
+                            SizedBox(height: 10),
+                            Row(
+                              mainAxisAlignment: MainAxisAlignment.end,
+                              children: [
+                                GestureDetector(
+                                  onTap: () => {},
+                                  child: Container(
+                                    padding: EdgeInsets.all(10),
+                                    decoration: BoxDecoration(
+                                      color: Colors.white,
+                                      borderRadius: BorderRadius.all(Radius.circular(5)),
+                                    ),
+                                    child: Text(
+                                      ouputCreateCodeButton(notifier.language),
+                                      style: TextStyle(color: Colors.grey),
+                                    ),
+                                  ),
+                                ),
+                              ],
+                            )
+                          ],
+                        ),
+                      ),
                     ),
             ],
           ),
@@ -106,19 +196,67 @@ class _VideoOutputConfigurationState extends State<VideoOutputConfiguration> {
   }
 
   listOfImages() {
-    return ListView.builder(
-      shrinkWrap: true,
+    return ListView(
       scrollDirection: Axis.horizontal,
-      itemCount: bytesList.length,
-      itemBuilder: (BuildContext context, int index) => Wrap(
-        children: [
-          SizedBox(
-            height: 110,
-            width: 110,
-            child: Card(
-              child: Center(
-                child: Image.memory(bytesList[index]),
+      children: [
+        Row(
+          children: [
+            for (var elem in bytesList)
+              Container(
+                height: 110,
+                width: 110,
+                padding: EdgeInsets.all(2),
+                margin: EdgeInsets.only(right: 10),
+                decoration: BoxDecoration(color: Colors.white, borderRadius: BorderRadius.all(Radius.circular(5))),
+                child: FittedBox(
+                  fit: width >= height ? BoxFit.fitWidth : BoxFit.fitHeight,
+                  child: Image.memory(elem),
+                ),
               ),
+          ],
+        )
+      ],
+    );
+  }
+
+  TextEditingController fpsController = TextEditingController();
+  fpsTextField() {
+    return Padding(
+      padding: const EdgeInsets.all(10),
+      child: Row(
+        children: [
+          Text(
+            fromVideoFpsSelectorLable(notifier.language),
+            style: TextStyle(
+              color: Colors.white,
+            ),
+          ),
+          Container(
+            width: 50,
+            height: 50,
+            padding: EdgeInsets.all(5),
+            margin: EdgeInsets.only(left: 10),
+            decoration: BoxDecoration(color: Colors.white, borderRadius: BorderRadius.all(Radius.circular(5))),
+            child: TextField(
+              controller: fpsController,
+              textAlign: TextAlign.end,
+              keyboardType: TextInputType.number,
+              inputFormatters: <TextInputFormatter>[FilteringTextInputFormatter.digitsOnly],
+              onChanged: (value) {
+                if (value.isEmpty || value == "0") {
+                  setState(() {
+                    fpsController.text = "5";
+                  });
+                  return;
+                }
+                int val = int.tryParse(value) ?? 5;
+                if (val > fps) {
+                  setState(() {
+                    fpsController.text = fps.toInt().toString();
+                  });
+                  return;
+                }
+              },
             ),
           ),
         ],
@@ -132,16 +270,33 @@ class _VideoOutputConfigurationState extends State<VideoOutputConfiguration> {
 
     bytesList.clear();
 
+    Directory d = Directory("$tempPath/pixel_generator/$temp/");
+
+    while (!d.existsSync()) {
+      d.createSync(recursive: true);
+    }
+
+    var w = columns * matrixColumns;
+    var h = rows * matrixRows;
+
+    Map sizeRescaled = rescaledDimPos();
+    int x = sizeRescaled["x"];
+    int y = sizeRescaled["y"];
+    int mw = sizeRescaled["w"];
+    int mh = sizeRescaled["h"];
+
+    int fps = int.tryParse(fpsController.text) ?? 5;
+
     List args = [
-      "-t /home/yanhung/$temp/",
+      "-t $tempPath/pixel_generator/$temp/",
       "-n base",
-      "-f /media/yanhung/Elements/twitter_20220619_184851.mp4",
-      "-c 200x200",
-      "-s 180x180",
-      "-r 96x96",
-      "-a 1000",
-      "-e 5000",
-      "-p 5",
+      "-f ${widget.video}",
+      "-c ${x}x$y",
+      "-s ${mw}x$mh",
+      "-r ${w}x$h",
+      "-a $startMillis",
+      "-e $endMillis",
+      "-p $fps",
     ];
 
     var cmd = "python3 assets/generator.py ${args.join(" ")}";
@@ -149,7 +304,7 @@ class _VideoOutputConfigurationState extends State<VideoOutputConfiguration> {
     var shell = Shell();
     await shell.run(cmd);
 
-    List dirList = Directory("/home/yanhung/$temp/").listSync();
+    List dirList = Directory("$tempPath/pixel_generator/$temp/").listSync();
 
     for (var file in dirList) {
       File f = file;
@@ -162,9 +317,52 @@ class _VideoOutputConfigurationState extends State<VideoOutputConfiguration> {
     setState(() {
       generating = false;
     });
+
+    d.deleteSync(recursive: true);
   }
 
-  Widget informationTable(List values) {
+  rescaledDimPos() {
+    double w = (columns * matrixColumns - 1) * 13 * scale + 10 * scale;
+    double h = (rows * matrixRows - 1) * 13 * scale + 10 * scale;
+
+    if (size.height <= size.width) {
+      double showedH = size.height;
+      double showedW = size.height / height * width;
+
+      double x = (posx - (size.width - showedW) / 2) / showedW * width;
+      double y = showedH / height * posy;
+
+      try {
+        return {
+          "x": (x != double.infinity && x != double.nan) ? x.toInt() : 0,
+          "y": (y != double.infinity && y != double.nan) ? y.toInt() : 0,
+          "w": (w != double.infinity && w != double.nan) ? w.toInt() : 0,
+          "h": (h != double.infinity && h != double.nan) ? h.toInt() : 0,
+        };
+      } catch (e) {
+        return {"x": 0, "y": 0, "w": 0, "h": 0};
+      }
+    }
+
+    double showedW = size.width;
+    double showedH = size.width / width * height;
+
+    double x = showedW / width * posx;
+    double y = (posy - (size.height - showedH) / 2) / showedH * height;
+
+    try {
+      return {
+        "x": (x != double.infinity && x != double.nan) ? x.toInt() : 0,
+        "y": (y != double.infinity && y != double.nan) ? y.toInt() : 0,
+        "w": (w != double.infinity && w != double.nan) ? w.toInt() : 0,
+        "h": (h != double.infinity && h != double.nan) ? h.toInt() : 0,
+      };
+    } catch (e) {
+      return {"x": 0, "y": 0, "w": 0, "h": 0};
+    }
+  }
+
+  Widget informationTable(List values, String tableName) {
     return Padding(
       padding: EdgeInsets.all(10),
       child: Column(
@@ -176,37 +374,58 @@ class _VideoOutputConfigurationState extends State<VideoOutputConfiguration> {
               borderRadius: BorderRadius.all(Radius.circular(5)),
               border: Border.all(width: 2, color: Colors.black),
             ),
-            child: Row(
-              mainAxisSize: MainAxisSize.min,
+            child: Column(
               children: [
-                Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    for (int i = 0; i < values.length; i++)
-                      Column(
-                        children: [
-                          Text(values[i][0]),
-                          i != values.length - 1 ? Divider() : Container(),
-                        ],
-                      ),
-                  ],
-                ),
-                SizedBox(
-                  height: values.length * 30,
-                  child: VerticalDivider(
-                    color: Colors.black,
+                Text(
+                  tableName,
+                  style: TextStyle(
+                    color: Colors.white,
                   ),
                 ),
-                Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
+                SizedBox(height: 10),
+                Row(
+                  mainAxisSize: MainAxisSize.min,
                   children: [
-                    for (int i = 0; i < values.length; i++)
-                      Column(
-                        children: [
-                          Text(values[i][1]),
-                          i != values.length - 1 ? Divider() : Container(),
-                        ],
+                    Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        for (int i = 0; i < values.length; i++)
+                          Column(
+                            children: [
+                              Text(
+                                values[i][0],
+                                style: TextStyle(
+                                  color: Colors.white,
+                                ),
+                              ),
+                              i != values.length - 1 ? Divider() : Container(),
+                            ],
+                          ),
+                      ],
+                    ),
+                    SizedBox(
+                      height: values.length * 30,
+                      child: VerticalDivider(
+                        color: Colors.white,
                       ),
+                    ),
+                    Column(
+                      crossAxisAlignment: CrossAxisAlignment.end,
+                      children: [
+                        for (int i = 0; i < values.length; i++)
+                          Column(
+                            children: [
+                              Text(
+                                values[i][1],
+                                style: TextStyle(
+                                  color: Colors.white,
+                                ),
+                              ),
+                              i != values.length - 1 ? Divider() : Container(),
+                            ],
+                          ),
+                      ],
+                    ),
                   ],
                 ),
               ],
@@ -224,5 +443,53 @@ class _VideoOutputConfigurationState extends State<VideoOutputConfiguration> {
       ["Matrix columns", matrixColumns.toString()],
       ["Matrix rows", matrixRows.toString()],
     ];
+  }
+
+  List<List<String>> videoInfo() {
+    return [
+      ["Width", width.toString()],
+      ["Height", height.toString()],
+      ["FPS", fps.toStringAsFixed(2)],
+      ["Duration", duration],
+    ];
+  }
+
+  List<List<String>> startEnd() {
+    return [
+      ["Start", epochToTimeText(startMillis)],
+      ["End", epochToTimeText(endMillis)],
+    ];
+  }
+
+  getVideoInfo() async {
+    var shell = Shell();
+
+    List args = [
+      "-f /media/yanhung/Elements/twitter_20220619_184851.mp4",
+      "-p fps",
+    ];
+
+    var out = await shell.run("python3 assets/get_video_info.py ${args.join(" ")}");
+    fps = double.tryParse(out.outText) ?? 0;
+
+    args = [
+      "-f /media/yanhung/Elements/twitter_20220619_184851.mp4",
+      "-p size",
+    ];
+
+    out = await shell.run("python3 assets/get_video_info.py ${args.join(" ")}");
+    String size = out.outText;
+    width = int.tryParse(size.split("x")[0].toString()) ?? 0;
+    height = int.tryParse(size.split("x")[1].toString()) ?? 0;
+
+    args = [
+      "-f /media/yanhung/Elements/twitter_20220619_184851.mp4",
+      "-p duration",
+    ];
+
+    out = await shell.run("python3 assets/get_video_info.py ${args.join(" ")}");
+    duration = out.outText;
+
+    setState(() {});
   }
 }
