@@ -1,4 +1,4 @@
-// ignore_for_file: prefer_const_constructors, unused_local_variable, prefer_const_literals_to_create_immutables, must_be_immutable
+// ignore_for_file: prefer_const_constructors, unused_local_variable, prefer_const_literals_to_create_immutables, must_be_immutable, use_build_context_synchronously
 
 import 'package:calculator/language/editor.dart';
 import 'package:calculator/main.dart';
@@ -90,6 +90,14 @@ class _ShowHideCodeWidgetState extends State<ShowHideCodeWidget> {
                   label: copyToClipBoard(notifier.language),
                   func: () async {
                     await Clipboard.setData(ClipboardData(text: outText));
+
+                    final scaffold = ScaffoldMessenger.of(context);
+                    scaffold.showSnackBar(
+                      SnackBar(
+                        content: Text(copiedToClipBoard(notifier.language)),
+                        duration: Duration(seconds: 1),
+                      ),
+                    );
                     // copied successfully
                   },
                   darkTheme: !notifier.darkTheme,
