@@ -5,14 +5,16 @@ import 'dart:typed_data';
 
 import 'package:calculator/language/editor.dart';
 import 'package:calculator/main.dart';
+import 'package:calculator/screens/editor/widgets/video_output/code_from_video.dart';
+import 'package:calculator/screens/editor/widgets/video_output/generate_code_from_frames.dart';
 import 'package:calculator/styles/styles.dart';
 import 'package:calculator/utils/epoch_to_time.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:nil/nil.dart';
 import 'package:process_run/shell.dart';
 import 'package:path_provider/path_provider.dart';
 import 'dart:math';
-import 'dart:ui' as ui;
 
 class VideoOutputConfiguration extends StatefulWidget {
   SettingsScreenNotifier notifier;
@@ -80,8 +82,10 @@ class _VideoOutputConfigurationState extends State<VideoOutputConfiguration> {
   String temp = "";
 
   bool generating = true;
+  bool showCode = false;
 
   List<Uint8List> bytesList = [];
+  List<List<String>> pixels = [];
 
   @override
   void initState() {
@@ -124,89 +128,123 @@ class _VideoOutputConfigurationState extends State<VideoOutputConfiguration> {
           borderRadius: BorderRadius.all(Radius.circular(5)),
           color: blueTheme(notifier.darkTheme),
         ),
-        child: Expanded(
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Row(
+        child: showCode
+            ? CodeFromVideo(
+                columns: columns,
+                matrixColumns: matrixColumns,
+                matrixRows: matrixRows,
+                notifier: notifier,
+                rows: rows,
+                values: pixels,
+                fps: double.tryParse(fpsController.text) ?? 5,
+                showHideCode: showHideCode,
+              )
+            : Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  informationTable(matrixData(), ouputMatrixInformationTable(notifier.language)),
-                  informationTable(videoInfo(), ouputVideoInformationTable(notifier.language)),
-                  informationTable(startEnd(), ouputStartAndEnd(notifier.language)),
-                ],
-              ),
-              fpsTextField(),
-              generating
-                  ? Expanded(
-                      child: Center(
-                        child: TextButton(
-                          onPressed: () => generateVideoFrames(),
-                          child: Container(
-                            padding: EdgeInsets.all(10),
-                            decoration: BoxDecoration(
-                              color: Colors.white,
-                              borderRadius: BorderRadius.all(Radius.circular(5)),
+                  Row(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      informationTable(matrixData(), ouputMatrixInformationTable(notifier.language)),
+                      informationTable(videoInfo(), ouputVideoInformationTable(notifier.language)),
+                      informationTable(startEnd(), ouputStartAndEnd(notifier.language)),
+                    ],
+                  ),
+                  fpsTextField(),
+                  Expanded(
+                    child: generating
+                        ? Center(
+                            child: TextButton(
+                              onPressed: () => generateVideoFrames(),
+                              child: Container(
+                                padding: EdgeInsets.all(10),
+                                decoration: BoxDecoration(
+                                  color: Colors.white,
+                                  borderRadius: BorderRadius.all(Radius.circular(5)),
+                                ),
+                                child: Text(
+                                  ouputGenerateFramesButton(notifier.language),
+                                  style: TextStyle(color: Colors.grey),
+                                ),
+                              ),
                             ),
-                            child: Text(
-                              ouputGenerateFramesButton(notifier.language),
-                              style: TextStyle(color: Colors.grey),
+                          )
+                        : Padding(
+                            padding: EdgeInsets.all(10),
+                            child: Expanded(
+                              child: Column(
+                                children: [
+                                  Expanded(
+                                    child: listOfImages(),
+                                  ),
+                                  SizedBox(height: 10),
+                                  Row(
+                                    mainAxisAlignment: MainAxisAlignment.end,
+                                    children: [
+                                      GestureDetector(
+                                        onTap: () => {
+                                          setState(
+                                            () {
+                                              pixels = generateCodeFromFrames(
+                                                notifier,
+                                                bytesList,
+                                                rows,
+                                                columns,
+                                                matrixColumns,
+                                                matrixRows,
+                                              );
+
+                                              showCode = true;
+                                            },
+                                          )
+                                        },
+                                        child: Container(
+                                          padding: EdgeInsets.all(10),
+                                          decoration: BoxDecoration(
+                                            color: Colors.white,
+                                            borderRadius: BorderRadius.all(Radius.circular(5)),
+                                          ),
+                                          child: Text(
+                                            ouputCreateCodeButton(notifier.language),
+                                            style: TextStyle(color: Colors.grey),
+                                          ),
+                                        ),
+                                      ),
+                                    ],
+                                  )
+                                ],
+                              ),
                             ),
                           ),
-                        ),
-                      ),
-                    )
-                  : Expanded(
-                      child: Padding(
-                        padding: EdgeInsets.all(10),
-                        child: Column(
-                          children: [
-                            Expanded(
-                              child: listOfImages(),
-                            ),
-                            SizedBox(height: 10),
-                            Row(
-                              mainAxisAlignment: MainAxisAlignment.end,
-                              children: [
-                                GestureDetector(
-                                  onTap: () => {},
-                                  child: Container(
-                                    padding: EdgeInsets.all(10),
-                                    decoration: BoxDecoration(
-                                      color: Colors.white,
-                                      borderRadius: BorderRadius.all(Radius.circular(5)),
-                                    ),
-                                    child: Text(
-                                      ouputCreateCodeButton(notifier.language),
-                                      style: TextStyle(color: Colors.grey),
-                                    ),
-                                  ),
-                                ),
-                              ],
-                            )
-                          ],
-                        ),
-                      ),
-                    ),
-            ],
-          ),
-        ),
+                  ),
+                ],
+              ),
       ),
     );
   }
 
+  showHideCode() {
+    setState(() {
+      showCode = !showCode;
+    });
+  }
+
   listOfImages() {
-    return ListView(
-      scrollDirection: Axis.horizontal,
-      children: [
-        Row(
+    return ListView.builder(
+      itemCount: 1,
+      // scrollDirection: Axis.horizontal,
+      addAutomaticKeepAlives: false,
+      addRepaintBoundaries: false,
+      itemBuilder: (context, index) {
+        return Wrap(
+          alignment: WrapAlignment.center,
           children: [
             for (var elem in bytesList)
               Container(
                 height: 110,
                 width: 110,
                 padding: EdgeInsets.all(2),
-                margin: EdgeInsets.only(right: 10),
+                margin: EdgeInsets.fromLTRB(0, 0, 10, 10),
                 decoration: BoxDecoration(color: Colors.white, borderRadius: BorderRadius.all(Radius.circular(5))),
                 child: FittedBox(
                   fit: width >= height ? BoxFit.fitWidth : BoxFit.fitHeight,
@@ -214,8 +252,8 @@ class _VideoOutputConfigurationState extends State<VideoOutputConfiguration> {
                 ),
               ),
           ],
-        )
-      ],
+        );
+      },
     );
   }
 
@@ -462,34 +500,36 @@ class _VideoOutputConfigurationState extends State<VideoOutputConfiguration> {
   }
 
   getVideoInfo() async {
-    var shell = Shell();
+    try {
+      var shell = Shell();
 
-    List args = [
-      "-f /media/yanhung/Elements/twitter_20220619_184851.mp4",
-      "-p fps",
-    ];
+      List args = [
+        "-f ${widget.video}",
+        "-p fps",
+      ];
 
-    var out = await shell.run("python3 assets/get_video_info.py ${args.join(" ")}");
-    fps = double.tryParse(out.outText) ?? 0;
+      var out = await shell.run("python3 assets/get_video_info.py ${args.join(" ")}");
+      fps = double.tryParse(out.outText) ?? 0;
 
-    args = [
-      "-f /media/yanhung/Elements/twitter_20220619_184851.mp4",
-      "-p size",
-    ];
+      args = [
+        "-f ${widget.video}",
+        "-p size",
+      ];
 
-    out = await shell.run("python3 assets/get_video_info.py ${args.join(" ")}");
-    String size = out.outText;
-    width = int.tryParse(size.split("x")[0].toString()) ?? 0;
-    height = int.tryParse(size.split("x")[1].toString()) ?? 0;
+      out = await shell.run("python3 assets/get_video_info.py ${args.join(" ")}");
+      String size = out.outText;
+      width = int.tryParse(size.split("x")[0].toString()) ?? 0;
+      height = int.tryParse(size.split("x")[1].toString()) ?? 0;
 
-    args = [
-      "-f /media/yanhung/Elements/twitter_20220619_184851.mp4",
-      "-p duration",
-    ];
+      args = [
+        "-f ${widget.video}",
+        "-p duration",
+      ];
 
-    out = await shell.run("python3 assets/get_video_info.py ${args.join(" ")}");
-    duration = out.outText;
+      out = await shell.run("python3 assets/get_video_info.py ${args.join(" ")}");
+      duration = out.outText;
 
-    setState(() {});
+      setState(() {});
+    } catch (_) {}
   }
 }

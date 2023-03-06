@@ -41,6 +41,15 @@ generateCode(int language) {
   }
 }
 
+backToVideo(int language) {
+  switch (language) {
+    case 0:
+      return "Back to video";
+    case 1:
+      return "Volver al video";
+  }
+}
+
 generationProcess(int language, bool sucess) {
   switch (language) {
     case 0:
@@ -65,6 +74,15 @@ copyToClipBoard(int language) {
       return "Copy to clipboard";
     case 1:
       return "Copiar al portapapeles";
+  }
+}
+
+copiedToClipBoard(int language) {
+  switch (language) {
+    case 0:
+      return "Copied to clipboard";
+    case 1:
+      return "Copiado al portapapeles";
   }
 }
 

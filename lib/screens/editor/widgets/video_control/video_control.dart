@@ -6,6 +6,7 @@ import 'package:calculator/styles/styles.dart';
 import 'package:calculator/utils/epoch_to_time.dart';
 import 'package:dart_vlc/dart_vlc.dart';
 import 'package:flutter/material.dart';
+import 'package:nil/nil.dart';
 
 class VideoControlWidget extends StatefulWidget {
   SettingsScreenNotifier notifier;
@@ -13,6 +14,7 @@ class VideoControlWidget extends StatefulWidget {
   bool playPause;
   Player player;
   double width;
+  double pos;
   Function setPosStart;
   Function setPosEnd;
 
@@ -23,6 +25,7 @@ class VideoControlWidget extends StatefulWidget {
     required this.playPauseVideo,
     required this.player,
     required this.width,
+    required this.pos,
     required this.setPosStart,
     required this.setPosEnd,
   }) : super(key: key);
@@ -60,52 +63,29 @@ class _VideoControlWidgetState extends State<VideoControlWidget> {
     super.initState();
   }
 
-  @override
-  void didChangeDependencies() async {
-    super.didChangeDependencies();
-    player.currentStream.listen((current) {
-      setState(() => current = current);
-    });
+  // @override
+  // void didChangeDependencies() {
+  //   player.positionStream.listen(
+  //     (position) async {
+  //       playerPos = position.position!.inMilliseconds / position.duration!.inMilliseconds;
 
-    player.positionStream.listen(
-      (position) async {
-        playerPos = position.position!.inMilliseconds / position.duration!.inMilliseconds;
+  //       if (position.position!.inMilliseconds / position.duration!.inMilliseconds >= 1 - posxEnd) {
+  //         playerPos = 1 - posxEnd - 1 / width;
+  //         playerPos = playerPos < 0
+  //             ? 0
+  //             : playerPos > 1
+  //                 ? 1
+  //                 : playerPos;
+  //         player.pause();
+  //         playPause = false;
+  //       }
 
-        if (position.position!.inMilliseconds / position.duration!.inMilliseconds >= 1 - posxEnd) {
-          playerPos = 1 - posxEnd - 1 / width;
-          playerPos = playerPos < 0
-              ? 0
-              : playerPos > 1
-                  ? 1
-                  : playerPos;
-          player.pause();
-          playPause = false;
-        }
+  //       setState(() {});
+  //     },
+  //   );
 
-        setState(() {});
-      },
-    );
-
-    player.playbackStream.listen((playback) {
-      setState(() {
-        playPause = playback.isPlaying;
-
-        if (!playPause && picked) {
-          widget.player.play();
-          player.play();
-        }
-      });
-    });
-
-    player.errorStream.listen((event) {
-      setState(() {});
-    });
-    // player?.generateStream?.listen((general) {
-    //   setState(() => general = general);
-    // });
-    // devices = await Devices.all;
-    // setState(() {});
-  }
+  //   super.didChangeDependencies();
+  // }
 
   @override
   Widget build(BuildContext context) {
@@ -176,7 +156,7 @@ class _VideoControlWidgetState extends State<VideoControlWidget> {
                     ),
                   ),
                   Positioned(
-                    left: !picked ? playerPos * (width - 20) + 4 : 0,
+                    left: leftPosPlayerProgress(),
                     top: 0,
                     child: Container(
                       width: !picked ? 3 : 0,
@@ -203,72 +183,14 @@ class _VideoControlWidgetState extends State<VideoControlWidget> {
                       ),
                     ),
                   ),
+
                   // start limit
-                  Positioned(
-                    left: 0,
-                    top: 5,
-                    child: Container(
-                      width: posxStart * (width - 10),
-                      height: 5,
-                      margin: EdgeInsets.symmetric(horizontal: 5),
-                      decoration: BoxDecoration(
-                        color: blueTheme(!notifier.darkTheme),
-                        borderRadius: BorderRadius.all(Radius.circular(5)),
-                      ),
-                    ),
-                  ),
-                  Positioned(
-                    left: posxStart * (width - 20),
-                    top: 2.5,
-                    child: Tooltip(
-                      message: getMillisToText(selected: 1),
-                      verticalOffset: -35,
-                      child: Container(
-                        width: 10,
-                        height: 10,
-                        margin: EdgeInsets.symmetric(horizontal: 5),
-                        decoration: BoxDecoration(
-                          color: blueTheme(!notifier.darkTheme),
-                          borderRadius: BorderRadius.all(Radius.circular(5)),
-                        ),
-                      ),
-                    ),
-                  ),
+                  limitBar(0, posxStart * (width - 10)),
+                  limitSelector(posxStart * (width - 20), 1),
+
                   // end limit
-                  Positioned(
-                    left: (1 - posxEnd) * (width - 10),
-                    top: 5,
-                    child: Row(
-                      children: [
-                        Container(
-                          width: posxEnd * (width - 10),
-                          height: 5,
-                          margin: EdgeInsets.symmetric(horizontal: 5),
-                          decoration: BoxDecoration(
-                            color: blueTheme(!notifier.darkTheme),
-                            borderRadius: BorderRadius.all(Radius.circular(5)),
-                          ),
-                        ),
-                      ],
-                    ),
-                  ),
-                  Positioned(
-                    left: (1 - posxEnd) * (width - 20),
-                    top: 2.5,
-                    child: Tooltip(
-                      message: getMillisToText(selected: 0),
-                      verticalOffset: -35,
-                      child: Container(
-                        width: 10,
-                        height: 10,
-                        margin: EdgeInsets.symmetric(horizontal: 5),
-                        decoration: BoxDecoration(
-                          color: blueTheme(!notifier.darkTheme),
-                          borderRadius: BorderRadius.all(Radius.circular(5)),
-                        ),
-                      ),
-                    ),
-                  ),
+                  limitBar((1 - posxEnd) * (width - 10), posxEnd * (width - 10)),
+                  limitSelector((1 - posxEnd) * (width - 20), 0),
                 ],
               ),
             ),
@@ -339,6 +261,52 @@ class _VideoControlWidgetState extends State<VideoControlWidget> {
           ],
         )
       ],
+    );
+  }
+
+  leftPosPlayerProgress() {
+    var val = widget.playPause ? widget.pos * (width - 20) + 4 : posxStart * (width - 20) + 4;
+
+    return val.isNaN ? 4.0 : val;
+  }
+
+  limitSelector(double left, int sel) {
+    return Positioned(
+      left: left,
+      top: 2.5,
+      child: Tooltip(
+        message: getMillisToText(selected: sel),
+        verticalOffset: -35,
+        child: Container(
+          width: 10,
+          height: 10,
+          margin: EdgeInsets.symmetric(horizontal: 5),
+          decoration: BoxDecoration(
+            color: blueTheme(!notifier.darkTheme),
+            borderRadius: BorderRadius.all(Radius.circular(5)),
+          ),
+        ),
+      ),
+    );
+  }
+
+  limitBar(double left, double w) {
+    return Positioned(
+      left: left,
+      top: 5,
+      child: Row(
+        children: [
+          Container(
+            width: w,
+            height: 5,
+            margin: EdgeInsets.symmetric(horizontal: 5),
+            decoration: BoxDecoration(
+              color: blueTheme(!notifier.darkTheme),
+              borderRadius: BorderRadius.all(Radius.circular(5)),
+            ),
+          ),
+        ],
+      ),
     );
   }
 

@@ -57,13 +57,13 @@ class _From_VideoState extends State<From_Video> {
   int pointScaleTouched = 0;
 
   double scale = 1;
-
   double posxMatrixPainter = 0;
   double posyMatrixPainter = 0;
   double matrixWidth = 0;
   double matrixHeight = 0;
   double posxStart = 0;
   double posxEnd = 0;
+  double playerPos = 0;
 
   Color currentColor = Colors.white;
   Color rgbColor = Colors.red;
@@ -158,12 +158,38 @@ class _From_VideoState extends State<From_Video> {
   }
 
   @override
+  void didChangeDependencies() {
+    player.positionStream.listen(
+      (position) async {
+        playerPos = position.position!.inMilliseconds / position.duration!.inMilliseconds;
+
+        if (position.position!.inMilliseconds / position.duration!.inMilliseconds >= 1 - posxEnd) {
+          playerPos = 1 - posxEnd - 1 / oldSize.width;
+          playerPos = playerPos < 0
+              ? 0
+              : playerPos > 1
+                  ? 1
+                  : playerPos;
+          player.pause();
+          playPause = false;
+        }
+
+        setState(() {});
+      },
+    );
+
+    super.didChangeDependencies();
+  }
+
+  @override
   Widget build(BuildContext context) {
     player.setVolume(0);
     return Consumer<SettingsScreenNotifier>(builder: (context, notifier, child) {
       return Expanded(
         child: Container(
           padding: EdgeInsets.all(5),
+          height: double.infinity,
+          width: double.infinity,
           child: Column(
             children: [
               Padding(
@@ -222,8 +248,6 @@ class _From_VideoState extends State<From_Video> {
                       child: Row(
                         children: [
                           SizedBox(width: 5),
-                          SizedBox(height: 40, child: VerticalDivider(color: Colors.white)),
-                          SizedBox(width: 5),
                           Visibility(
                             visible: imagePeeked && codeGenerated,
                             child: EditorButton(
@@ -232,13 +256,21 @@ class _From_VideoState extends State<From_Video> {
                               darkTheme: notifier.darkTheme,
                             ),
                           ),
+                          SizedBox(height: 40, child: VerticalDivider(color: Colors.white)),
+                          SizedBox(width: 5),
                           SizedBox(width: imagePeeked && codeGenerated ? 10 : 0),
                           Visibility(
                             visible: imagePeeked,
                             child: Row(
                               children: [
                                 EditorButton(
-                                  label: generateCode(notifier.language),
+                                  label: showVideoConfiguration
+                                      ? backToVideo(
+                                          notifier.language,
+                                        )
+                                      : generateCode(
+                                          notifier.language,
+                                        ),
                                   func: () => handleSavePressed(notifier),
                                   darkTheme: notifier.darkTheme,
                                 ),
@@ -318,6 +350,7 @@ class _From_VideoState extends State<From_Video> {
                                           width: oldSize.width,
                                           setPosStart: setPosStart,
                                           setPosEnd: setPosEnd,
+                                          pos: playerPos,
                                         ),
                                       )
                                     ],
@@ -473,6 +506,8 @@ class _From_VideoState extends State<From_Video> {
         player.play();
         return;
       }
+
+      playerPos = posxStart;
       player.pause();
     });
   }
@@ -480,12 +515,14 @@ class _From_VideoState extends State<From_Video> {
   setPosStart(double start) {
     setState(() {
       posxStart = start;
+      playerPos = start;
     });
   }
 
   setPosEnd(double end) {
     setState(() {
       posxEnd = end;
+      playerPos = 1 - end;
     });
   }
 
@@ -529,13 +566,6 @@ class _From_VideoState extends State<From_Video> {
     setState(() {
       showVideoConfiguration = !showVideoConfiguration;
     });
-  }
-
-  getHex(int val) {
-    String out = val.toRadixString(16);
-
-    out = "0" * (2 - out.length) + out;
-    return out;
   }
 
   showAlertDialog(String title, String msg) {

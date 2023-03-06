@@ -12,6 +12,7 @@ import 'package:calculator/screens/editor/widgets/matrix_painter.dart';
 import 'package:calculator/screens/editor/widgets/scale_button.dart';
 import 'package:calculator/screens/editor/widgets/show_hide_code.dart';
 import 'package:calculator/styles/styles.dart';
+import 'package:calculator/utils/get_hex.dart';
 import 'package:file_picker/file_picker.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
@@ -295,13 +296,6 @@ class _From_ImageState extends State<From_Image> {
         codeGenerated = true;
       });
     }
-  }
-
-  getHex(int val) {
-    String out = val.toRadixString(16);
-
-    out = "0" * (2 - out.length) + out;
-    return out;
   }
 
   showAlertDialog(String title, String msg) {
