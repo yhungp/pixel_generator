@@ -58,13 +58,11 @@ class MyApp extends StatelessWidget {
               //   primarySwatch: Colors.blue,
               // ),
               theme: ThemeData(
-                primarySwatch:
-                    notifier.darkTheme ? Colors.blueGrey : Colors.blue,
+                primarySwatch: notifier.darkTheme ? Colors.blueGrey : Colors.blue,
               ),
               themeMode: notifier.darkTheme ? ThemeMode.dark : ThemeMode.light,
               scrollBehavior: MyCustomScrollBehavior(),
-              home: MyHomePage(
-                  title: titles[notifier.currentScreen][notifier.language]),
+              home: MyHomePage(title: titles[notifier.currentScreen][notifier.language]),
               // home: const MyHomePage(title: 'Pixel matrix generator'),
             );
           },
@@ -112,7 +110,30 @@ class _MyHomePageState extends State<MyHomePage> {
 
     return Scaffold(
       appBar: AppBar(
-        title: Text(widget.title),
+        title: Row(
+          children: [
+            Visibility(
+              visible: route != "home",
+              child: Row(
+                children: [
+                  Consumer<SettingsScreenNotifier>(builder: (context, notifier, child) {
+                    return IconButton(
+                      onPressed: () {
+                        setState(() {
+                          route = "home";
+                          notifier.setApplicationScreen(0);
+                        });
+                      },
+                      icon: Icon(Icons.arrow_back),
+                    );
+                  }),
+                  SizedBox(width: 10)
+                ],
+              ),
+            ),
+            Text(widget.title),
+          ],
+        ),
         actions: <Widget>[
           Consumer<SettingsScreenNotifier>(builder: (context, notifier, child) {
             return Switch(

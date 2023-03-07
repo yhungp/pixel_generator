@@ -18,7 +18,7 @@ class GenericButton extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return GestureDetector(
-      onTap: () => func(context),
+      onTap: () => func(),
       child: Container(
         margin: EdgeInsets.only(top: 5),
         padding: EdgeInsets.all(10),

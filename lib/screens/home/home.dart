@@ -65,8 +65,7 @@ class _HomePageState extends State<HomePage> {
 
   @override
   Widget build(BuildContext context) {
-    return Consumer<SettingsScreenNotifier>(
-        builder: (context, notifier, child) {
+    return Consumer<SettingsScreenNotifier>(builder: (context, notifier, child) {
       return Container(
         height: double.infinity,
         width: double.infinity,
@@ -83,9 +82,8 @@ class _HomePageState extends State<HomePage> {
                   Center(
                     child: Container(
                       padding: EdgeInsets.all(10),
-                      decoration: BoxDecoration(
-                          borderRadius: BorderRadius.all(Radius.circular(20)),
-                          color: Colors.grey),
+                      decoration:
+                          BoxDecoration(borderRadius: BorderRadius.all(Radius.circular(20)), color: Colors.grey),
                       child: Text(
                         recentProjects(notifier.language),
                         style: TextStyle(color: Colors.black87),
@@ -172,8 +170,7 @@ class _HomePageState extends State<HomePage> {
                                     children: [
                                       Wrap(
                                         alignment: WrapAlignment.start,
-                                        crossAxisAlignment:
-                                            WrapCrossAlignment.start,
+                                        crossAxisAlignment: WrapCrossAlignment.start,
                                         children: generateListOfRecentCards(),
                                       )
                                     ],
@@ -183,16 +180,16 @@ class _HomePageState extends State<HomePage> {
                                   mainAxisAlignment: MainAxisAlignment.end,
                                   children: [
                                     GenericButton(
-                                        label:
-                                            createNewProject(notifier.language),
-                                        func: newProject,
-                                        darkTheme: notifier.darkTheme),
+                                      label: createNewProject(notifier.language),
+                                      func: newProject,
+                                      darkTheme: notifier.darkTheme,
+                                    ),
                                     SizedBox(width: 10),
                                     GenericButton(
-                                        label: openExistingProject(
-                                            notifier.language),
-                                        func: openProjectFromDialog,
-                                        darkTheme: notifier.darkTheme)
+                                      label: openExistingProject(notifier.language),
+                                      func: () => openProjectFromDialog(context),
+                                      darkTheme: notifier.darkTheme,
+                                    )
                                   ],
                                 )
                               ],
@@ -219,26 +216,20 @@ class _HomePageState extends State<HomePage> {
                         child: Column(
                           children: [
                             Expanded(
-                                child: ![
-                              fileEmpty(notifier.language),
-                              errorLoadingFile(notifier.language)
-                            ].contains(fileContent)
+                                child: ![fileEmpty(notifier.language), errorLoadingFile(notifier.language)]
+                                        .contains(fileContent)
                                     ? ListView(
                                         controller: ScrollController(),
                                         children: [
                                           Text(fileContent,
-                                              style: TextStyle(
-                                                  color: textColor(
-                                                      notifier.darkTheme)),
+                                              style: TextStyle(color: textColor(notifier.darkTheme)),
                                               textAlign: TextAlign.start)
                                         ],
                                       )
                                     : Center(
                                         child: Text(
                                           fileContent,
-                                          style: TextStyle(
-                                              color: textColor(
-                                                  notifier.darkTheme)),
+                                          style: TextStyle(color: textColor(notifier.darkTheme)),
                                           textAlign: TextAlign.center,
                                         ),
                                       ))
@@ -271,8 +262,7 @@ class _HomePageState extends State<HomePage> {
     int counter = 0;
     for (var recent in recentProjectHistory) {
       final int count = counter;
-      widget.add(
-          Consumer<SettingsScreenNotifier>(builder: (context, notifier, child) {
+      widget.add(Consumer<SettingsScreenNotifier>(builder: (context, notifier, child) {
         return RecentContainerHomeWidget(
           darkTheme: notifier.darkTheme,
           language: notifier.language,
@@ -315,8 +305,7 @@ class _HomePageState extends State<HomePage> {
     showDialog(
       context: context,
       builder: (BuildContext context) {
-        return Consumer<SettingsScreenNotifier>(
-            builder: (context, notifier, child) {
+        return Consumer<SettingsScreenNotifier>(builder: (context, notifier, child) {
           return StatefulBuilder(builder: (context, setInnerState) {
             return AlertDialog(
               title: Text(existingProjectTitle(notifier.language),
@@ -329,8 +318,7 @@ class _HomePageState extends State<HomePage> {
                       mainAxisAlignment: MainAxisAlignment.start,
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        Text(existingProjectMsg(notifier.language),
-                            style: TextStyle(color: Colors.grey)),
+                        Text(existingProjectMsg(notifier.language), style: TextStyle(color: Colors.grey)),
                         Container(
                           margin: EdgeInsets.only(top: 10),
                           height: 60,
@@ -342,13 +330,11 @@ class _HomePageState extends State<HomePage> {
                                   decoration: BoxDecoration(
                                       color: Color.fromARGB(255, 200, 200, 200),
                                       borderRadius: BorderRadius.only(
-                                          topLeft: Radius.circular(10),
-                                          bottomLeft: Radius.circular(10))),
+                                          topLeft: Radius.circular(10), bottomLeft: Radius.circular(10))),
                                   child: TextField(
                                     controller: dir,
                                     onChanged: (text) async {
-                                      showAccept =
-                                          await checkValidProjectFile(text);
+                                      showAccept = await checkValidProjectFile(text);
                                       setInnerState(() {});
                                     },
                                   ),
@@ -358,8 +344,7 @@ class _HomePageState extends State<HomePage> {
                                 onTap: () async {
                                   var file = await openFile();
                                   dir.text = file;
-                                  showAccept =
-                                      await checkValidProjectFile(file);
+                                  showAccept = await checkValidProjectFile(file);
                                   setInnerState(() {});
                                 },
                                 child: Container(
@@ -368,8 +353,7 @@ class _HomePageState extends State<HomePage> {
                                   decoration: BoxDecoration(
                                       color: blueTheme(notifier.darkTheme),
                                       borderRadius: BorderRadius.only(
-                                          topRight: Radius.circular(10),
-                                          bottomRight: Radius.circular(10))),
+                                          topRight: Radius.circular(10), bottomRight: Radius.circular(10))),
                                   child: Icon(Icons.search),
                                 ),
                               )
@@ -420,12 +404,9 @@ class _HomePageState extends State<HomePage> {
 
       Map recent = jsonDecode(contents);
 
-      if ((recent.containsKey("matrix_columns") &&
-              recent["matrix_columns"].runtimeType == int) ||
-          (recent.containsKey("matrix_rows") &&
-              recent["matrix_rows"].runtimeType == int) ||
-          (recent.containsKey("columns") &&
-              recent["columns"].runtimeType == int) ||
+      if ((recent.containsKey("matrix_columns") && recent["matrix_columns"].runtimeType == int) ||
+          (recent.containsKey("matrix_rows") && recent["matrix_rows"].runtimeType == int) ||
+          (recent.containsKey("columns") && recent["columns"].runtimeType == int) ||
           (recent.containsKey("rows") && recent["rows"].runtimeType == int)) {
         return true;
       }
@@ -443,16 +424,14 @@ class _HomePageState extends State<HomePage> {
       setContent(index, language);
 
       fileSize = recentProjectComponentFileSize[index];
-      recentProjectComponentSelected[index] =
-          !recentProjectComponentSelected[index];
+      recentProjectComponentSelected[index] = !recentProjectComponentSelected[index];
       recentProjectComponentSelected.asMap().forEach((i, _) {
         if (i != index) {
           recentProjectComponentSelected[index] = false;
           return;
         }
 
-        recentProjectComponentSelected[index] =
-            !recentProjectComponentSelected[index];
+        recentProjectComponentSelected[index] = !recentProjectComponentSelected[index];
       });
     });
   }
@@ -492,8 +471,7 @@ class _HomePageState extends State<HomePage> {
 
   // create app folder and recent projects file if it doesn't exist
   // readWrite: true -> read       false -> write
-  readWriteRecentProjects(
-      {bool readWrite = true, String newFilePath = ""}) async {
+  readWriteRecentProjects({bool readWrite = true, String newFilePath = ""}) async {
     String home = "";
     Map<String, String> envVars = Platform.environment;
     if (Platform.isMacOS) {
@@ -541,17 +519,12 @@ class _HomePageState extends State<HomePage> {
           return;
         }
 
-        if (recent.containsKey("recents") &&
-            recent["recents"].runtimeType == List) {
+        if (recent.containsKey("recents") && recent["recents"].runtimeType == List) {
           List r = recent["recents"];
 
-          recentProjectHistory = r
-              .where((element) => checkIsJsonFile(element.toString()))
-              .toList();
-          recentProjectComponentSelected =
-              List.generate(recentProjectHistory.length, (index) => false);
-          recentProjectComponentFileSize =
-              List.generate(recentProjectHistory.length, (index) => 0);
+          recentProjectHistory = r.where((element) => checkIsJsonFile(element.toString())).toList();
+          recentProjectComponentSelected = List.generate(recentProjectHistory.length, (index) => false);
+          recentProjectComponentFileSize = List.generate(recentProjectHistory.length, (index) => 0);
         }
 
         setState(() {});
