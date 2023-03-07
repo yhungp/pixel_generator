@@ -1,10 +1,13 @@
 // ignore_for_file: prefer_const_constructors, unused_local_variable, prefer_const_literals_to_create_immutables, must_be_immutable, use_build_context_synchronously
 
+import 'dart:io';
+
 import 'package:calculator/language/editor.dart';
 import 'package:calculator/main.dart';
 import 'package:calculator/screens/editor/widgets/button.dart';
 import 'package:calculator/screens/editor/widgets/editor_text_tield.dart';
 import 'package:calculator/styles/styles.dart';
+import 'package:file_picker/file_picker.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 
@@ -93,7 +96,29 @@ class _CodeFromVideoState extends State<CodeFromVideo> {
               enableBrightnessWidget(),
               Expanded(child: Container()),
               EditorButton(
+                backColor: Colors.transparent,
+                withBorders: Colors.white,
+                label: saveToFile(notifier.language),
+                func: () async {
+                  String? outputFile = await FilePicker.platform.saveFile(
+                    dialogTitle: 'Please select an output file:',
+                    fileName: 'file.ino',
+                    allowedExtensions: ['ino'],
+                  );
+
+                  if (outputFile != null) {
+                    File f = File(outputFile);
+                    f.writeAsString(outText);
+                  }
+                },
+                darkTheme: !notifier.darkTheme,
+              ),
+              SizedBox(width: 10),
+              EditorButton(
+                backColor: Colors.transparent,
+                withBorders: Colors.white,
                 label: copyToClipBoard(notifier.language),
+                darkTheme: !notifier.darkTheme,
                 func: () async {
                   await Clipboard.setData(ClipboardData(text: outText));
 
@@ -106,8 +131,7 @@ class _CodeFromVideoState extends State<CodeFromVideo> {
                   );
                   // copied successfully
                 },
-                darkTheme: !notifier.darkTheme,
-              )
+              ),
             ],
           ),
           SizedBox(height: 10),

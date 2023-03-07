@@ -77,6 +77,24 @@ copyToClipBoard(int language) {
   }
 }
 
+saveToFile(int language) {
+  switch (language) {
+    case 0:
+      return "Save to file";
+    case 1:
+      return "Guardar en archivo";
+  }
+}
+
+selectFileToSave(int language) {
+  switch (language) {
+    case 0:
+      return "Please select an output file:";
+    case 1:
+      return "Seleccione un archivo de salida:";
+  }
+}
+
 copiedToClipBoard(int language) {
   switch (language) {
     case 0:

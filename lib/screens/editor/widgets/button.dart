@@ -9,11 +9,15 @@ class EditorButton extends StatelessWidget {
     required this.label,
     required this.func,
     required this.darkTheme,
+    this.backColor,
+    this.withBorders,
   }) : super(key: key);
 
   String label;
   Function func;
   bool darkTheme;
+  Color? backColor;
+  Color? withBorders;
 
   @override
   Widget build(BuildContext context) {
@@ -25,7 +29,8 @@ class EditorButton extends StatelessWidget {
         padding: EdgeInsets.all(10),
         decoration: BoxDecoration(
           borderRadius: BorderRadius.all(Radius.circular(5)),
-          color: buttonOnHome(darkTheme),
+          border: Border.all(width: 1, color: withBorders ?? Colors.transparent),
+          color: backColor ?? buttonOnHome(darkTheme),
         ),
         child: Text(
           label,
