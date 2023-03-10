@@ -1,35 +1,19 @@
-individualMatrix(int language) {
-  switch (language) {
-    case 0:
-      return "Individual matrix";
-    case 1:
-      return "Matriz individual";
-  }
-}
+String individualMatrix(int language) => [
+      "Individual matrix",
+      "Matriz individual",
+    ][language];
 
-matrixArray(int language) {
-  switch (language) {
-    case 0:
-      return "Matrix array";
-    case 1:
-      return "Arreglo de matrices";
-  }
-}
+String matrixArray(int language) => [
+      "Matrix array",
+      "Arreglo de matrices",
+    ][language];
 
-continueBtn(int language) {
-  switch (language) {
-    case 0:
-      return "Continue";
-    case 1:
-      return "Continuar";
-  }
-}
+String continueBtn(int language) => [
+      "Continue",
+      "Continuar",
+    ][language];
 
-saveAndContinueBtn(int language) {
-  switch (language) {
-    case 0:
-      return "Save & continue";
-    case 1:
-      return "Guardar y continuar";
-  }
-}
+String saveAndContinueBtn(int language) => [
+      "Save & continue",
+      "Guardar y continuar",
+    ][language];

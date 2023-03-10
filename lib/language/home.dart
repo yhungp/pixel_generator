@@ -1,99 +1,54 @@
-recentProjects(int language) {
-  switch (language) {
-    case 0:
-      return "Recent projects";
-    case 1:
-      return "Proyectos recientes";
-  }
-}
+String recentProjects(int language) => [
+      "Recent projects",
+      "Proyectos recientes",
+    ][language];
 
-noRecentProjectsToShow(int language) {
-  switch (language) {
-    case 0:
-      return "No recent projects to show";
-    case 1:
-      return "No hay proyectos recientes para mostrar";
-  }
-}
+String noRecentProjectsToShow(int language) => [
+      "No recent projects to show",
+      "No hay proyectos recientes para mostrar",
+    ][language];
 
-createNewProject(int language) {
-  switch (language) {
-    case 0:
-      return "New project";
-    case 1:
-      return "Nuevo proyecto";
-  }
-}
+String createNewProject(int language) => [
+      "New project",
+      "Nuevo proyecto",
+    ][language];
 
-openExistingProject(int language) {
-  switch (language) {
-    case 0:
-      return "Open project";
-    case 1:
-      return "Abrir proyecto";
-  }
-}
+String openExistingProject(int language) => [
+      "Open project",
+      "Abrir proyecto",
+    ][language];
 
-fileEmpty(int language) {
-  switch (language) {
-    case 0:
-      return "File is empty";
-    case 1:
-      return "El archivo está vacío";
-  }
-}
+String fileEmpty(int language) => [
+      "File is empty",
+      "El archivo está vacío",
+    ][language];
 
-errorLoadingFile(int language) {
-  switch (language) {
-    case 0:
-      return "Error loading file";
-    case 1:
-      return "Error cargando el archivo";
-  }
-}
+String errorLoadingFile(int language) => [
+      "Error loading file",
+      "Error cargando el archivo",
+    ][language];
 
-fileLocation(int language) {
-  switch (language) {
-    case 0:
-      return "File location:";
-    case 1:
-      return "Localización de archivo:";
-  }
-}
+String fileLocation(int language) => [
+      "File location:",
+      "Localización de archivo:",
+    ][language];
 
-fileDoNotExist(int language) {
-  switch (language) {
-    case 0:
-      return "Project file don't exist.";
-    case 1:
-      return "El archivo de programa no existe.";
-  }
-}
+String fileDoNotExist(int language) => [
+      "Project file don't exist.",
+      "El archivo de programa no existe.",
+    ][language];
 
-fileSizeLabel(int language) {
-  switch (language) {
-    case 0:
-      return "File Size:";
-    case 1:
-      return "Tamaño de archivo:";
-  }
-}
+String fileSizeLabel(int language) => [
+      "File Size:",
+      "Tamaño de archivo:",
+    ][language];
 
-existingProjectTitle(int language) {
-  switch (language) {
-    case 0:
-      return "Load an existing project";
-    case 1:
-      return "Cargar desde un proyecto existente";
-  }
-}
+String existingProjectTitle(int language) => [
+      "Load an existing project",
+      "Cargar desde un proyecto existente",
+    ][language];
 
-existingProjectMsg(int language) {
-  switch (language) {
-    case 0:
-      return "Insert a valid path to a project file";
-    case 1:
-      return "Inserte una dirección válida a un archivo de proyecto";
-  }
-}
-
+String existingProjectMsg(int language) => [
+      "Insert a valid path to a project file",
+      "Inserte una dirección válida a un archivo de proyecto",
+    ][language];

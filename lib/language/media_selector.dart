@@ -1,35 +1,19 @@
-peekFile(int language) {
-  switch (language) {
-    case 0:
-      return "Peek a file to show";
-    case 1:
-      return "Seleccione un archivo a reproducir";
-  }
-}
+String peekFile(int language) => [
+      "Peek a file to show",
+      "Seleccione un archivo a reproducir",
+    ][language];
 
-nextButton(int language) {
-  switch (language) {
-    case 0:
-      return "Next";
-    case 1:
-      return "Siguiente";
-  }
-}
+String nextButton(int language) => [
+      "Next",
+      "Siguiente",
+    ][language];
 
-backToMatrixCreation(int language) {
-  switch (language) {
-    case 0:
-      return "Back to matrix creation";
-    case 1:
-      return "Volver a la creación de la matriz";
-  }
-}
+String backToMatrixCreation(int language) => [
+      "Back to matrix creation",
+      "Volver a la creación de la matriz",
+    ][language];
 
-acceptVideo(int language) {
-  switch (language) {
-    case 0:
-      return "Accept";
-    case 1:
-      return "Aceptar";
-  }
-}
+String acceptVideo(int language) => [
+      "Accept",
+      "Aceptar",
+    ][language];

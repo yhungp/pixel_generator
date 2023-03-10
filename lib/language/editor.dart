@@ -1,186 +1,104 @@
-// black or white
-allTo(int language, int blackOrWhite) {
-  List en = ["All to black", "All to white"];
-  List es = ["Todo a negro", "Todo a blanco"];
+String allTo(int language, int blackOrWhite) => [
+      ["All to black", "All to white"][blackOrWhite],
+      ["Todo a negro", "Todo a blanco"][blackOrWhite],
+    ][language];
 
-  switch (language) {
-    case 0:
-      return en[blackOrWhite];
-    case 1:
-      return es[blackOrWhite];
-  }
-}
+String peekingColorLabel(int language) => [
+      "Peeking color",
+      "Seleccionando color",
+    ][language];
 
-// grey scale
-peekingColorLabel(int language) {
-  switch (language) {
-    case 0:
-      return "Peeking color";
-    case 1:
-      return "Seleccionando color";
-  }
-}
+String peekingFileLabel(int language, {bool videoOrImage = true}) => [
+      "Peek a${videoOrImage ? " video" : "n image"} file ",
+      "Seleccione un archivo de ${videoOrImage ? "video" : "imagen"}",
+    ][language];
 
-// grey scale
-peekingFileLabel(int language, {bool videoOrImage = true}) {
-  // videoOrImage -> true: video   false: image
-  switch (language) {
-    case 0:
-      return "Peek a${videoOrImage ? " video" : "n image"} file ";
-    case 1:
-      return "Seleccione un archivo de ${videoOrImage ? "video" : "imagen"}";
-  }
-}
+String generateCode(int language) => [
+      "Generate code",
+      "Generar el código",
+    ][language];
 
-generateCode(int language) {
-  switch (language) {
-    case 0:
-      return "Generate code";
-    case 1:
-      return "Generar el código";
-  }
-}
+String backToVideo(int language) => [
+      "Back to video",
+      "Volver al video",
+    ][language];
 
-backToVideo(int language) {
-  switch (language) {
-    case 0:
-      return "Back to video";
-    case 1:
-      return "Volver al video";
-  }
-}
+String generationProcess(int language, bool sucess) => [
+      sucess ? "Code generated successfully" : "Error generating code",
+      sucess ? "Código generado correctamente" : "Error al generar el código",
+    ][language];
 
-generationProcess(int language, bool sucess) {
-  switch (language) {
-    case 0:
-      return sucess ? "Code generated successfully" : "Error generating code";
-    case 1:
-      return sucess ? "Código generado correctamente" : "Error al generar el código";
-  }
-}
+String showCodeLabel(int language, bool showCode) => [
+      !showCode ? "Show code" : "Hide code",
+      !showCode ? "Mostrar código" : "Ocultar código",
+    ][language];
 
-showCodeLabel(int language, bool showCode) {
-  switch (language) {
-    case 0:
-      return !showCode ? "Show code" : "Hide code";
-    case 1:
-      return !showCode ? "Mostrar código" : "Ocultar código";
-  }
-}
+String copyToClipBoard(int language) => [
+      "Copy to clipboard",
+      "Copiar al portapapeles",
+    ][language];
 
-copyToClipBoard(int language) {
-  switch (language) {
-    case 0:
-      return "Copy to clipboard";
-    case 1:
-      return "Copiar al portapapeles";
-  }
-}
+String saveToFile(int language) => [
+      "Save to file",
+      "Guardar en archivo",
+    ][language];
 
-saveToFile(int language) {
-  switch (language) {
-    case 0:
-      return "Save to file";
-    case 1:
-      return "Guardar en archivo";
-  }
-}
+String selectFileToSave(int language) => [
+      "Please select an output file:",
+      "Seleccione un archivo de salida:",
+    ][language];
 
-selectFileToSave(int language) {
-  switch (language) {
-    case 0:
-      return "Please select an output file:";
-    case 1:
-      return "Seleccione un archivo de salida:";
-  }
-}
+String copiedToClipBoard(int language) => [
+      "Copied to clipboard",
+      "Copiado al portapapeles",
+    ][language];
 
-copiedToClipBoard(int language) {
-  switch (language) {
-    case 0:
-      return "Copied to clipboard";
-    case 1:
-      return "Copiado al portapapeles";
-  }
-}
+String addBrightnessControl(int language) => [
+      "Add brightness control",
+      "Agregar control de brillo",
+    ][language];
 
-addBrightnessControl(int language) {
-  switch (language) {
-    case 0:
-      return "Add brightness control";
-    case 1:
-      return "Agregar control de brillo";
-  }
-}
+String addBrightnessValue(int language) => [
+      "Start value",
+      "Valor inicial",
+    ][language];
 
-addBrightnessValue(int language) {
-  switch (language) {
-    case 0:
-      return "Start value";
-    case 1:
-      return "Valor inicial";
-  }
-}
+String maxAdcValueLabel(int language) => [
+      "Max. ADC value",
+      "Máximo valor del ADC",
+    ][language];
 
-maxAdcValueLabel(int language) {
-  switch (language) {
-    case 0:
-      return "Max. ADC value";
-    case 1:
-      return "Máximo valor del ADC";
-  }
-}
+String fromVideoFpsSelectorLable(int language) => [
+      "FPS to show:",
+      "FPS a mostrar:",
+    ][language];
 
-fromVideoFpsSelectorLable(int language) {
-  switch (language) {
-    case 0:
-      return "FPS to show:";
-    case 1:
-      return "FPS a mostrar:";
-  }
-}
+String ouputMatrixInformationTable(int language) => [
+      "Matrix information",
+      "Información de la matriz",
+    ][language];
 
-ouputMatrixInformationTable(int language) {
-  switch (language) {
-    case 0:
-      return "Matrix information";
-    case 1:
-      return "Información de la matriz";
-  }
-}
+String ouputVideoInformationTable(int language) => [
+      "Video information",
+      "Información del video",
+    ][language];
 
-ouputVideoInformationTable(int language) {
-  switch (language) {
-    case 0:
-      return "Video information";
-    case 1:
-      return "Información del video";
-  }
-}
+String ouputStartAndEnd(int language) => [
+      "Start and end",
+      "Inicio y fin",
+    ][language];
 
-ouputStartAndEnd(int language) {
-  switch (language) {
-    case 0:
-      return "Start and end";
-    case 1:
-      return "Inicio y fin";
-  }
-}
+String ouputGenerateFramesButton(int language) => [
+      "Generate frames",
+      "Generar frames",
+    ][language];
 
-ouputGenerateFramesButton(int language) {
-  switch (language) {
-    case 0:
-      return "Generate frames";
-    case 1:
-      return "Generar frames";
-  }
-}
+String ouputCreateCodeButton(int language) => [
+      "Create code",
+      "Crear código",
+    ][language];
 
-ouputCreateCodeButton(int language) {
-  switch (language) {
-    case 0:
-      return "Create code";
-    case 1:
-      return "Crear código";
-  }
-}
+String ouputLoadingVideoInfo(int language) => [
+      "Loading video info",
+      "Cargando información de video",
+    ][language];

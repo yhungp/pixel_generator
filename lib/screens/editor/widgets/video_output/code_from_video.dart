@@ -93,15 +93,31 @@ class _CodeFromVideoState extends State<CodeFromVideo> {
           Row(
             mainAxisAlignment: MainAxisAlignment.start,
             children: [
-              enableBrightnessWidget(),
+              EnableBrightness(
+                showHideCode: widget.showHideCode,
+                toggleSwitch: toggleSwitch,
+                onPinValueChange: onPinValueChange,
+                onAdcValueChange: onAdcValueChange,
+                onBrightnessValueChange: onBrightnessValueChange,
+                brightnessValue: brightnessValue,
+                brightnessPin: brightnessPin,
+                maxAdcValue: maxAdcValue,
+                enableBrightnessControl: enableBrightnessControl,
+                notifier: notifier,
+              ),
               Expanded(child: Container()),
               EditorButton(
                 backColor: Colors.transparent,
                 withBorders: Colors.white,
                 label: saveToFile(notifier.language),
+                textOrIcon: Icon(
+                  Icons.save,
+                  size: 15,
+                  color: Colors.white,
+                ),
                 func: () async {
                   String? outputFile = await FilePicker.platform.saveFile(
-                    dialogTitle: 'Please select an output file:',
+                    dialogTitle: selectFileToSave(notifier.language),
                     fileName: 'file.ino',
                     allowedExtensions: ['ino'],
                   );
@@ -119,6 +135,11 @@ class _CodeFromVideoState extends State<CodeFromVideo> {
                 withBorders: Colors.white,
                 label: copyToClipBoard(notifier.language),
                 darkTheme: !notifier.darkTheme,
+                textOrIcon: Icon(
+                  Icons.copy,
+                  size: 15,
+                  color: Colors.white,
+                ),
                 func: () async {
                   await Clipboard.setData(ClipboardData(text: outText));
 
@@ -131,6 +152,21 @@ class _CodeFromVideoState extends State<CodeFromVideo> {
                   );
                   // copied successfully
                 },
+              ),
+              SizedBox(width: 10),
+              EditorButton(
+                backColor: Colors.transparent,
+                withBorders: Colors.white,
+                label: saveToFile(notifier.language),
+                darkTheme: notifier.darkTheme,
+                func: () {
+                  widget.showHideCode(false);
+                },
+                textOrIcon: Icon(
+                  Icons.cancel,
+                  size: 15,
+                  color: Colors.white,
+                ),
               ),
             ],
           ),
@@ -174,99 +210,6 @@ class _CodeFromVideoState extends State<CodeFromVideo> {
           ),
         ],
       ),
-    );
-  }
-
-  Row enableBrightnessWidget() {
-    return Row(
-      children: [
-        IconButton(onPressed: () => widget.showHideCode(), icon: Icon(Icons.cancel)),
-        SizedBox(
-          width: 40,
-          height: 40,
-          child: Switch(
-            onChanged: toggleSwitch,
-            value: enableBrightnessControl,
-            activeColor: Colors.white,
-            inactiveThumbColor: Colors.black,
-            materialTapTargetSize: MaterialTapTargetSize.shrinkWrap,
-          ),
-        ),
-        SizedBox(
-          width: 10,
-        ),
-        Text(
-          addBrightnessControl(notifier.language),
-          style: TextStyle(color: Colors.white),
-        ),
-        SizedBox(
-          width: 20,
-        ),
-        Visibility(
-          visible: enableBrightnessControl,
-          child: Container(
-            decoration: BoxDecoration(
-              borderRadius: BorderRadius.all(Radius.circular(5)),
-              color: buttonOnHome(!notifier.darkTheme),
-            ),
-            padding: EdgeInsets.all(5),
-            child: Row(
-              children: [
-                SizedBox(
-                  width: 5,
-                ),
-                Text(
-                  "Pin",
-                  style: TextStyle(
-                    color: Colors.white,
-                  ),
-                ),
-                SizedBox(
-                  width: 5,
-                ),
-                editorTextField(brightnessPin, notifier, onPinValueChange, allowLetters: true),
-                SizedBox(
-                  width: 30,
-                ),
-                Text(
-                  addBrightnessValue(notifier.language),
-                  style: TextStyle(
-                    color: Colors.white,
-                  ),
-                ),
-                SizedBox(
-                  width: 5,
-                ),
-                editorTextField(
-                  brightnessValue,
-                  notifier,
-                  onBrightnessValueChange,
-                ),
-                SizedBox(
-                  width: 30,
-                ),
-                Text(
-                  maxAdcValueLabel(notifier.language),
-                  style: TextStyle(
-                    color: Colors.white,
-                  ),
-                ),
-                SizedBox(
-                  width: 5,
-                ),
-                editorTextField(
-                  maxAdcValue,
-                  notifier,
-                  onAdcValueChange,
-                ),
-                SizedBox(
-                  width: 5,
-                ),
-              ],
-            ),
-          ),
-        ),
-      ],
     );
   }
 
@@ -418,5 +361,126 @@ class _CodeFromVideoState extends State<CodeFromVideo> {
     outText += "}\n";
 
     return outText;
+  }
+}
+
+class EnableBrightness extends StatelessWidget {
+  EnableBrightness({
+    Key? key,
+    required this.showHideCode,
+    required this.toggleSwitch,
+    required this.onPinValueChange,
+    required this.onAdcValueChange,
+    required this.onBrightnessValueChange,
+    required this.brightnessValue,
+    required this.brightnessPin,
+    required this.maxAdcValue,
+    required this.enableBrightnessControl,
+    required this.notifier,
+  }) : super(key: key);
+
+  Function showHideCode;
+  Function toggleSwitch;
+  Function onPinValueChange;
+  Function onAdcValueChange;
+  Function onBrightnessValueChange;
+
+  TextEditingController brightnessValue;
+  TextEditingController maxAdcValue;
+  TextEditingController brightnessPin;
+
+  bool enableBrightnessControl;
+
+  SettingsScreenNotifier notifier;
+
+  @override
+  Widget build(BuildContext context) {
+    return Row(
+      children: [
+        // IconButton(onPressed: () => showHideCode(), icon: Icon(Icons.cancel)),
+        SizedBox(
+          width: 40,
+          height: 55,
+          child: Switch(
+            onChanged: (value) => toggleSwitch(value),
+            value: enableBrightnessControl,
+            activeColor: Colors.white,
+            inactiveThumbColor: Colors.black,
+            materialTapTargetSize: MaterialTapTargetSize.shrinkWrap,
+          ),
+        ),
+        SizedBox(
+          width: 10,
+        ),
+        Text(
+          addBrightnessControl(notifier.language),
+          style: TextStyle(color: Colors.white),
+        ),
+        SizedBox(
+          width: 20,
+        ),
+        Visibility(
+          visible: enableBrightnessControl,
+          child: Container(
+            decoration: BoxDecoration(
+              borderRadius: BorderRadius.all(Radius.circular(5)),
+              border: Border.all(width: 1, color: Colors.white),
+            ),
+            padding: EdgeInsets.all(10),
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+              children: [
+                Container(
+                  margin: EdgeInsets.only(right: 10),
+                  child: Row(
+                    children: [
+                      Text(
+                        "Pin",
+                        style: TextStyle(
+                          color: Colors.white,
+                        ),
+                      ),
+                      SizedBox(width: 5),
+                      editorTextField(brightnessPin, notifier, onPinValueChange, allowLetters: true),
+                    ],
+                  ),
+                ),
+                Container(
+                  margin: EdgeInsets.only(right: 10),
+                  child: Row(
+                    children: [
+                      Text(
+                        addBrightnessValue(notifier.language),
+                        style: TextStyle(
+                          color: Colors.white,
+                        ),
+                      ),
+                      SizedBox(width: 5),
+                      editorTextField(
+                        brightnessValue,
+                        notifier,
+                        onBrightnessValueChange,
+                      ),
+                    ],
+                  ),
+                ),
+                Text(
+                  maxAdcValueLabel(notifier.language),
+                  style: TextStyle(
+                    color: Colors.white,
+                  ),
+                ),
+                SizedBox(width: 5),
+                editorTextField(
+                  maxAdcValue,
+                  notifier,
+                  onAdcValueChange,
+                ),
+              ],
+            ),
+          ),
+        ),
+      ],
+    );
   }
 }

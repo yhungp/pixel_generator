@@ -1,10 +1,13 @@
 // ignore_for_file: prefer_const_constructors, unused_local_variable, prefer_const_literals_to_create_immutables, must_be_immutable, use_build_context_synchronously
 
+import 'dart:io';
+
 import 'package:calculator/language/editor.dart';
 import 'package:calculator/main.dart';
 import 'package:calculator/screens/editor/widgets/button.dart';
 import 'package:calculator/screens/editor/widgets/editor_text_tield.dart';
 import 'package:calculator/styles/styles.dart';
+import 'package:file_picker/file_picker.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 
@@ -15,6 +18,7 @@ class ShowHideCodeWidget extends StatefulWidget {
   int columns;
   int matrixRows;
   int matrixColumns;
+  Function showHideCode;
 
   ShowHideCodeWidget({
     Key? key,
@@ -24,6 +28,7 @@ class ShowHideCodeWidget extends StatefulWidget {
     required this.notifier,
     required this.rows,
     required this.values,
+    required this.showHideCode,
   }) : super(key: key);
 
   @override
@@ -43,6 +48,9 @@ class _ShowHideCodeWidgetState extends State<ShowHideCodeWidget> {
   TextEditingController brightnessPin = TextEditingController();
   TextEditingController brightnessValue = TextEditingController();
   TextEditingController maxAdcValue = TextEditingController();
+
+  ScrollController vertical = ScrollController();
+  ScrollController horizontal = ScrollController();
 
   @override
   void initState() {
@@ -87,7 +95,38 @@ class _ShowHideCodeWidgetState extends State<ShowHideCodeWidget> {
                 enableBrightnessWidget(),
                 Expanded(child: Container()),
                 EditorButton(
+                  backColor: Colors.transparent,
+                  withBorders: Colors.white,
+                  label: saveToFile(notifier.language),
+                  textOrIcon: Icon(
+                    Icons.save,
+                    size: 15,
+                    color: Colors.white,
+                  ),
+                  func: () async {
+                    String? outputFile = await FilePicker.platform.saveFile(
+                      dialogTitle: selectFileToSave(notifier.language),
+                      fileName: 'file.ino',
+                      allowedExtensions: ['ino'],
+                    );
+
+                    if (outputFile != null) {
+                      File f = File(outputFile);
+                      f.writeAsString(outText);
+                    }
+                  },
+                  darkTheme: !notifier.darkTheme,
+                ),
+                SizedBox(width: 10),
+                EditorButton(
+                  backColor: Colors.transparent,
+                  withBorders: Colors.white,
                   label: copyToClipBoard(notifier.language),
+                  textOrIcon: Icon(
+                    Icons.copy,
+                    size: 15,
+                    color: Colors.white,
+                  ),
                   func: () async {
                     await Clipboard.setData(ClipboardData(text: outText));
 
@@ -101,29 +140,60 @@ class _ShowHideCodeWidgetState extends State<ShowHideCodeWidget> {
                     // copied successfully
                   },
                   darkTheme: !notifier.darkTheme,
-                )
+                ),
+                SizedBox(width: 10),
+                EditorButton(
+                  backColor: Colors.transparent,
+                  withBorders: Colors.white,
+                  label: saveToFile(notifier.language),
+                  darkTheme: notifier.darkTheme,
+                  func: () {
+                    widget.showHideCode(false);
+                  },
+                  textOrIcon: Icon(
+                    Icons.cancel,
+                    size: 15,
+                    color: Colors.white,
+                  ),
+                ),
               ],
             ),
             SizedBox(height: 10),
             Expanded(
-              child: ListView(
-                children: [
-                  Column(
-                    mainAxisAlignment: MainAxisAlignment.start,
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      for (var text in List.generate(outText.split("\n").length, (index) => outText.split("\n")[index]))
-                        Text(
-                          text,
-                          overflow: TextOverflow.ellipsis,
-                          style: TextStyle(
-                            color: Colors.white,
-                            fontFamily: "SourceCodeProRegular",
-                          ),
-                        )
-                    ],
-                  )
-                ],
+              child: SizedBox(
+                width: double.infinity,
+                height: double.infinity,
+                child: Scrollbar(
+                  controller: vertical,
+                  thumbVisibility: true,
+                  trackVisibility: true,
+                  child: Scrollbar(
+                    controller: horizontal,
+                    thumbVisibility: true,
+                    trackVisibility: true,
+                    notificationPredicate: (notif) => notif.depth == 1,
+                    child: SingleChildScrollView(
+                      controller: vertical,
+                      child: SingleChildScrollView(
+                        controller: horizontal,
+                        scrollDirection: Axis.horizontal,
+                        child: Column(
+                          mainAxisAlignment: MainAxisAlignment.start,
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Text(
+                              outText,
+                              style: TextStyle(
+                                color: Colors.white,
+                                fontFamily: "SourceCodeProRegular",
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                    ),
+                  ),
+                ),
               ),
             ),
           ],
@@ -146,16 +216,12 @@ class _ShowHideCodeWidgetState extends State<ShowHideCodeWidget> {
             materialTapTargetSize: MaterialTapTargetSize.shrinkWrap,
           ),
         ),
-        SizedBox(
-          width: 10,
-        ),
+        SizedBox(width: 10),
         Text(
           addBrightnessControl(notifier.language),
           style: TextStyle(color: Colors.white),
         ),
-        SizedBox(
-          width: 20,
-        ),
+        SizedBox(width: 20),
         Visibility(
           visible: enableBrightnessControl,
           child: Container(
@@ -166,56 +232,42 @@ class _ShowHideCodeWidgetState extends State<ShowHideCodeWidget> {
             padding: EdgeInsets.all(5),
             child: Row(
               children: [
-                SizedBox(
-                  width: 5,
-                ),
+                SizedBox(width: 5),
                 Text(
                   "Pin",
                   style: TextStyle(
                     color: Colors.white,
                   ),
                 ),
-                SizedBox(
-                  width: 5,
-                ),
+                SizedBox(width: 5),
                 editorTextField(brightnessPin, notifier, onPinValueChange, allowLetters: true),
-                SizedBox(
-                  width: 30,
-                ),
+                SizedBox(width: 30),
                 Text(
                   addBrightnessValue(notifier.language),
                   style: TextStyle(
                     color: Colors.white,
                   ),
                 ),
-                SizedBox(
-                  width: 5,
-                ),
+                SizedBox(width: 5),
                 editorTextField(
                   brightnessValue,
                   notifier,
                   onBrightnessValueChange,
                 ),
-                SizedBox(
-                  width: 30,
-                ),
+                SizedBox(width: 30),
                 Text(
                   maxAdcValueLabel(notifier.language),
                   style: TextStyle(
                     color: Colors.white,
                   ),
                 ),
-                SizedBox(
-                  width: 5,
-                ),
+                SizedBox(width: 5),
                 editorTextField(
                   maxAdcValue,
                   notifier,
                   onAdcValueChange,
                 ),
-                SizedBox(
-                  width: 5,
-                ),
+                SizedBox(width: 5),
               ],
             ),
           ),

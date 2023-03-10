@@ -11,7 +11,6 @@ import 'package:calculator/main.dart';
 import 'package:calculator/screens/editor/api_calls/api_calls.dart';
 import 'package:calculator/screens/editor/widgets/button.dart';
 import 'package:calculator/screens/editor/widgets/matrix_painter.dart';
-import 'package:calculator/screens/editor/widgets/show_hide_code.dart';
 import 'package:calculator/screens/editor/widgets/video_control/video_control.dart';
 import 'package:calculator/screens/editor/widgets/video_output/video_output.dart';
 import 'package:calculator/styles/styles.dart';
@@ -244,33 +243,20 @@ class _From_VideoState extends State<From_Video> {
                       ),
                     ),
                     Visibility(
-                      visible: imagePeeked || codeGenerated,
+                      visible: imagePeeked,
                       child: Row(
                         children: [
                           SizedBox(width: 5),
-                          Visibility(
-                            visible: imagePeeked && codeGenerated,
-                            child: EditorButton(
-                              label: showCodeLabel(notifier.language, showCode),
-                              func: () => showHideCode(),
-                              darkTheme: notifier.darkTheme,
-                            ),
-                          ),
-                          SizedBox(height: 40, child: VerticalDivider(color: Colors.white)),
+                          SizedBox(height: 40, child: VerticalDivider(color: Colors.grey)),
                           SizedBox(width: 5),
-                          SizedBox(width: imagePeeked && codeGenerated ? 10 : 0),
                           Visibility(
                             visible: imagePeeked,
                             child: Row(
                               children: [
                                 EditorButton(
                                   label: showVideoConfiguration
-                                      ? backToVideo(
-                                          notifier.language,
-                                        )
-                                      : generateCode(
-                                          notifier.language,
-                                        ),
+                                      ? backToVideo(notifier.language)
+                                      : generateCode(notifier.language),
                                   func: () => handleSavePressed(notifier),
                                   darkTheme: notifier.darkTheme,
                                 ),
@@ -302,61 +288,54 @@ class _From_VideoState extends State<From_Video> {
                             posxStart: posxStart,
                             posxEnd: 1 - posxEnd,
                             duration: player.position.duration!.inMilliseconds,
+                            showCode: showCode,
+                            showHideCode: showHideCode,
                           )
-                        : showCode
-                            ? ShowHideCodeWidget(
-                                notifier: notifier,
-                                values: pixels,
-                                rows: rows,
-                                columns: columns,
-                                matrixRows: matrixRows,
-                                matrixColumns: matrixColumns,
-                              )
-                            : Expanded(
-                                child: Container(
-                                  decoration: BoxDecoration(
-                                    borderRadius: BorderRadius.all(Radius.circular(5)),
-                                    color: blueTheme(notifier.darkTheme),
-                                  ),
-                                  padding: EdgeInsets.all(10),
-                                  child: Column(
-                                    mainAxisAlignment: MainAxisAlignment.start,
-                                    crossAxisAlignment: CrossAxisAlignment.start,
-                                    children: [
-                                      !imagePeeked
-                                          ? Expanded(
-                                              key: widgetKey,
-                                              child: Center(
-                                                child: Text(
-                                                  peekingFileLabel(
-                                                    notifier.language,
-                                                  ),
-                                                  style: TextStyle(
-                                                    fontSize: 30,
-                                                    color: Colors.white,
-                                                  ),
-                                                ),
-                                              ),
-                                            )
-                                          : videoPlayer(notifier),
-                                      SizedBox(height: 10),
-                                      Visibility(
-                                        visible: imagePeeked,
-                                        child: VideoControlWidget(
-                                          notifier: notifier,
-                                          playPauseVideo: playPauseVideo,
-                                          playPause: playPause,
-                                          player: player,
-                                          width: oldSize.width,
-                                          setPosStart: setPosStart,
-                                          setPosEnd: setPosEnd,
-                                          pos: playerPos,
-                                        ),
-                                      )
-                                    ],
-                                  ),
-                                ),
+                        : Expanded(
+                            child: Container(
+                              decoration: BoxDecoration(
+                                borderRadius: BorderRadius.all(Radius.circular(5)),
+                                color: blueTheme(notifier.darkTheme),
                               ),
+                              padding: EdgeInsets.all(10),
+                              child: Column(
+                                mainAxisAlignment: MainAxisAlignment.start,
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  !imagePeeked
+                                      ? Expanded(
+                                          key: widgetKey,
+                                          child: Center(
+                                            child: Text(
+                                              peekingFileLabel(
+                                                notifier.language,
+                                              ),
+                                              style: TextStyle(
+                                                fontSize: 30,
+                                                color: Colors.white,
+                                              ),
+                                            ),
+                                          ),
+                                        )
+                                      : videoPlayer(notifier),
+                                  SizedBox(height: 10),
+                                  Visibility(
+                                    visible: imagePeeked,
+                                    child: VideoControlWidget(
+                                      notifier: notifier,
+                                      playPauseVideo: playPauseVideo,
+                                      playPause: playPause,
+                                      player: player,
+                                      width: oldSize.width,
+                                      setPosStart: setPosStart,
+                                      setPosEnd: setPosEnd,
+                                      pos: playerPos,
+                                    ),
+                                  )
+                                ],
+                              ),
+                            ),
+                          ),
                   ],
                 ),
               ),
@@ -592,9 +571,9 @@ class _From_VideoState extends State<From_Video> {
     );
   }
 
-  showHideCode() {
+  showHideCode(bool value) {
     setState(() {
-      showCode = !showCode;
+      showCode = value;
     });
   }
 

@@ -34,6 +34,9 @@ parser.add_option("-p", "--property",
  
 (options, args) = parser.parse_args()
 
-cam = cv2.VideoCapture(options.filename)
+filename = options.filename
+p = options.property
 
-print(get_propperty(options.property, cam))
+cam = cv2.VideoCapture(f'{filename}')
+
+print(get_propperty(p, cam))

@@ -11,7 +11,6 @@ import 'package:calculator/styles/styles.dart';
 import 'package:calculator/utils/epoch_to_time.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import 'package:nil/nil.dart';
 import 'package:process_run/shell.dart';
 import 'package:path_provider/path_provider.dart';
 import 'dart:math';
@@ -35,6 +34,10 @@ class VideoOutputConfiguration extends StatefulWidget {
 
   Size size;
 
+  bool showCode;
+
+  Function showHideCode;
+
   VideoOutputConfiguration({
     Key? key,
     required this.columns,
@@ -51,6 +54,8 @@ class VideoOutputConfiguration extends StatefulWidget {
     required this.posxStart,
     required this.posxEnd,
     required this.duration,
+    required this.showCode,
+    required this.showHideCode,
   }) : super(key: key);
 
   @override
@@ -83,6 +88,7 @@ class _VideoOutputConfigurationState extends State<VideoOutputConfiguration> {
 
   bool generating = true;
   bool showCode = false;
+  bool loadingVideoInfo = true;
 
   List<Uint8List> bytesList = [];
   List<List<String>> pixels = [];
@@ -106,7 +112,6 @@ class _VideoOutputConfigurationState extends State<VideoOutputConfiguration> {
 
     temp = "temp_${getRandomString(15)}";
 
-    // generateVideoFrames();
     getVideoInfo();
 
     super.initState();
@@ -128,7 +133,7 @@ class _VideoOutputConfigurationState extends State<VideoOutputConfiguration> {
           borderRadius: BorderRadius.all(Radius.circular(5)),
           color: blueTheme(notifier.darkTheme),
         ),
-        child: showCode
+        child: widget.showCode
             ? CodeFromVideo(
                 columns: columns,
                 matrixColumns: matrixColumns,
@@ -137,7 +142,7 @@ class _VideoOutputConfigurationState extends State<VideoOutputConfiguration> {
                 rows: rows,
                 values: pixels,
                 fps: double.tryParse(fpsController.text) ?? 5,
-                showHideCode: showHideCode,
+                showHideCode: widget.showHideCode,
               )
             : Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
@@ -152,81 +157,82 @@ class _VideoOutputConfigurationState extends State<VideoOutputConfiguration> {
                   ),
                   fpsTextField(),
                   Expanded(
-                    child: generating
+                    child: loadingVideoInfo
                         ? Center(
-                            child: TextButton(
-                              onPressed: () => generateVideoFrames(),
-                              child: Container(
-                                padding: EdgeInsets.all(10),
-                                decoration: BoxDecoration(
-                                  color: Colors.white,
-                                  borderRadius: BorderRadius.all(Radius.circular(5)),
-                                ),
-                                child: Text(
-                                  ouputGenerateFramesButton(notifier.language),
-                                  style: TextStyle(color: Colors.grey),
-                                ),
-                              ),
+                            child: Text(
+                              ouputLoadingVideoInfo(notifier.language),
+                              style: TextStyle(color: Colors.white, fontSize: 20),
                             ),
                           )
-                        : Padding(
-                            padding: EdgeInsets.all(10),
-                            child: Expanded(
-                              child: Column(
-                                children: [
-                                  Expanded(
-                                    child: listOfImages(),
+                        : generating
+                            ? Center(
+                                child: TextButton(
+                                  onPressed: () => generateVideoFrames(),
+                                  child: Container(
+                                    padding: EdgeInsets.all(10),
+                                    decoration: BoxDecoration(
+                                      color: Colors.white,
+                                      borderRadius: BorderRadius.all(Radius.circular(5)),
+                                    ),
+                                    child: Text(
+                                      ouputGenerateFramesButton(notifier.language),
+                                      style: TextStyle(color: Colors.grey),
+                                    ),
                                   ),
-                                  SizedBox(height: 10),
-                                  Row(
-                                    mainAxisAlignment: MainAxisAlignment.end,
+                                ),
+                              )
+                            : Padding(
+                                padding: EdgeInsets.all(10),
+                                child: Expanded(
+                                  child: Column(
                                     children: [
-                                      GestureDetector(
-                                        onTap: () => {
-                                          setState(
-                                            () {
-                                              pixels = generateCodeFromFrames(
-                                                notifier,
-                                                bytesList,
-                                                rows,
-                                                columns,
-                                                matrixColumns,
-                                                matrixRows,
-                                              );
-
-                                              showCode = true;
-                                            },
-                                          )
-                                        },
-                                        child: Container(
-                                          padding: EdgeInsets.all(10),
-                                          decoration: BoxDecoration(
-                                            color: Colors.white,
-                                            borderRadius: BorderRadius.all(Radius.circular(5)),
-                                          ),
-                                          child: Text(
-                                            ouputCreateCodeButton(notifier.language),
-                                            style: TextStyle(color: Colors.grey),
-                                          ),
-                                        ),
+                                      Expanded(
+                                        child: listOfImages(),
                                       ),
+                                      SizedBox(height: 10),
+                                      Row(
+                                        mainAxisAlignment: MainAxisAlignment.end,
+                                        children: [
+                                          GestureDetector(
+                                            onTap: () => {
+                                              setState(
+                                                () {
+                                                  pixels = generateCodeFromFrames(
+                                                    notifier,
+                                                    bytesList,
+                                                    rows,
+                                                    columns,
+                                                    matrixColumns,
+                                                    matrixRows,
+                                                  );
+
+                                                  widget.showCode = true;
+                                                },
+                                              )
+                                            },
+                                            child: Container(
+                                              padding: EdgeInsets.all(10),
+                                              decoration: BoxDecoration(
+                                                color: Colors.white,
+                                                borderRadius: BorderRadius.all(Radius.circular(5)),
+                                              ),
+                                              child: Text(
+                                                ouputCreateCodeButton(notifier.language),
+                                                style: TextStyle(color: Colors.black54),
+                                              ),
+                                            ),
+                                          ),
+                                        ],
+                                      )
                                     ],
-                                  )
-                                ],
+                                  ),
+                                ),
                               ),
-                            ),
-                          ),
                   ),
                 ],
               ),
       ),
     );
-  }
-
-  showHideCode() {
-    setState(() {
-      showCode = !showCode;
-    });
   }
 
   listOfImages() {
@@ -529,7 +535,9 @@ class _VideoOutputConfigurationState extends State<VideoOutputConfiguration> {
       out = await shell.run("python3 assets/get_video_info.py ${args.join(" ")}");
       duration = out.outText;
 
-      setState(() {});
+      setState(() {
+        loadingVideoInfo = false;
+      });
     } catch (_) {}
   }
 }

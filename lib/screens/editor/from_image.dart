@@ -322,9 +322,9 @@ class _From_ImageState extends State<From_Image> {
     );
   }
 
-  showHideCode() {
+  showHideCode(bool value) {
     setState(() {
-      showCode = !showCode;
+      showCode = value;
     });
   }
 
@@ -398,17 +398,17 @@ class _From_ImageState extends State<From_Image> {
                       child: Row(
                         children: [
                           SizedBox(width: 5),
-                          SizedBox(height: 40, child: VerticalDivider(color: Colors.white)),
+                          SizedBox(height: 40, child: VerticalDivider(color: Colors.grey)),
                           SizedBox(width: 5),
                           Visibility(
-                            visible: imagePeeked && codeGenerated,
+                            visible: imagePeeked && codeGenerated && !showCode,
                             child: EditorButton(
                               label: showCodeLabel(notifier.language, showCode),
-                              func: () => showHideCode(),
+                              func: () => showHideCode(true),
                               darkTheme: notifier.darkTheme,
                             ),
                           ),
-                          SizedBox(width: imagePeeked && codeGenerated ? 10 : 0),
+                          SizedBox(width: imagePeeked && codeGenerated && !showCode ? 10 : 0),
                           Visibility(
                             visible: imagePeeked,
                             child: EditorButton(
@@ -434,6 +434,7 @@ class _From_ImageState extends State<From_Image> {
                             columns: columns,
                             matrixRows: matrixRows,
                             matrixColumns: matrixColumns,
+                            showHideCode: showHideCode,
                           )
                         : Expanded(
                             child: Container(
@@ -495,7 +496,7 @@ class _From_ImageState extends State<From_Image> {
                                                 width: double.infinity,
                                                 height: double.infinity,
                                                 child: !sizeLoaded
-                                                    ? Text("data")
+                                                    ? Text("")
                                                     : CustomPaint(
                                                         size: Size(
                                                           oldSize.width,
@@ -550,7 +551,7 @@ class _From_ImageState extends State<From_Image> {
         imageFromFile = image;
         imagePeeked = true;
         setState(() {});
-      } catch (e) {}
+      } catch (_) {}
     }
   }
 
