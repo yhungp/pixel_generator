@@ -6,6 +6,7 @@ import 'package:calculator/screens/editor/widgets/hand_painting/set_matrix_black
 import 'package:calculator/screens/editor/widgets/matrix_painter.dart';
 import 'package:calculator/screens/editor/widgets/hand_painting/show_matrix_joined.dart';
 import 'package:calculator/styles/styles.dart';
+import 'package:calculator/utils/rgb_stops_and_colors.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_colorpicker/flutter_colorpicker.dart';
 import 'package:provider/provider.dart';
@@ -44,7 +45,7 @@ class _RGB_PickerState extends State<RGB_Picker> {
   int rows = 1;
   double scale = 1;
 
-  double posxGrayScale = 0;
+  double posxTone = 0;
   double posyGrayScale = 0;
 
   double posxColorBar = 0;
@@ -61,7 +62,7 @@ class _RGB_PickerState extends State<RGB_Picker> {
   ColorOptions colorOptions = ColorOptions.black;
 
   bool peekingColor = false;
-  bool grayScaleTouched = false;
+  bool toneTouched = false;
   bool rgbScaleTouched = false;
   bool matrixTouched = false;
   bool showMatrixJoinedFlag = false;
@@ -163,34 +164,11 @@ class _RGB_PickerState extends State<RGB_Picker> {
                         mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                         children: [
                           GestureDetector(
-                            onPanUpdate: (details) {
-                              final tapPosition = details.localPosition;
-
-                              updatePosxColorBar(tapPosition.dx, tapPosition.dy);
-
-                              setState(() {
-                                rgbScaleTouched = true;
-                              });
-                            },
-                            onTapDown: (TapDownDetails details) {
-                              final tapPosition = details.localPosition;
-
-                              updatePosxColorBar(tapPosition.dx, tapPosition.dy);
-
-                              setState(() {
-                                rgbScaleTouched = true;
-                              });
-                            },
-                            onPanEnd: (_) {
-                              setState(() {
-                                rgbScaleTouched = false;
-                              });
-                            },
-                            onTapUp: (_) {
-                              setState(() {
-                                rgbScaleTouched = false;
-                              });
-                            },
+                            onPanUpdate: changePosxColorBar,
+                            onPanStart: changePosxColorBar,
+                            onTapDown: changePosxColorBar,
+                            onPanEnd: setRgbScaleTouched,
+                            onTapUp: setRgbScaleTouched,
                             child: ClipRRect(
                               borderRadius: BorderRadius.all(Radius.circular(5)),
                               child: CustomPaint(
@@ -199,7 +177,7 @@ class _RGB_PickerState extends State<RGB_Picker> {
                                   posxColorBar,
                                   posyColorBar,
                                   rgbScaleTouched,
-                                  grayScaleTouched,
+                                  toneTouched,
                                   setRgbColor,
                                 ),
                               ),
@@ -211,42 +189,19 @@ class _RGB_PickerState extends State<RGB_Picker> {
                               ClipRRect(
                                 borderRadius: BorderRadius.all(Radius.circular(5)),
                                 child: GestureDetector(
-                                  onPanUpdate: (details) {
-                                    final tapPosition = details.localPosition;
-
-                                    updatePosxGrayScale(tapPosition.dx, tapPosition.dy);
-
-                                    setState(() {
-                                      grayScaleTouched = true;
-                                    });
-                                  },
-                                  onTapDown: (TapDownDetails details) {
-                                    final tapPosition = details.localPosition;
-
-                                    updatePosxGrayScale(tapPosition.dx, tapPosition.dy);
-
-                                    setState(() {
-                                      grayScaleTouched = true;
-                                    });
-                                  },
-                                  onPanEnd: (_) {
-                                    setState(() {
-                                      grayScaleTouched = false;
-                                    });
-                                  },
-                                  onTapUp: (_) {
-                                    setState(() {
-                                      grayScaleTouched = false;
-                                    });
-                                  },
+                                  onPanUpdate: updateTonePosition,
+                                  onPanStart: updateTonePosition,
+                                  onTapDown: updateTonePosition,
+                                  onPanEnd: setToneTouchedFalse,
+                                  onTapUp: setToneTouchedFalse,
                                   child: CustomPaint(
                                     size: Size(200, 30),
                                     painter: Rectangle(
-                                      posxGrayScale,
+                                      posxTone,
                                       posyGrayScale,
                                       rgbScaleTouched,
-                                      grayScaleTouched,
-                                      setGrayScaleColor,
+                                      toneTouched,
+                                      setToneColor,
                                       gradient: true,
                                       color: rgbColor,
                                     ),
@@ -367,39 +322,71 @@ class _RGB_PickerState extends State<RGB_Picker> {
     });
   }
 
+  void changePosxColorBar(details) {
+    final tapPosition = details.localPosition;
+
+    updatePosxColorBar(tapPosition.dx, tapPosition.dy);
+
+    setState(() {
+      rgbScaleTouched = true;
+    });
+  }
+
+  void setRgbScaleTouched(_) {
+    setState(() {
+      rgbScaleTouched = false;
+    });
+  }
+
+  void setToneTouchedFalse(_) {
+    setState(() {
+      toneTouched = false;
+    });
+  }
+
+  void updateTonePosition(details) {
+    final tapPosition = details.localPosition;
+
+    updatePosxTone(tapPosition.dx, tapPosition.dy);
+
+    setState(() {
+      toneTouched = true;
+    });
+  }
+
   setRgbColor(Color color) {
     setState(() {
       rgbColor = color;
     });
   }
 
-  setGrayScaleColor(Color color) {
+  setToneColor(Color color) {
     setState(() {
       currentColor = color;
     });
   }
 
-  updatePosxGrayScale(double dx, double dy) {
+  updatePosxTone(double dx, double dy) {
     if (dy < 0 || dy > 20) {
       return;
     }
 
     if (dx < 0) {
       setState(() {
-        posxGrayScale = 0;
+        posxTone = 0;
       });
       return;
     }
 
     if (dx > 200) {
       setState(() {
-        posxGrayScale = 200;
+        posxTone = 200;
       });
       return;
     }
 
     setState(() {
-      posxGrayScale = dx;
+      posxTone = dx;
     });
   }
 
@@ -539,8 +526,6 @@ class Rectangle extends CustomPainter {
     this.color = Colors.white,
   });
 
-  empty() {}
-
   @override
   void paint(Canvas canvas, Size size) async {
     final pictureRecorder = ui.PictureRecorder();
@@ -550,14 +535,7 @@ class Rectangle extends CustomPainter {
       var rect = Offset(0, 0) & Size(size.width / 2, size.height);
 
       Paint paint = Paint();
-      paint.shader = LinearGradient(
-        begin: Alignment.centerLeft,
-        end: Alignment.centerRight,
-        colors: [
-          Colors.white,
-          color,
-        ],
-      ).createShader(rect);
+      paint.shader = getShader(rect, [0, 1], [Colors.white, color]);
 
       canvas.drawRect(rect, paint);
       canvasToSave.drawRect(rect, paint);
@@ -565,14 +543,7 @@ class Rectangle extends CustomPainter {
       rect = Offset(size.width / 2, 0) & Size(size.width / 2, size.height);
 
       paint = Paint();
-      paint.shader = LinearGradient(
-        begin: Alignment.centerLeft,
-        end: Alignment.centerRight,
-        colors: [
-          color,
-          Colors.black,
-        ],
-      ).createShader(rect);
+      paint.shader = getShader(rect, [0, 1], [color, Colors.black]);
 
       canvas.drawRect(rect, paint);
 
@@ -580,85 +551,49 @@ class Rectangle extends CustomPainter {
         canvasToSave.drawRect(rect, paint);
 
         final picture = pictureRecorder.endRecording();
-        final exported = await picture.toImage(
-          size.width.toInt(),
-          size.height.toInt(),
-        );
-
-        final data = await exported.toByteData();
-        final result = data!.buffer.asUint8List();
-
-        var c = image.Image.fromBytes(
-          size.width.toInt(),
-          size.height.toInt(),
-          result,
-          format: image.Format.bgra,
-        ).getPixel(
-          posx.toInt(),
-          10,
-        );
-
-        setColor(Color(c));
+        await processTouch(picture, size);
       }
 
       return;
     }
 
-    var stops = [
-      0.142857143,
-      0.2857142857142857,
-      0.42857142857142855,
-      0.5714285714285714,
-      0.7142857142857143,
-      0.8571428571428571,
-      1.0
-    ];
-
-    var colors = [
-      Color.fromARGB(255, 255, 0, 0),
-      Color.fromARGB(255, 255, 255, 0),
-      Color.fromARGB(255, 0, 255, 0),
-      Color.fromARGB(255, 0, 255, 255),
-      Color.fromARGB(255, 0, 0, 255),
-      Color.fromARGB(255, 255, 0, 255),
-      Color.fromARGB(255, 255, 0, 0),
-    ];
-
     var rect = Offset.zero & size;
     Paint paint = Paint();
-    paint.shader = LinearGradient(
+    paint.shader = getShader(rect, stops, colors);
+
+    canvas.drawRect(rect, paint);
+
+    if (rgbScaleTouched || grayScaleTouched) {
+      canvasToSave.drawRect(rect, paint);
+
+      final picture = pictureRecorder.endRecording();
+      await processTouch(picture, size);
+    }
+  }
+
+  getShader(Rect rect, List<double> stops, List<Color> colors) {
+    return LinearGradient(
       begin: Alignment.centerLeft,
       end: Alignment.centerRight,
       stops: stops,
       colors: colors,
     ).createShader(rect);
+  }
 
-    canvas.drawRect(rect, paint);
+  processTouch(ui.Picture picture, Size size) async {
+    final exported = await picture.toImage(size.width.toInt(), size.height.toInt());
 
-    if (rgbScaleTouched) {
-      canvasToSave.drawRect(rect, paint);
+    final data = await exported.toByteData();
+    final result = data!.buffer.asUint8List();
 
-      final picture = pictureRecorder.endRecording();
-      final exported = await picture.toImage(
-        size.width.toInt(),
-        size.height.toInt(),
-      );
+    var c = image.Image.fromBytes(
+      size.width.toInt(),
+      size.height.toInt(),
+      result,
+      format: image.Format.bgra,
+    ).getPixel(posx.toInt(), 10);
 
-      final data = await exported.toByteData();
-      final result = data!.buffer.asUint8List();
-
-      var c = image.Image.fromBytes(
-        size.width.toInt(),
-        size.height.toInt(),
-        result,
-        format: image.Format.bgra,
-      ).getPixel(
-        posx.toInt(),
-        0,
-      );
-
-      setColor(Color(c));
-    }
+    setColor(Color(c));
   }
 
   @override
