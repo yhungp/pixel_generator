@@ -19,6 +19,7 @@ class MatrixPainter extends CustomPainter {
   int rows;
   bool matrixTouched;
   bool showSpaceBetweenMatrix;
+  bool dontShowSpaceBetweenMatrix;
   bool imagePeeked;
   bool showmatrix;
   bool showOnlyPixels;
@@ -40,6 +41,7 @@ class MatrixPainter extends CustomPainter {
     this.colors,
     this.scale, {
     this.showSpaceBetweenMatrix = true,
+    this.dontShowSpaceBetweenMatrix = false,
     this.image,
     this.imagePeeked = false,
     this.showmatrix = true,
@@ -61,10 +63,10 @@ class MatrixPainter extends CustomPainter {
           for (int x = 0; x < matrixRows; x++) {
             for (int y = 0; y < matrixColumns; y++) {
               double dx = showSpaceBetweenMatrix
-                  ? (j + x) * 13 * scale + 13.0 * scale * j * matrixColumns - 5 * j
+                  ? (j + x) * 13 * scale + 13.0 * scale * j * matrixColumns - (dontShowSpaceBetweenMatrix ? 13 : 5) * j
                   : y * 13 * scale + 13.0 * scale * j * matrixColumns + posx;
               double dy = showSpaceBetweenMatrix
-                  ? (i + y) * 13 * scale + 13.0 * scale * i * matrixRows - 5 * i
+                  ? (i + y) * 13 * scale + 13.0 * scale * i * matrixRows - (dontShowSpaceBetweenMatrix ? 13 : 5) * i
                   : x * 13 * scale + 13.0 * scale * i * matrixRows + posy;
 
               path.addRRect(
@@ -124,10 +126,10 @@ class MatrixPainter extends CustomPainter {
           for (int x = 0; x < matrixRows; x++) {
             for (int y = 0; y < matrixColumns; y++) {
               double dx = showSpaceBetweenMatrix
-                  ? (j + x) * 13 * scale + 13.0 * scale * j * matrixColumns - 5 * j
+                  ? (j + x) * 13 * scale + 13.0 * scale * j * matrixColumns - (dontShowSpaceBetweenMatrix ? 13 : 5) * j
                   : y * 13 * scale + 13.0 * scale * j * matrixColumns + posx;
               double dy = showSpaceBetweenMatrix
-                  ? (i + y) * 13 * scale + 13.0 * scale * i * matrixRows - 5 * i
+                  ? (i + y) * 13 * scale + 13.0 * scale * i * matrixRows - (dontShowSpaceBetweenMatrix ? 13 : 5) * i
                   : x * 13 * scale + 13.0 * scale * i * matrixRows + posy;
 
               var rect = Offset(dx, dy) & Size(10 * scale, 10 * scale);

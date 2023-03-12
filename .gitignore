@@ -1,6 +1,8 @@
 todo.txt
 test/test.txt
 .vscode/
+assets/dist/*
+assets/build/*
 
 # Miscellaneous
 *.class

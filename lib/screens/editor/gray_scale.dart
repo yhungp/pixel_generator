@@ -2,7 +2,9 @@
 
 import 'package:calculator/language/editor.dart';
 import 'package:calculator/main.dart';
+import 'package:calculator/screens/editor/widgets/hand_painting/set_matrix_black_or_white.dart';
 import 'package:calculator/screens/editor/widgets/matrix_painter.dart';
+import 'package:calculator/screens/editor/widgets/hand_painting/show_matrix_joined.dart';
 import 'package:calculator/styles/styles.dart';
 import 'package:calculator/widgets/scale_button.dart';
 import 'package:flutter/material.dart';
@@ -59,6 +61,7 @@ class _GreyScaleState extends State<GreyScale> {
   bool grayScaleTouched = false;
   bool rgbScaleTouched = false;
   bool matrixTouched = false;
+  bool showMatrixJoinedFlag = false;
 
   @override
   void initState() {
@@ -112,84 +115,22 @@ class _GreyScaleState extends State<GreyScale> {
           padding: EdgeInsets.all(5),
           child: Column(
             children: [
-              // Padding(
-              //   padding: const EdgeInsets.all(5),
-              //   child: viewScale(notifier),
-              // ),
               Padding(
                 padding: const EdgeInsets.only(bottom: 10),
                 child: Row(
                   children: [
-                    GestureDetector(
-                      onTap: () {
-                        setState(() {
-                          colors = List.generate(
-                            rows,
-                            (index) => List.generate(
-                              columns,
-                              (index) => List.generate(
-                                matrixRows,
-                                (index) => List.generate(
-                                  matrixColumns,
-                                  (index) => Colors.black,
-                                ),
-                              ),
-                            ),
-                          );
-                        });
-                      },
-                      child: Container(
-                        alignment: Alignment.center,
-                        padding: EdgeInsets.all(5),
-                        decoration: BoxDecoration(
-                          borderRadius: BorderRadius.all(Radius.circular(5)),
-                          color: blueTheme(notifier.darkTheme),
-                        ),
-                        height: 40,
-                        child: Text(
-                          allTo(notifier.language, 0),
-                          style: TextStyle(
-                            color: Colors.white,
-                          ),
-                        ),
-                      ),
+                    SetMatrixBlackOrWhite(
+                      func: () => setColors(Colors.black),
+                      notifier: notifier,
+                      color: Colors.white,
+                      textSelector: 0,
                     ),
-                    SizedBox(
-                      width: 10,
-                    ),
-                    GestureDetector(
-                      onTap: () {
-                        setState(() {
-                          colors = List.generate(
-                            rows,
-                            (index) => List.generate(
-                              columns,
-                              (index) => List.generate(
-                                matrixRows,
-                                (index) => List.generate(
-                                  matrixColumns,
-                                  (index) => Colors.white,
-                                ),
-                              ),
-                            ),
-                          );
-                        });
-                      },
-                      child: Container(
-                        alignment: Alignment.center,
-                        padding: EdgeInsets.all(5),
-                        decoration: BoxDecoration(
-                          borderRadius: BorderRadius.all(Radius.circular(5)),
-                          color: blueTheme(notifier.darkTheme),
-                        ),
-                        height: 40,
-                        child: Text(
-                          allTo(notifier.language, 1),
-                          style: TextStyle(
-                            color: Colors.white,
-                          ),
-                        ),
-                      ),
+                    SizedBox(width: 10),
+                    SetMatrixBlackOrWhite(
+                      func: () => setColors(Colors.white),
+                      notifier: notifier,
+                      color: Colors.white,
+                      textSelector: 1,
                     ),
                     SizedBox(
                       width: 10,
@@ -274,14 +215,16 @@ class _GreyScaleState extends State<GreyScale> {
                         ),
                         alignment: Alignment.center,
                         child: Text(
-                          peekingColorLabel(
-                            notifier.language,
-                          ),
-                          style: TextStyle(
-                            color: Colors.white,
-                          ),
+                          peekingColorLabel(notifier.language),
+                          style: TextStyle(color: Colors.white),
                         ),
                       ),
+                    ),
+                    Expanded(child: Container()),
+                    ShowMatrixJoined(
+                      showMatrixJoinedFlag: showMatrixJoinedFlag,
+                      toogleMatrixJoined: toogleMatrixJoined,
+                      notifier: notifier,
                     ),
                   ],
                 ),
@@ -358,6 +301,7 @@ class _GreyScaleState extends State<GreyScale> {
                                   currentColor,
                                   colors,
                                   widget.scale,
+                                  showSpaceBetweenMatrix: !showMatrixJoinedFlag,
                                 ),
                               ),
                             ),
@@ -369,6 +313,24 @@ class _GreyScaleState extends State<GreyScale> {
                 ),
               ),
             ],
+          ),
+        ),
+      );
+    });
+  }
+
+  setColors(Color color) {
+    setState(() {
+      colors = List.generate(
+        rows,
+        (index) => List.generate(
+          columns,
+          (index) => List.generate(
+            matrixRows,
+            (index) => List.generate(
+              matrixColumns,
+              (index) => color,
+            ),
           ),
         ),
       );
@@ -452,69 +414,10 @@ class _GreyScaleState extends State<GreyScale> {
     colors[rowsCountIndex][columnsCountIndex][matrixRowsTextCountIndex][matrixColumnsTextCountIndex] = currentColor;
   }
 
-  Row viewScale(SettingsScreenNotifier notifier) {
-    return Row(
-      children: [
-        ScaleButton(
-          text: "-",
-          darkTheme: notifier.darkTheme,
-          func: downScale,
-        ),
-        Container(
-          width: 100,
-          alignment: Alignment.center,
-          padding: EdgeInsets.all(10),
-          child: Text(
-            "Zoom: ${scale >= 1 ? scale.toStringAsFixed(0) : scale}",
-            style: TextStyle(
-              color: textColorMatrixCreation(
-                notifier.darkTheme,
-              ),
-            ),
-          ),
-        ),
-        ScaleButton(
-          text: "+",
-          darkTheme: notifier.darkTheme,
-          func: upScale,
-        ),
-      ],
-    );
-  }
-
-  upScale() {
-    if (scale >= 1) {
-      setState(() {
-        scale += 1;
-        scale = double.parse(scale.toStringAsFixed(1));
-      });
-      return;
-    }
-    if (scale <= 0.9) {
-      setState(() {
-        scale += 0.1;
-        scale = double.parse(scale.toStringAsFixed(1));
-      });
-      return;
-    }
-    scale = 1;
-  }
-
-  downScale() {
-    if (scale > 1) {
-      setState(() {
-        scale -= 1;
-        scale = double.parse(scale.toStringAsFixed(1));
-      });
-      return;
-    }
-    if (scale > 0.1) {
-      setState(() {
-        scale -= 0.1;
-        scale = double.parse(scale.toStringAsFixed(1));
-      });
-      return;
-    }
+  toogleMatrixJoined(bool value) {
+    setState(() {
+      showMatrixJoinedFlag = value;
+    });
   }
 }
 

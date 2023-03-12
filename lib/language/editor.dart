@@ -102,3 +102,8 @@ String ouputLoadingVideoInfo(int language) => [
       "Loading video info",
       "Cargando información de video",
     ][language];
+
+String showMatrixLabel(int language) => [
+      "Show matrix array joined",
+      "Mostrar matrices unidas unido",
+    ][language];

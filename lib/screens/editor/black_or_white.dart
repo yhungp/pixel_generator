@@ -2,7 +2,9 @@
 
 import 'package:calculator/language/editor.dart';
 import 'package:calculator/main.dart';
+import 'package:calculator/screens/editor/widgets/hand_painting/set_matrix_black_or_white.dart';
 import 'package:calculator/screens/editor/widgets/matrix_painter.dart';
+import 'package:calculator/screens/editor/widgets/hand_painting/show_matrix_joined.dart';
 import 'package:calculator/styles/styles.dart';
 import 'package:calculator/widgets/scale_button.dart';
 import 'package:flutter/material.dart';
@@ -52,6 +54,7 @@ class _BlackOrWhiteState extends State<BlackOrWhite> {
   bool grayScaleTouched = false;
   bool rgbScaleTouched = false;
   bool matrixTouched = false;
+  bool showMatrixJoinedFlag = false;
 
   @override
   void initState() {
@@ -83,8 +86,8 @@ class _BlackOrWhiteState extends State<BlackOrWhite> {
       for (int j = 0; j < columns; j++) {
         for (int x = 0; x < matrixRows; x++) {
           for (int y = 0; y < matrixColumns; y++) {
-            double dx = (j + x) * 13 * scale + 13.0 * scale * j * matrixColumns - 5 * j;
-            double dy = (i + y) * 13 * scale + 13.0 * scale * i * matrixRows - 5 * i;
+            double dx = (j + x) * 13 * scale + 13.0 * scale * j * matrixColumns - (showMatrixJoinedFlag ? 13 : 5) * j;
+            double dy = (i + y) * 13 * scale + 13.0 * scale * i * matrixRows - (showMatrixJoinedFlag ? 13 : 5) * i;
 
             bool pixelTouched = posx > dx && posx < dx + 10 * scale && posy > dy && posy < dy + 10 * scale;
 
@@ -105,90 +108,31 @@ class _BlackOrWhiteState extends State<BlackOrWhite> {
           padding: EdgeInsets.all(5),
           child: Column(
             children: [
-              // Padding(
-              //   padding: const EdgeInsets.all(5),
-              //   child: viewScale(notifier),
-              // ),
               Padding(
                 padding: const EdgeInsets.only(bottom: 10),
                 child: Row(
                   children: [
-                    GestureDetector(
-                      onTap: () {
-                        setState(() {
-                          colors = List.generate(
-                            rows,
-                            (index) => List.generate(
-                              columns,
-                              (index) => List.generate(
-                                matrixRows,
-                                (index) => List.generate(
-                                  matrixColumns,
-                                  (index) => Colors.black,
-                                ),
-                              ),
-                            ),
-                          );
-                        });
-                      },
-                      child: Container(
-                        alignment: Alignment.center,
-                        padding: EdgeInsets.all(5),
-                        decoration: BoxDecoration(
-                          borderRadius: BorderRadius.all(Radius.circular(5)),
-                          color: blueTheme(notifier.darkTheme),
-                        ),
-                        height: 40,
-                        child: Text(
-                          allTo(notifier.language, 0),
-                          style: TextStyle(
-                            color: Colors.white,
-                          ),
-                        ),
-                      ),
+                    SetMatrixBlackOrWhite(
+                      func: () => setColors(Colors.black),
+                      notifier: notifier,
+                      color: Colors.white,
+                      textSelector: 0,
                     ),
-                    SizedBox(
-                      width: 10,
+                    SizedBox(width: 10),
+                    SetMatrixBlackOrWhite(
+                      func: () => setColors(Colors.white),
+                      notifier: notifier,
+                      color: Colors.white,
+                      textSelector: 1,
                     ),
-                    GestureDetector(
-                      onTap: () {
-                        setState(() {
-                          colors = List.generate(
-                            rows,
-                            (index) => List.generate(
-                              columns,
-                              (index) => List.generate(
-                                matrixRows,
-                                (index) => List.generate(
-                                  matrixColumns,
-                                  (index) => Colors.white,
-                                ),
-                              ),
-                            ),
-                          );
-                        });
-                      },
-                      child: Container(
-                        alignment: Alignment.center,
-                        padding: EdgeInsets.all(5),
-                        decoration: BoxDecoration(
-                          borderRadius: BorderRadius.all(Radius.circular(5)),
-                          color: blueTheme(notifier.darkTheme),
-                        ),
-                        height: 40,
-                        child: Text(
-                          allTo(notifier.language, 1),
-                          style: TextStyle(
-                            color: Colors.white,
-                          ),
-                        ),
-                      ),
-                    ),
-                    SizedBox(
-                      width: 10,
-                    ),
-                    selector(
-                      notifier,
+                    SizedBox(width: 10),
+                    selector(notifier),
+                    SizedBox(width: 10),
+                    Expanded(child: Container()),
+                    ShowMatrixJoined(
+                      showMatrixJoinedFlag: showMatrixJoinedFlag,
+                      toogleMatrixJoined: toogleMatrixJoined,
+                      notifier: notifier,
                     ),
                   ],
                 ),
@@ -265,6 +209,7 @@ class _BlackOrWhiteState extends State<BlackOrWhite> {
                                   currentColor,
                                   colors,
                                   widget.scale,
+                                  dontShowSpaceBetweenMatrix: showMatrixJoinedFlag,
                                 ),
                               ),
                             ),
@@ -279,6 +224,30 @@ class _BlackOrWhiteState extends State<BlackOrWhite> {
           ),
         ),
       );
+    });
+  }
+
+  setColors(Color color) {
+    setState(() {
+      colors = List.generate(
+        rows,
+        (index) => List.generate(
+          columns,
+          (index) => List.generate(
+            matrixRows,
+            (index) => List.generate(
+              matrixColumns,
+              (index) => color,
+            ),
+          ),
+        ),
+      );
+    });
+  }
+
+  toogleMatrixJoined(bool value) {
+    setState(() {
+      showMatrixJoinedFlag = value;
     });
   }
 

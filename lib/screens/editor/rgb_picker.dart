@@ -2,9 +2,10 @@
 
 import 'package:calculator/language/editor.dart';
 import 'package:calculator/main.dart';
+import 'package:calculator/screens/editor/widgets/hand_painting/set_matrix_black_or_white.dart';
 import 'package:calculator/screens/editor/widgets/matrix_painter.dart';
+import 'package:calculator/screens/editor/widgets/hand_painting/show_matrix_joined.dart';
 import 'package:calculator/styles/styles.dart';
-import 'package:calculator/widgets/scale_button.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_colorpicker/flutter_colorpicker.dart';
 import 'package:provider/provider.dart';
@@ -63,6 +64,7 @@ class _RGB_PickerState extends State<RGB_Picker> {
   bool grayScaleTouched = false;
   bool rgbScaleTouched = false;
   bool matrixTouched = false;
+  bool showMatrixJoinedFlag = false;
 
   @override
   void initState() {
@@ -72,21 +74,33 @@ class _RGB_PickerState extends State<RGB_Picker> {
     columns = widget.columns;
     rows = widget.rows;
 
-    colors = List.generate(
-      rows,
-      (index) => List.generate(
-        columns,
-        (index) => List.generate(
-          matrixRows,
-          (index) => List.generate(
-            matrixColumns,
-            (index) => Colors.white,
-          ),
-        ),
-      ),
-    );
+    setColors(Colors.white);
 
     super.initState();
+  }
+
+  toogleMatrixJoined(bool value) {
+    setState(() {
+      showMatrixJoinedFlag = value;
+    });
+  }
+
+  setColors(Color color) {
+    setState(() {
+      colors = List.generate(
+        rows,
+        (index) => List.generate(
+          columns,
+          (index) => List.generate(
+            matrixRows,
+            (index) => List.generate(
+              matrixColumns,
+              (index) => color,
+            ),
+          ),
+        ),
+      );
+    });
   }
 
   checkIfCoordinatesOnRectangle(double posx, double posy) {
@@ -120,161 +134,39 @@ class _RGB_PickerState extends State<RGB_Picker> {
           padding: EdgeInsets.all(5),
           child: Column(
             children: [
-              // Padding(
-              //   padding: const EdgeInsets.all(5),
-              //   child: viewScale(notifier),
-              // ),
               Padding(
                 padding: const EdgeInsets.only(bottom: 10),
                 child: Row(
                   children: [
-                    GestureDetector(
-                      onTap: () {
-                        setState(() {
-                          colors = List.generate(
-                            rows,
-                            (index) => List.generate(
-                              columns,
-                              (index) => List.generate(
-                                matrixRows,
-                                (index) => List.generate(
-                                  matrixColumns,
-                                  (index) => Colors.black,
-                                ),
-                              ),
-                            ),
-                          );
-                        });
-                      },
-                      child: Container(
-                        alignment: Alignment.center,
-                        padding: EdgeInsets.all(5),
-                        decoration: BoxDecoration(
-                          borderRadius: BorderRadius.all(Radius.circular(5)),
-                          color: blueTheme(notifier.darkTheme),
-                        ),
-                        height: 40,
-                        child: Text(
-                          allTo(notifier.language, 0),
-                          style: TextStyle(
-                            color: Colors.white,
-                          ),
-                        ),
-                      ),
+                    SetMatrixBlackOrWhite(
+                      func: () => setColors(Colors.black),
+                      notifier: notifier,
+                      color: Colors.white,
+                      textSelector: 0,
                     ),
-                    SizedBox(
-                      width: 10,
+                    SizedBox(width: 10),
+                    SetMatrixBlackOrWhite(
+                      func: () => setColors(Colors.white),
+                      notifier: notifier,
+                      color: Colors.white,
+                      textSelector: 1,
                     ),
-                    GestureDetector(
-                      onTap: () {
-                        setState(() {
-                          colors = List.generate(
-                            rows,
-                            (index) => List.generate(
-                              columns,
-                              (index) => List.generate(
-                                matrixRows,
-                                (index) => List.generate(
-                                  matrixColumns,
-                                  (index) => Colors.white,
-                                ),
-                              ),
-                            ),
-                          );
-                        });
-                      },
-                      child: Container(
-                        alignment: Alignment.center,
-                        padding: EdgeInsets.all(5),
-                        decoration: BoxDecoration(
-                          borderRadius: BorderRadius.all(Radius.circular(5)),
-                          color: blueTheme(notifier.darkTheme),
-                        ),
-                        height: 40,
-                        child: Text(
-                          allTo(notifier.language, 1),
-                          style: TextStyle(
-                            color: Colors.white,
-                          ),
-                        ),
-                      ),
-                    ),
-                    SizedBox(
-                      width: 10,
-                    ),
+                    SizedBox(width: 10),
                     Container(
                       decoration: BoxDecoration(
                         borderRadius: BorderRadius.all(Radius.circular(5)),
                         color: blueTheme(notifier.darkTheme),
                       ),
-                      padding: EdgeInsets.all(10),
+                      padding: EdgeInsets.all(5),
                       margin: EdgeInsets.only(right: 10),
                       child: Row(
                         mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                         children: [
-                          Row(
-                            children: [
-                              GestureDetector(
-                                onPanUpdate: (details) {
-                                  final tapPosition = details.localPosition;
-
-                                  updatePosxGrayScale(
-                                    tapPosition.dx,
-                                    tapPosition.dy,
-                                  );
-
-                                  setState(() {
-                                    grayScaleTouched = true;
-                                  });
-                                },
-                                onTapDown: (TapDownDetails details) {
-                                  final tapPosition = details.localPosition;
-
-                                  updatePosxGrayScale(
-                                    tapPosition.dx,
-                                    tapPosition.dy,
-                                  );
-
-                                  setState(() {
-                                    grayScaleTouched = true;
-                                  });
-                                },
-                                onPanEnd: (_) {
-                                  setState(() {
-                                    grayScaleTouched = false;
-                                  });
-                                },
-                                onTapUp: (_) {
-                                  setState(() {
-                                    grayScaleTouched = false;
-                                  });
-                                },
-                                child: CustomPaint(
-                                  size: Size(200, 20),
-                                  painter: Rectangle(
-                                    posxGrayScale,
-                                    posyGrayScale,
-                                    rgbScaleTouched,
-                                    grayScaleTouched,
-                                    setGrayScaleColor,
-                                    gradient: true,
-                                    color: rgbColor,
-                                  ),
-                                ),
-                              ),
-                            ],
-                          ),
-                          SizedBox(
-                            width: 10,
-                          ),
                           GestureDetector(
                             onPanUpdate: (details) {
                               final tapPosition = details.localPosition;
 
-                              updatePosxColorBar(
-                                tapPosition.dx,
-                                tapPosition.dy,
-                              );
+                              updatePosxColorBar(tapPosition.dx, tapPosition.dy);
 
                               setState(() {
                                 rgbScaleTouched = true;
@@ -283,10 +175,7 @@ class _RGB_PickerState extends State<RGB_Picker> {
                             onTapDown: (TapDownDetails details) {
                               final tapPosition = details.localPosition;
 
-                              updatePosxColorBar(
-                                tapPosition.dx,
-                                tapPosition.dy,
-                              );
+                              updatePosxColorBar(tapPosition.dx, tapPosition.dy);
 
                               setState(() {
                                 rgbScaleTouched = true;
@@ -302,35 +191,88 @@ class _RGB_PickerState extends State<RGB_Picker> {
                                 rgbScaleTouched = false;
                               });
                             },
-                            child: CustomPaint(
-                              size: Size(200, 20),
-                              painter: Rectangle(
-                                posxColorBar,
-                                posyColorBar,
-                                rgbScaleTouched,
-                                grayScaleTouched,
-                                setRgbColor,
+                            child: ClipRRect(
+                              borderRadius: BorderRadius.all(Radius.circular(5)),
+                              child: CustomPaint(
+                                size: Size(200, 30),
+                                painter: Rectangle(
+                                  posxColorBar,
+                                  posyColorBar,
+                                  rgbScaleTouched,
+                                  grayScaleTouched,
+                                  setRgbColor,
+                                ),
                               ),
                             ),
                           ),
-                          SizedBox(
-                            width: 10,
+                          SizedBox(width: 10),
+                          Row(
+                            children: [
+                              ClipRRect(
+                                borderRadius: BorderRadius.all(Radius.circular(5)),
+                                child: GestureDetector(
+                                  onPanUpdate: (details) {
+                                    final tapPosition = details.localPosition;
+
+                                    updatePosxGrayScale(tapPosition.dx, tapPosition.dy);
+
+                                    setState(() {
+                                      grayScaleTouched = true;
+                                    });
+                                  },
+                                  onTapDown: (TapDownDetails details) {
+                                    final tapPosition = details.localPosition;
+
+                                    updatePosxGrayScale(tapPosition.dx, tapPosition.dy);
+
+                                    setState(() {
+                                      grayScaleTouched = true;
+                                    });
+                                  },
+                                  onPanEnd: (_) {
+                                    setState(() {
+                                      grayScaleTouched = false;
+                                    });
+                                  },
+                                  onTapUp: (_) {
+                                    setState(() {
+                                      grayScaleTouched = false;
+                                    });
+                                  },
+                                  child: CustomPaint(
+                                    size: Size(200, 30),
+                                    painter: Rectangle(
+                                      posxGrayScale,
+                                      posyGrayScale,
+                                      rgbScaleTouched,
+                                      grayScaleTouched,
+                                      setGrayScaleColor,
+                                      gradient: true,
+                                      color: rgbColor,
+                                    ),
+                                  ),
+                                ),
+                              ),
+                            ],
                           ),
+                          SizedBox(width: 10),
                           Container(
-                            width: 20,
-                            height: 20,
+                            width: 30,
+                            height: 30,
                             decoration: BoxDecoration(
                               color: currentColor,
-                              border: Border.all(
-                                color: blackTheme(notifier.darkTheme),
-                              ),
-                              borderRadius: BorderRadius.all(
-                                Radius.circular(4),
-                              ),
+                              border: Border.all(color: blackTheme(notifier.darkTheme)),
+                              borderRadius: BorderRadius.all(Radius.circular(5)),
                             ),
                           ),
                         ],
                       ),
+                    ),
+                    Expanded(child: Container()),
+                    ShowMatrixJoined(
+                      showMatrixJoinedFlag: showMatrixJoinedFlag,
+                      toogleMatrixJoined: toogleMatrixJoined,
+                      notifier: notifier,
                     ),
                   ],
                 ),
@@ -407,6 +349,7 @@ class _RGB_PickerState extends State<RGB_Picker> {
                                   currentColor,
                                   colors,
                                   widget.scale,
+                                  showSpaceBetweenMatrix: !showMatrixJoinedFlag,
                                 ),
                               ),
                             ),
@@ -574,71 +517,6 @@ class _RGB_PickerState extends State<RGB_Picker> {
     Color color,
   ) {
     colors[rIndex][cIndex][mrIndex][mcIndex] = color;
-  }
-
-  Row viewScale(SettingsScreenNotifier notifier) {
-    return Row(
-      children: [
-        ScaleButton(
-          text: "-",
-          darkTheme: notifier.darkTheme,
-          func: downScale,
-        ),
-        Container(
-          width: 100,
-          alignment: Alignment.center,
-          padding: EdgeInsets.all(10),
-          child: Text(
-            "Zoom: ${scale >= 1 ? scale.toStringAsFixed(0) : scale}",
-            style: TextStyle(
-              color: textColorMatrixCreation(
-                notifier.darkTheme,
-              ),
-            ),
-          ),
-        ),
-        ScaleButton(
-          text: "+",
-          darkTheme: notifier.darkTheme,
-          func: upScale,
-        ),
-      ],
-    );
-  }
-
-  upScale() {
-    if (scale >= 1) {
-      setState(() {
-        scale += 1;
-        scale = double.parse(scale.toStringAsFixed(1));
-      });
-      return;
-    }
-    if (scale <= 0.9) {
-      setState(() {
-        scale += 0.1;
-        scale = double.parse(scale.toStringAsFixed(1));
-      });
-      return;
-    }
-    scale = 1;
-  }
-
-  downScale() {
-    if (scale > 1) {
-      setState(() {
-        scale -= 1;
-        scale = double.parse(scale.toStringAsFixed(1));
-      });
-      return;
-    }
-    if (scale > 0.1) {
-      setState(() {
-        scale -= 0.1;
-        scale = double.parse(scale.toStringAsFixed(1));
-      });
-      return;
-    }
   }
 }
 
