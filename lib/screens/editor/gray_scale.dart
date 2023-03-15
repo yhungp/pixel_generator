@@ -34,7 +34,6 @@ enum ColorOptions {
   black,
   white,
 }
-
 class _GreyScaleState extends State<GreyScale> {
   int matrixColumns = 8;
   int matrixRows = 8;
@@ -93,8 +92,8 @@ class _GreyScaleState extends State<GreyScale> {
       for (int j = 0; j < columns; j++) {
         for (int x = 0; x < matrixRows; x++) {
           for (int y = 0; y < matrixColumns; y++) {
-            double dx = (j + x) * 13 * scale + 13.0 * scale * j * matrixColumns - 5 * j;
-            double dy = (i + y) * 13 * scale + 13.0 * scale * i * matrixRows - 5 * i;
+            double dx = (j + x) * 13 * scale + 13.0 * scale * j * matrixColumns - (showMatrixJoinedFlag ? 13 : 5) * j;
+            double dy = (i + y) * 13 * scale + 13.0 * scale * i * matrixRows - (showMatrixJoinedFlag ? 13 : 5) * i;
 
             bool pixelTouched = posx > dx && posx < dx + 10 * scale && posy > dy && posy < dy + 10 * scale;
 
@@ -301,7 +300,7 @@ class _GreyScaleState extends State<GreyScale> {
                                   currentColor,
                                   colors,
                                   widget.scale,
-                                  showSpaceBetweenMatrix: !showMatrixJoinedFlag,
+                                  dontShowSpaceBetweenMatrix: showMatrixJoinedFlag,
                                 ),
                               ),
                             ),

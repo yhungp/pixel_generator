@@ -6,7 +6,6 @@ import 'package:calculator/styles/styles.dart';
 import 'package:calculator/utils/epoch_to_time.dart';
 import 'package:dart_vlc/dart_vlc.dart';
 import 'package:flutter/material.dart';
-import 'package:nil/nil.dart';
 
 class VideoControlWidget extends StatefulWidget {
   SettingsScreenNotifier notifier;

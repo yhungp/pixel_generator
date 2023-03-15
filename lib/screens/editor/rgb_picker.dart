@@ -1,6 +1,5 @@
 // ignore_for_file: must_be_immutable, prefer_const_constructors, prefer_const_literals_to_create_immutables, camel_case_types
 
-import 'package:calculator/language/editor.dart';
 import 'package:calculator/main.dart';
 import 'package:calculator/screens/editor/widgets/hand_painting/set_matrix_black_or_white.dart';
 import 'package:calculator/screens/editor/widgets/matrix_painter.dart';
@@ -8,7 +7,6 @@ import 'package:calculator/screens/editor/widgets/hand_painting/show_matrix_join
 import 'package:calculator/styles/styles.dart';
 import 'package:calculator/utils/rgb_stops_and_colors.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_colorpicker/flutter_colorpicker.dart';
 import 'package:provider/provider.dart';
 import 'dart:ui' as ui;
 import 'package:image/image.dart' as image;
@@ -45,11 +43,10 @@ class _RGB_PickerState extends State<RGB_Picker> {
   int rows = 1;
   double scale = 1;
 
-  double posxTone = 0;
+  double posxTone = 100;
   double posyGrayScale = 0;
 
   double posxColorBar = 0;
-  double posyColorBar = 0;
 
   double posxMatrixPainter = 0;
   double posyMatrixPainter = 0;
@@ -109,8 +106,8 @@ class _RGB_PickerState extends State<RGB_Picker> {
       for (int j = 0; j < columns; j++) {
         for (int x = 0; x < matrixRows; x++) {
           for (int y = 0; y < matrixColumns; y++) {
-            double dx = (j + x) * 13 * scale + 13.0 * scale * j * matrixColumns - 5 * j;
-            double dy = (i + y) * 13 * scale + 13.0 * scale * i * matrixRows - 5 * i;
+            double dx = (j + x) * 13 * scale + 13.0 * scale * j * matrixColumns - (showMatrixJoinedFlag ? 13 : 5) * j;
+            double dy = (i + y) * 13 * scale + 13.0 * scale * i * matrixRows - (showMatrixJoinedFlag ? 13 : 5) * i;
 
             bool pixelTouched = posx > dx && posx < dx + 10 * scale && posy > dy && posy < dy + 10 * scale;
 
@@ -121,10 +118,6 @@ class _RGB_PickerState extends State<RGB_Picker> {
         }
       }
     }
-  }
-
-  void changeColor(Color color) {
-    setState(() => currentColor = color);
   }
 
   @override
@@ -175,7 +168,6 @@ class _RGB_PickerState extends State<RGB_Picker> {
                                 size: Size(200, 30),
                                 painter: Rectangle(
                                   posxColorBar,
-                                  posyColorBar,
                                   rgbScaleTouched,
                                   toneTouched,
                                   setRgbColor,
@@ -198,7 +190,6 @@ class _RGB_PickerState extends State<RGB_Picker> {
                                     size: Size(200, 30),
                                     painter: Rectangle(
                                       posxTone,
-                                      posyGrayScale,
                                       rgbScaleTouched,
                                       toneTouched,
                                       setToneColor,
@@ -304,7 +295,7 @@ class _RGB_PickerState extends State<RGB_Picker> {
                                   currentColor,
                                   colors,
                                   widget.scale,
-                                  showSpaceBetweenMatrix: !showMatrixJoinedFlag,
+                                  dontShowSpaceBetweenMatrix: showMatrixJoinedFlag,
                                 ),
                               ),
                             ),
@@ -414,24 +405,6 @@ class _RGB_PickerState extends State<RGB_Picker> {
     });
   }
 
-  void showColorPicker() {
-    showDialog(
-      context: context,
-      builder: (BuildContext context) {
-        return AlertDialog(
-          title: Text("Pick a color"),
-          content: SingleChildScrollView(
-            child: ColorPicker(
-              pickerColor: currentColor,
-              // paletteType: PaletteType.hueWheel,
-              onColorChanged: (Color value) => changeColor(value),
-            ),
-          ),
-        );
-      },
-    );
-  }
-
   updateColorGreyScale(double posx) {
     int scaled = (posx / 200 * 255).toInt();
     return Color.fromARGB(255, scaled, scaled, scaled);
@@ -503,7 +476,9 @@ class _RGB_PickerState extends State<RGB_Picker> {
     int mcIndex,
     Color color,
   ) {
-    colors[rIndex][cIndex][mrIndex][mcIndex] = color;
+    setState(() {
+      colors[rIndex][cIndex][mrIndex][mcIndex] = color;
+    });
   }
 }
 
@@ -512,13 +487,11 @@ class Rectangle extends CustomPainter {
   bool rgbScaleTouched;
   bool grayScaleTouched;
   double posx;
-  double posy;
   Color color;
   Function setColor;
 
   Rectangle(
     this.posx,
-    this.posy,
     this.rgbScaleTouched,
     this.grayScaleTouched,
     this.setColor, {
