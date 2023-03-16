@@ -1,6 +1,9 @@
 // ignore_for_file: must_be_immutable, prefer_const_constructors, prefer_const_literals_to_create_immutables, camel_case_types
 
+import 'package:calculator/language/editor.dart';
 import 'package:calculator/main.dart';
+import 'package:calculator/screens/editor/widgets/button.dart';
+import 'package:calculator/screens/editor/widgets/hand_painting/code_from_colors_widget.dart';
 import 'package:calculator/screens/editor/widgets/hand_painting/set_matrix_black_or_white.dart';
 import 'package:calculator/screens/editor/widgets/matrix_painter.dart';
 import 'package:calculator/screens/editor/widgets/hand_painting/show_matrix_joined.dart';
@@ -64,6 +67,8 @@ class _RGB_PickerState extends State<RGB_Picker> {
   bool matrixTouched = false;
   bool showMatrixJoinedFlag = false;
 
+  bool showCode = false;
+
   @override
   void initState() {
     scale = widget.scale;
@@ -75,49 +80,6 @@ class _RGB_PickerState extends State<RGB_Picker> {
     setColors(Colors.white);
 
     super.initState();
-  }
-
-  toogleMatrixJoined(bool value) {
-    setState(() {
-      showMatrixJoinedFlag = value;
-    });
-  }
-
-  setColors(Color color) {
-    setState(() {
-      colors = List.generate(
-        rows,
-        (index) => List.generate(
-          columns,
-          (index) => List.generate(
-            matrixRows,
-            (index) => List.generate(
-              matrixColumns,
-              (index) => color,
-            ),
-          ),
-        ),
-      );
-    });
-  }
-
-  checkIfCoordinatesOnRectangle(double posx, double posy) {
-    for (int i = 0; i < rows; i++) {
-      for (int j = 0; j < columns; j++) {
-        for (int x = 0; x < matrixRows; x++) {
-          for (int y = 0; y < matrixColumns; y++) {
-            double dx = (j + x) * 13 * scale + 13.0 * scale * j * matrixColumns - (showMatrixJoinedFlag ? 13 : 5) * j;
-            double dy = (i + y) * 13 * scale + 13.0 * scale * i * matrixRows - (showMatrixJoinedFlag ? 13 : 5) * i;
-
-            bool pixelTouched = posx > dx && posx < dx + 10 * scale && posy > dy && posy < dy + 10 * scale;
-
-            if (pixelTouched) {
-              editPixel(i, j, x, y, currentColor);
-            }
-          }
-        }
-      }
-    }
   }
 
   @override
@@ -220,89 +182,105 @@ class _RGB_PickerState extends State<RGB_Picker> {
                       toogleMatrixJoined: toogleMatrixJoined,
                       notifier: notifier,
                     ),
+                    SizedBox(width: 10),
+                    EditorButton(
+                      label: !showCode ? generateCode(notifier.language) : hideCode(notifier.language),
+                      func: () {
+                        setState(() {
+                          showCode = !showCode;
+                        });
+                      },
+                      darkTheme: notifier.darkTheme,
+                    )
                   ],
                 ),
               ),
               Expanded(
                 child: Row(
                   children: [
-                    Expanded(
-                      child: Container(
-                        decoration: BoxDecoration(
-                          borderRadius: BorderRadius.all(Radius.circular(5)),
-                          color: blueTheme(notifier.darkTheme),
-                        ),
-                        padding: EdgeInsets.all(10),
-                        child: Column(
-                          mainAxisAlignment: MainAxisAlignment.start,
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            GestureDetector(
-                              onPanUpdate: (details) {
-                                final tapPosition = details.localPosition;
+                    showCode
+                        ? CodeFromColorsWidget(
+                            colors: colors,
+                            notifier: notifier,
+                            showHideCode: showHideCode,
+                          )
+                        : Expanded(
+                            child: Container(
+                              decoration: BoxDecoration(
+                                borderRadius: BorderRadius.all(Radius.circular(5)),
+                                color: blueTheme(notifier.darkTheme),
+                              ),
+                              padding: EdgeInsets.all(10),
+                              child: Column(
+                                mainAxisAlignment: MainAxisAlignment.start,
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  GestureDetector(
+                                    onPanUpdate: (details) {
+                                      final tapPosition = details.localPosition;
 
-                                setState(() {
-                                  posxMatrixPainter = tapPosition.dx;
-                                  posyMatrixPainter = tapPosition.dy;
+                                      setState(() {
+                                        posxMatrixPainter = tapPosition.dx;
+                                        posyMatrixPainter = tapPosition.dy;
 
-                                  checkIfCoordinatesOnRectangle(
-                                    posxMatrixPainter,
-                                    posyMatrixPainter,
-                                  );
+                                        checkIfCoordinatesOnRectangle(
+                                          posxMatrixPainter,
+                                          posyMatrixPainter,
+                                        );
 
-                                  matrixTouched = true;
-                                });
-                              },
-                              onTapDown: (TapDownDetails details) {
-                                final tapPosition = details.localPosition;
+                                        matrixTouched = true;
+                                      });
+                                    },
+                                    onTapDown: (TapDownDetails details) {
+                                      final tapPosition = details.localPosition;
 
-                                setState(() {
-                                  posxMatrixPainter = tapPosition.dx;
-                                  posyMatrixPainter = tapPosition.dy;
+                                      setState(() {
+                                        posxMatrixPainter = tapPosition.dx;
+                                        posyMatrixPainter = tapPosition.dy;
 
-                                  checkIfCoordinatesOnRectangle(
-                                    posxMatrixPainter,
-                                    posyMatrixPainter,
-                                  );
+                                        checkIfCoordinatesOnRectangle(
+                                          posxMatrixPainter,
+                                          posyMatrixPainter,
+                                        );
 
-                                  matrixTouched = true;
-                                });
-                              },
-                              onPanEnd: (_) {
-                                setState(() {
-                                  matrixTouched = false;
-                                });
-                              },
-                              onTapUp: (_) {
-                                setState(() {
-                                  matrixTouched = false;
-                                });
-                              },
-                              child: CustomPaint(
-                                size: Size(
-                                  matrixColumns * 13.0 * columns + (columns - 1) * 5,
-                                  matrixRows * 13.0 * rows + (rows - 1) * 5,
-                                ),
-                                painter: MatrixPainter(
-                                  posxMatrixPainter,
-                                  posyMatrixPainter,
-                                  false,
-                                  columns,
-                                  matrixColumns,
-                                  matrixRows,
-                                  rows,
-                                  matrixTouched,
-                                  currentColor,
-                                  colors,
-                                  widget.scale,
-                                  dontShowSpaceBetweenMatrix: showMatrixJoinedFlag,
-                                ),
+                                        matrixTouched = true;
+                                      });
+                                    },
+                                    onPanEnd: (_) {
+                                      setState(() {
+                                        matrixTouched = false;
+                                      });
+                                    },
+                                    onTapUp: (_) {
+                                      setState(() {
+                                        matrixTouched = false;
+                                      });
+                                    },
+                                    child: CustomPaint(
+                                      size: Size(
+                                        matrixColumns * 13.0 * columns + (columns - 1) * 5,
+                                        matrixRows * 13.0 * rows + (rows - 1) * 5,
+                                      ),
+                                      painter: MatrixPainter(
+                                        posxMatrixPainter,
+                                        posyMatrixPainter,
+                                        false,
+                                        columns,
+                                        matrixColumns,
+                                        matrixRows,
+                                        rows,
+                                        matrixTouched,
+                                        currentColor,
+                                        colors,
+                                        widget.scale,
+                                        dontShowSpaceBetweenMatrix: showMatrixJoinedFlag,
+                                      ),
+                                    ),
+                                  ),
+                                ],
                               ),
                             ),
-                          ],
-                        ),
-                      ),
-                    ),
+                          ),
                   ],
                 ),
               ),
@@ -311,6 +289,55 @@ class _RGB_PickerState extends State<RGB_Picker> {
         ),
       );
     });
+  }
+
+  showHideCode(bool value) {
+    setState(() {
+      showCode = value;
+    });
+  }
+
+  toogleMatrixJoined(bool value) {
+    setState(() {
+      showMatrixJoinedFlag = value;
+    });
+  }
+
+  setColors(Color color) {
+    setState(() {
+      colors = List.generate(
+        rows,
+        (index) => List.generate(
+          columns,
+          (index) => List.generate(
+            matrixRows,
+            (index) => List.generate(
+              matrixColumns,
+              (index) => color,
+            ),
+          ),
+        ),
+      );
+    });
+  }
+
+  checkIfCoordinatesOnRectangle(double posx, double posy) {
+    for (int i = 0; i < rows; i++) {
+      for (int j = 0; j < columns; j++) {
+        for (int x = 0; x < matrixRows; x++) {
+          for (int y = 0; y < matrixColumns; y++) {
+            double dx = (j + x) * 13 * scale + 13.0 * scale * j * matrixColumns - (showMatrixJoinedFlag ? 13 : 5) * j;
+            double dy = (i + y) * 13 * scale + 13.0 * scale * i * matrixRows - (showMatrixJoinedFlag ? 13 : 5) * i;
+
+            bool pixelTouched = posx > dx && posx < dx + 10 * scale && posy > dy && posy < dy + 10 * scale;
+
+            if (pixelTouched) {
+              editPixel(i, j, x, y, currentColor);
+            }
+          }
+        }
+      }
+    }
   }
 
   void changePosxColorBar(details) {

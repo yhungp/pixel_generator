@@ -62,30 +62,6 @@ class _VideoControlWidgetState extends State<VideoControlWidget> {
     super.initState();
   }
 
-  // @override
-  // void didChangeDependencies() {
-  //   player.positionStream.listen(
-  //     (position) async {
-  //       playerPos = position.position!.inMilliseconds / position.duration!.inMilliseconds;
-
-  //       if (position.position!.inMilliseconds / position.duration!.inMilliseconds >= 1 - posxEnd) {
-  //         playerPos = 1 - posxEnd - 1 / width;
-  //         playerPos = playerPos < 0
-  //             ? 0
-  //             : playerPos > 1
-  //                 ? 1
-  //                 : playerPos;
-  //         player.pause();
-  //         playPause = false;
-  //       }
-
-  //       setState(() {});
-  //     },
-  //   );
-
-  //   super.didChangeDependencies();
-  // }
-
   @override
   Widget build(BuildContext context) {
     width = widget.width;

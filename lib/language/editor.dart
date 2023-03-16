@@ -18,6 +18,11 @@ String generateCode(int language) => [
       "Generar el código",
     ][language];
 
+String hideCode(int language) => [
+      "Hide code",
+      "Ocultar código",
+    ][language];
+
 String backToVideo(int language) => [
       "Back to video",
       "Volver al video",
