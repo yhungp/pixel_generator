@@ -16,13 +16,19 @@ setupLoopFunctions(currentValue) {
   return outText;
 }
 
-frameCounterCheck(length) {
+frameCounterCheck(length, enableBrightnessControl) {
   String outText = "  }\n\n";
   outText += "  FastLED.show();\n\n";
   outText += "  frameCounter += 1;\n";
   outText += "  if (frameCounter == $length){\n";
   outText += "    frameCounter = 0;\n";
   outText += "  }\n";
+
+  if (enableBrightnessControl) {
+    outText += "\n  BRIGHTNESS_HAS_CHANGE = false;\n";
+  }
+
+  outText += "}\n\n";
 
   return outText;
 }

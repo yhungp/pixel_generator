@@ -1,7 +1,6 @@
 // ignore_for_file: prefer_const_constructors, must_be_immutable, prefer_const_literals_to_create_immutables, depend_on_referenced_packages
 
 import 'dart:io';
-import 'dart:typed_data';
 
 import 'package:calculator/language/editor.dart';
 import 'package:calculator/main.dart';
@@ -334,7 +333,7 @@ class _VideoOutputConfigurationState extends State<VideoOutputConfiguration> {
     List args = [
       "-t $tempPath/pixel_generator/$temp/",
       "-n base",
-      "-f ${widget.video}",
+      "-f \"${widget.video}\"",
       "-c ${x}x$y",
       "-s ${mw}x$mh",
       "-r ${w}x$h",

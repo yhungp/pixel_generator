@@ -5,8 +5,9 @@ import 'dart:io';
 import 'package:calculator/language/editor.dart';
 import 'package:calculator/main.dart';
 import 'package:calculator/screens/editor/widgets/button.dart';
-import 'package:calculator/screens/editor/widgets/editor_text_tield.dart';
+import 'package:calculator/screens/editor/widgets/enable_brightness.dart';
 import 'package:calculator/styles/styles.dart';
+import 'package:calculator/utils/editor_code_generators/code_generators.dart';
 import 'package:file_picker/file_picker.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
@@ -92,7 +93,19 @@ class _ShowHideCodeWidgetState extends State<ShowHideCodeWidget> {
             Row(
               mainAxisAlignment: MainAxisAlignment.start,
               children: [
-                enableBrightnessWidget(),
+                // enableBrightnessWidget(),
+                EnableBrightness(
+                  showHideCode: widget.showHideCode,
+                  toggleSwitch: toggleSwitch,
+                  onPinValueChange: onPinValueChange,
+                  onAdcValueChange: onAdcValueChange,
+                  onBrightnessValueChange: onBrightnessValueChange,
+                  brightnessValue: brightnessValue,
+                  brightnessPin: brightnessPin,
+                  maxAdcValue: maxAdcValue,
+                  enableBrightnessControl: enableBrightnessControl,
+                  notifier: notifier,
+                ),
                 Expanded(child: Container()),
                 EditorButton(
                   backColor: Colors.transparent,
@@ -202,80 +215,6 @@ class _ShowHideCodeWidgetState extends State<ShowHideCodeWidget> {
     );
   }
 
-  Row enableBrightnessWidget() {
-    return Row(
-      children: [
-        SizedBox(
-          width: 40,
-          height: 40,
-          child: Switch(
-            onChanged: toggleSwitch,
-            value: enableBrightnessControl,
-            activeColor: Colors.white,
-            inactiveThumbColor: Colors.black,
-            materialTapTargetSize: MaterialTapTargetSize.shrinkWrap,
-          ),
-        ),
-        SizedBox(width: 10),
-        Text(
-          addBrightnessControl(notifier.language),
-          style: TextStyle(color: Colors.white),
-        ),
-        SizedBox(width: 20),
-        Visibility(
-          visible: enableBrightnessControl,
-          child: Container(
-            decoration: BoxDecoration(
-              borderRadius: BorderRadius.all(Radius.circular(5)),
-              color: buttonOnHome(!notifier.darkTheme),
-            ),
-            padding: EdgeInsets.all(5),
-            child: Row(
-              children: [
-                SizedBox(width: 5),
-                Text(
-                  "Pin",
-                  style: TextStyle(
-                    color: Colors.white,
-                  ),
-                ),
-                SizedBox(width: 5),
-                editorTextField(brightnessPin, notifier, onPinValueChange, allowLetters: true),
-                SizedBox(width: 30),
-                Text(
-                  addBrightnessValue(notifier.language),
-                  style: TextStyle(
-                    color: Colors.white,
-                  ),
-                ),
-                SizedBox(width: 5),
-                editorTextField(
-                  brightnessValue,
-                  notifier,
-                  onBrightnessValueChange,
-                ),
-                SizedBox(width: 30),
-                Text(
-                  maxAdcValueLabel(notifier.language),
-                  style: TextStyle(
-                    color: Colors.white,
-                  ),
-                ),
-                SizedBox(width: 5),
-                editorTextField(
-                  maxAdcValue,
-                  notifier,
-                  onAdcValueChange,
-                ),
-                SizedBox(width: 5),
-              ],
-            ),
-          ),
-        ),
-      ],
-    );
-  }
-
   onPinValueChange() {
     setState(() {});
     if (["", "3"].contains(brightnessPin.text)) {
@@ -333,20 +272,13 @@ class _ShowHideCodeWidgetState extends State<ShowHideCodeWidget> {
 
     var addSpaces = enableBrightnessControl ? "       " : "";
 
-    var outText = "#include <FastLED.h>\n\n";
-    outText += "#define RGB_PIN       ${addSpaces}3\n";
-    outText += "#define RGB_LED_NUM   ${addSpaces}512\n";
-    outText += "#define BRIGHTNESS    $addSpaces${!enableBrightnessControl ? "255" : brightnessValue.text}\n";
-    outText += "#define CHIP_SET      ${addSpaces}WS2812B\n";
-    outText += "#define COLOR_CODE    ${addSpaces}GRB\n\n";
-    outText += "CRGB LEDs[RGB_LED_NUM];\n";
-
-    if (enableBrightnessControl) {
-      outText += "\nint BRIGHTNESS_CONTROL_PIN = ${brightnessPin.text};\n";
-      outText += "int BRIGHTNESS_PIN_VALUE   = 0;\n";
-      outText += "int DELAY_COUNTER          = 0;\n";
-      outText += "bool BRIGHTNESS_HAS_CHANGE = false;\n";
-    }
+    var outText = variablesAndLibraries(
+      addSpaces,
+      rows * columns * matrixRows * matrixColumns,
+      enableBrightnessControl,
+      brightnessValue,
+      brightnessPin,
+    );
 
     // add color codes
     outText += "\nconst long pixels[] PROGMEM = {\n  ${List.generate(
@@ -384,33 +316,10 @@ class _ShowHideCodeWidgetState extends State<ShowHideCodeWidget> {
 
     if (enableBrightnessControl) {
       outText += "  BRIGHTNESS_HAS_CHANGE = false;\n";
-      outText += "  Serial.println(\"Change\");\n";
     }
 
     outText += "}\n\n";
-
-    outText += "void setup() {\n";
-    outText += "  Serial.begin(9600);\n";
-    outText += '  Serial.println("WS2812B LEDs strip Initialize");\n';
-    outText += "  FastLED.addLeds<CHIP_SET, RGB_PIN, COLOR_CODE>(LEDs, RGB_LED_NUM);\n";
-    outText += "  FastLED.setBrightness(BRIGHTNESS);\n";
-    outText += "  FastLED.setMaxPowerInVoltsAndMilliamps(5, $currentValue);\n";
-    outText += "  FastLED.clear();\n";
-    outText += "  FastLED.show();\n";
-    outText += "}\n\n";
-
-    outText += "void loop() {\n";
-    outText += "  showImage();\n";
-    outText += "}\n";
-
-    List<Text> rowsList = List.generate(
-      rows * matrixRows * columns,
-      (index) => Text(
-        chunks[index].join(", "),
-        overflow: TextOverflow.ellipsis,
-        textAlign: TextAlign.start,
-      ),
-    );
+    outText += setupLoopFunctions(currentValue);
 
     return outText;
   }

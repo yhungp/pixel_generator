@@ -5,8 +5,9 @@ import 'dart:io';
 import 'package:calculator/language/editor.dart';
 import 'package:calculator/main.dart';
 import 'package:calculator/screens/editor/widgets/button.dart';
-import 'package:calculator/screens/editor/widgets/editor_text_tield.dart';
 import 'package:calculator/styles/styles.dart';
+import 'package:calculator/utils/editor_code_generators/code_generators.dart';
+import 'package:calculator/screens/editor/widgets/enable_brightness.dart';
 import 'package:file_picker/file_picker.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
@@ -272,56 +273,27 @@ class _CodeFromVideoState extends State<CodeFromVideo> {
 
     var addSpaces = enableBrightnessControl ? "       " : "";
 
-    var outText = "#include <FastLED.h>\n\n";
-    outText += "#define RGB_PIN       ${addSpaces}3\n";
-    outText += "#define RGB_LED_NUM   ${addSpaces}512\n";
-    outText += "#define BRIGHTNESS    $addSpaces${!enableBrightnessControl ? "255" : brightnessValue.text}\n";
-    outText += "#define CHIP_SET      ${addSpaces}WS2812B\n";
-    outText += "#define COLOR_CODE    ${addSpaces}GRB\n\n";
-    outText += "CRGB LEDs[RGB_LED_NUM];\n";
-
-    if (enableBrightnessControl) {
-      outText += "\nint BRIGHTNESS_CONTROL_PIN = ${brightnessPin.text};\n";
-      outText += "int BRIGHTNESS_PIN_VALUE   = 0;\n";
-      outText += "int DELAY_COUNTER          = 0;\n";
-      outText += "bool BRIGHTNESS_HAS_CHANGE = false;\n";
-    }
+    var outText = variablesAndLibraries(
+      addSpaces,
+      rows * columns * matrixRows * matrixColumns,
+      enableBrightnessControl,
+      brightnessValue,
+      brightnessPin,
+    );
 
     // add color codes
     // outText += "\nconst long pixels[] PROGMEM = {\n";
     for (int i = 0; i < values.length; i++) {
-      outText += "\nconst long pixels_$i[] PROGMEM = {\n  ${List.generate(
+      outText += "const long pixels_$i[] PROGMEM = {\n  ${List.generate(
         rows * matrixRows * columns,
         (index) => chunks[index + rows * matrixRows * columns * i].join(", "),
       ).join(",\n  ")}\n";
-      outText += "};\n";
+      outText += "};\n\n";
     }
-    outText += "\n\n";
 
     int delay = 1000 ~/ widget.fps;
 
-    outText += "int frameCounter = 0;\n";
-    outText += "void showImage(void) {\n";
-    outText += "  delay(${!enableBrightnessControl ? delay : 1});\n\n";
-
-    if (enableBrightnessControl) {
-      outText += "  DELAY_COUNTER += 1;\n\n";
-      outText += "  if(DELAY_COUNTER % 20 == 0) {\n";
-      outText += "    int val = map(analogRead( BRIGHTNESS_CONTROL_PIN ), 0, ${maxAdcValue.text}, 0, 255);\n";
-      outText += "    if (val != BRIGHTNESS_PIN_VALUE) {\n";
-      outText += "      BRIGHTNESS_PIN_VALUE = val;\n";
-      outText += "      BRIGHTNESS_HAS_CHANGE = true;\n";
-      outText += "      FastLED.setBrightness(BRIGHTNESS_PIN_VALUE);\n";
-      outText += "    }\n";
-      outText += "  }\n\n";
-      outText += "  if(DELAY_COUNTER != $delay && !BRIGHTNESS_HAS_CHANGE) {\n";
-      outText += "    return;\n";
-      outText += "  }\n\n";
-      outText += "  DELAY_COUNTER = 0;\n\n";
-      // outText += "  if(!BRIGHTNESS_HAS_CHANGE) {\n";
-      // outText += "    return;\n";
-      // outText += "  }\n\n";
-    }
+    outText += enableBrightnessControlLabel(maxAdcValue, delay, enableBrightnessControl);
 
     outText += "  for (int i = 0; i < RGB_LED_NUM; i++) {\n";
     outText += "    switch (frameCounter) {\n";
@@ -333,154 +305,10 @@ class _CodeFromVideoState extends State<CodeFromVideo> {
     }
 
     outText += "    }\n";
-    outText += "  }\n\n";
-    outText += "  FastLED.show();\n\n";
-    outText += "  frameCounter += 1;\n";
-    outText += "  if (frameCounter == ${values.length}){\n";
-    outText += "    frameCounter = 0;\n";
-    outText += "  }\n";
 
-    if (enableBrightnessControl) {
-      outText += "\n  BRIGHTNESS_HAS_CHANGE = false;\n";
-    }
-
-    outText += "}\n\n";
-
-    outText += "void setup() {\n";
-    outText += "  Serial.begin(9600);\n";
-    outText += '  Serial.println("WS2812B LEDs strip Initialize");\n';
-    outText += "  FastLED.addLeds<CHIP_SET, RGB_PIN, COLOR_CODE>(LEDs, RGB_LED_NUM);\n";
-    outText += "  FastLED.setBrightness(BRIGHTNESS);\n";
-    outText += "  FastLED.setMaxPowerInVoltsAndMilliamps(5, $currentValue);\n";
-    outText += "  FastLED.clear();\n";
-    outText += "  FastLED.show();\n";
-    outText += "}\n\n";
-
-    outText += "void loop() {\n";
-    outText += "  showImage();\n";
-    outText += "}\n";
+    outText += frameCounterCheck(values.length, enableBrightnessControl);
+    outText += setupLoopFunctions(currentValue);
 
     return outText;
-  }
-}
-
-class EnableBrightness extends StatelessWidget {
-  EnableBrightness({
-    Key? key,
-    required this.showHideCode,
-    required this.toggleSwitch,
-    required this.onPinValueChange,
-    required this.onAdcValueChange,
-    required this.onBrightnessValueChange,
-    required this.brightnessValue,
-    required this.brightnessPin,
-    required this.maxAdcValue,
-    required this.enableBrightnessControl,
-    required this.notifier,
-  }) : super(key: key);
-
-  Function showHideCode;
-  Function toggleSwitch;
-  Function onPinValueChange;
-  Function onAdcValueChange;
-  Function onBrightnessValueChange;
-
-  TextEditingController brightnessValue;
-  TextEditingController maxAdcValue;
-  TextEditingController brightnessPin;
-
-  bool enableBrightnessControl;
-
-  SettingsScreenNotifier notifier;
-
-  @override
-  Widget build(BuildContext context) {
-    return Row(
-      children: [
-        // IconButton(onPressed: () => showHideCode(), icon: Icon(Icons.cancel)),
-        SizedBox(
-          width: 40,
-          height: 55,
-          child: Switch(
-            onChanged: (value) => toggleSwitch(value),
-            value: enableBrightnessControl,
-            activeColor: Colors.white,
-            inactiveThumbColor: Colors.black,
-            materialTapTargetSize: MaterialTapTargetSize.shrinkWrap,
-          ),
-        ),
-        SizedBox(
-          width: 10,
-        ),
-        Text(
-          addBrightnessControl(notifier.language),
-          style: TextStyle(color: Colors.white),
-        ),
-        SizedBox(
-          width: 20,
-        ),
-        Visibility(
-          visible: enableBrightnessControl,
-          child: Container(
-            decoration: BoxDecoration(
-              borderRadius: BorderRadius.all(Radius.circular(5)),
-              border: Border.all(width: 1, color: Colors.white),
-            ),
-            padding: EdgeInsets.all(10),
-            child: Row(
-              mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-              children: [
-                Container(
-                  margin: EdgeInsets.only(right: 10),
-                  child: Row(
-                    children: [
-                      Text(
-                        "Pin",
-                        style: TextStyle(
-                          color: Colors.white,
-                        ),
-                      ),
-                      SizedBox(width: 5),
-                      editorTextField(brightnessPin, notifier, onPinValueChange, allowLetters: true),
-                    ],
-                  ),
-                ),
-                Container(
-                  margin: EdgeInsets.only(right: 10),
-                  child: Row(
-                    children: [
-                      Text(
-                        addBrightnessValue(notifier.language),
-                        style: TextStyle(
-                          color: Colors.white,
-                        ),
-                      ),
-                      SizedBox(width: 5),
-                      editorTextField(
-                        brightnessValue,
-                        notifier,
-                        onBrightnessValueChange,
-                      ),
-                    ],
-                  ),
-                ),
-                Text(
-                  maxAdcValueLabel(notifier.language),
-                  style: TextStyle(
-                    color: Colors.white,
-                  ),
-                ),
-                SizedBox(width: 5),
-                editorTextField(
-                  maxAdcValue,
-                  notifier,
-                  onAdcValueChange,
-                ),
-              ],
-            ),
-          ),
-        ),
-      ],
-    );
   }
 }
