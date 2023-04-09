@@ -2,11 +2,12 @@
 
 import 'package:calculator/language/editor.dart';
 import 'package:calculator/main.dart';
+import 'package:calculator/screens/editor/widgets/button.dart';
+import 'package:calculator/screens/editor/widgets/hand_painting/code_from_colors_widget.dart';
 import 'package:calculator/screens/editor/widgets/hand_painting/set_matrix_black_or_white.dart';
 import 'package:calculator/screens/editor/widgets/matrix_painter.dart';
 import 'package:calculator/screens/editor/widgets/hand_painting/show_matrix_joined.dart';
 import 'package:calculator/styles/styles.dart';
-import 'package:calculator/widgets/scale_button.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
@@ -34,6 +35,7 @@ enum ColorOptions {
   black,
   white,
 }
+
 class _GreyScaleState extends State<GreyScale> {
   int matrixColumns = 8;
   int matrixRows = 8;
@@ -61,6 +63,7 @@ class _GreyScaleState extends State<GreyScale> {
   bool rgbScaleTouched = false;
   bool matrixTouched = false;
   bool showMatrixJoinedFlag = false;
+  bool showCode = false;
 
   @override
   void initState() {
@@ -225,89 +228,105 @@ class _GreyScaleState extends State<GreyScale> {
                       toogleMatrixJoined: toogleMatrixJoined,
                       notifier: notifier,
                     ),
+                    SizedBox(width: 10),
+                    EditorButton(
+                      label: !showCode ? generateCode(notifier.language) : hideCode(notifier.language),
+                      func: () {
+                        setState(() {
+                          showCode = !showCode;
+                        });
+                      },
+                      darkTheme: notifier.darkTheme,
+                    )
                   ],
                 ),
               ),
               Expanded(
                 child: Row(
                   children: [
-                    Expanded(
-                      child: Container(
-                        decoration: BoxDecoration(
-                          borderRadius: BorderRadius.all(Radius.circular(5)),
-                          color: blueTheme(notifier.darkTheme),
-                        ),
-                        padding: EdgeInsets.all(10),
-                        child: Column(
-                          mainAxisAlignment: MainAxisAlignment.start,
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            GestureDetector(
-                              onPanUpdate: (details) {
-                                final tapPosition = details.localPosition;
+                    showCode
+                        ? CodeFromColorsWidget(
+                            colors: colors,
+                            notifier: notifier,
+                            showHideCode: showHideCode,
+                          )
+                        : Expanded(
+                            child: Container(
+                              decoration: BoxDecoration(
+                                borderRadius: BorderRadius.all(Radius.circular(5)),
+                                color: blueTheme(notifier.darkTheme),
+                              ),
+                              padding: EdgeInsets.all(10),
+                              child: Column(
+                                mainAxisAlignment: MainAxisAlignment.start,
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  GestureDetector(
+                                    onPanUpdate: (details) {
+                                      final tapPosition = details.localPosition;
 
-                                setState(() {
-                                  posxMatrixPainter = tapPosition.dx;
-                                  posyMatrixPainter = tapPosition.dy;
+                                      setState(() {
+                                        posxMatrixPainter = tapPosition.dx;
+                                        posyMatrixPainter = tapPosition.dy;
 
-                                  checkIfCoordinatesOnRectangle(
-                                    posxMatrixPainter,
-                                    posyMatrixPainter,
-                                  );
+                                        checkIfCoordinatesOnRectangle(
+                                          posxMatrixPainter,
+                                          posyMatrixPainter,
+                                        );
 
-                                  matrixTouched = true;
-                                });
-                              },
-                              onTapDown: (TapDownDetails details) {
-                                final tapPosition = details.localPosition;
+                                        matrixTouched = true;
+                                      });
+                                    },
+                                    onTapDown: (TapDownDetails details) {
+                                      final tapPosition = details.localPosition;
 
-                                setState(() {
-                                  posxMatrixPainter = tapPosition.dx;
-                                  posyMatrixPainter = tapPosition.dy;
+                                      setState(() {
+                                        posxMatrixPainter = tapPosition.dx;
+                                        posyMatrixPainter = tapPosition.dy;
 
-                                  checkIfCoordinatesOnRectangle(
-                                    posxMatrixPainter,
-                                    posyMatrixPainter,
-                                  );
+                                        checkIfCoordinatesOnRectangle(
+                                          posxMatrixPainter,
+                                          posyMatrixPainter,
+                                        );
 
-                                  matrixTouched = true;
-                                });
-                              },
-                              onPanEnd: (_) {
-                                setState(() {
-                                  matrixTouched = false;
-                                });
-                              },
-                              onTapUp: (_) {
-                                setState(() {
-                                  matrixTouched = false;
-                                });
-                              },
-                              child: CustomPaint(
-                                size: Size(
-                                  matrixColumns * 13.0 * columns + (columns - 1) * 5,
-                                  matrixRows * 13.0 * rows + (rows - 1) * 5,
-                                ),
-                                painter: MatrixPainter(
-                                  posxMatrixPainter,
-                                  posyMatrixPainter,
-                                  false,
-                                  columns,
-                                  matrixColumns,
-                                  matrixRows,
-                                  rows,
-                                  matrixTouched,
-                                  currentColor,
-                                  colors,
-                                  widget.scale,
-                                  dontShowSpaceBetweenMatrix: showMatrixJoinedFlag,
-                                ),
+                                        matrixTouched = true;
+                                      });
+                                    },
+                                    onPanEnd: (_) {
+                                      setState(() {
+                                        matrixTouched = false;
+                                      });
+                                    },
+                                    onTapUp: (_) {
+                                      setState(() {
+                                        matrixTouched = false;
+                                      });
+                                    },
+                                    child: CustomPaint(
+                                      size: Size(
+                                        matrixColumns * 13.0 * columns + (columns - 1) * 5,
+                                        matrixRows * 13.0 * rows + (rows - 1) * 5,
+                                      ),
+                                      painter: MatrixPainter(
+                                        posxMatrixPainter,
+                                        posyMatrixPainter,
+                                        false,
+                                        columns,
+                                        matrixColumns,
+                                        matrixRows,
+                                        rows,
+                                        matrixTouched,
+                                        currentColor,
+                                        colors,
+                                        widget.scale,
+                                        dontShowSpaceBetweenMatrix: showMatrixJoinedFlag,
+                                      ),
+                                    ),
+                                  ),
+                                ],
                               ),
                             ),
-                          ],
-                        ),
-                      ),
-                    ),
+                          ),
                   ],
                 ),
               ),
@@ -315,6 +334,12 @@ class _GreyScaleState extends State<GreyScale> {
           ),
         ),
       );
+    });
+  }
+
+  showHideCode(bool value) {
+    setState(() {
+      showCode = value;
     });
   }
 

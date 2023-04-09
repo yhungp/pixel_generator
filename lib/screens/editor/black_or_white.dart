@@ -330,8 +330,6 @@ class _BlackOrWhiteState extends State<BlackOrWhite> {
     );
   }
 
-  allToWhite() {}
-
   editPixel(
     int rowsCountIndex,
     int columnsCountIndex,
