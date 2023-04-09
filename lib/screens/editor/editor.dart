@@ -9,7 +9,6 @@ import 'package:calculator/screens/editor/from_image.dart';
 import 'package:calculator/screens/editor/from_video.dart';
 import 'package:calculator/screens/editor/gray_scale.dart';
 import 'package:calculator/screens/editor/rgb_picker.dart';
-import 'package:calculator/screens/editor/widgets/scale_button.dart';
 import 'package:calculator/screens/editor/widgets/top_bar/editor_top_bar.dart';
 import 'package:calculator/styles/styles.dart';
 import 'package:flutter/material.dart';
@@ -40,6 +39,14 @@ enum EditorOptions {
   fromImage,
   fromVideo,
 }
+
+List EditorOptionsLabels = [
+  "B/W",
+  "Gray",
+  "RGB",
+  "Image",
+  "Video",
+];
 
 class _EditorState extends State<Editor> {
   EditorOptions editorOptionsSelected = EditorOptions.blackOrWhite;

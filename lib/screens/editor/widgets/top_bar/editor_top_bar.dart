@@ -28,234 +28,184 @@ Row selector(
   Function setEditorOption,
   Function selectorBorderColor,
 ) {
+  var values = EditorOptions.values;
   return Row(
     children: [
       // black and white
       SizedBox(width: 5),
-      GestureDetector(
-        onTap: () => setEditorOption(EditorOptions.blackOrWhite),
-        child: Container(
-          width: 70,
-          height: 40,
-          decoration: BoxDecoration(
-            color: blueTheme(notifier.darkTheme),
-            borderRadius: BorderRadius.all(Radius.circular(5)),
-            border: Border.all(
-              color: selectorBorderColor(EditorOptions.blackOrWhite, notifier.darkTheme),
-              width: 2,
-            ),
-          ),
-          child: Row(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              Container(
-                width: 30,
-                height: 30,
-                alignment: Alignment.center,
-                decoration: BoxDecoration(
-                  color: Colors.black,
-                  borderRadius: BorderRadius.horizontal(left: Radius.circular(5)),
-                ),
-                child: Text(
-                  "B",
-                  style: TextStyle(
-                    color: Colors.white,
-                  ),
-                ),
-              ),
-              Container(
-                width: 30,
-                height: 30,
-                alignment: Alignment.center,
-                decoration: BoxDecoration(
-                  color: Colors.white,
-                  borderRadius: BorderRadius.horizontal(right: Radius.circular(5)),
-                ),
-                child: Text(
-                  "W",
-                  style: TextStyle(
-                    color: Colors.black,
-                  ),
-                ),
-              ),
-            ],
-          ),
-        ),
-      ),
 
-      // gray scale
-      SizedBox(width: 10),
-      GestureDetector(
-        onTap: () => setEditorOption(EditorOptions.grayScale),
-        child: Container(
-          width: 70,
-          height: 40,
-          decoration: BoxDecoration(
-            color: blueTheme(notifier.darkTheme),
-            borderRadius: BorderRadius.all(Radius.circular(5)),
-            border: Border.all(
-              color: selectorBorderColor(EditorOptions.grayScale, notifier.darkTheme),
-              width: 2,
-            ),
-          ),
-          child: Row(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              Container(
-                width: 60,
-                height: 30,
-                alignment: Alignment.center,
+      for (var i = 0; i < values.length; i++)
+        Row(
+          children: [
+            GestureDetector(
+              onTap: () => setEditorOption(values[i]),
+              child: Container(
+                width: 50,
+                height: 40,
                 decoration: BoxDecoration(
-                  gradient: LinearGradient(
-                    colors: [
-                      Colors.white,
-                      Colors.black,
-                    ],
-                  ),
+                  color: blueTheme(notifier.darkTheme),
                   borderRadius: BorderRadius.all(Radius.circular(5)),
+                  border: Border.all(
+                    color: selectorBorderColor(values[i], notifier.darkTheme),
+                    width: 2,
+                  ),
                 ),
-                child: Stack(
+                child: Row(
+                  mainAxisAlignment: MainAxisAlignment.center,
                   children: [
-                    // Implement the stroke
                     Text(
-                      'Gray',
+                      EditorOptionsLabels[i],
                       style: TextStyle(
-                        fontSize: 15,
-                        letterSpacing: 2,
-                        foreground: Paint()
-                          ..style = PaintingStyle.stroke
-                          ..strokeWidth = 5
-                          ..color = Colors.white,
-                      ),
-                    ),
-                    // The text inside
-                    const Text(
-                      'Gray',
-                      style: TextStyle(
-                        fontSize: 15,
-                        letterSpacing: 2,
-                        fontWeight: FontWeight.bold,
-                        color: Colors.black,
+                        color: Colors.white,
                       ),
                     ),
                   ],
                 ),
               ),
-            ],
-          ),
-        ),
-      ),
-
-      // rgb
-      SizedBox(width: 10),
-      GestureDetector(
-        onTap: () => setEditorOption(EditorOptions.rgbPicker),
-        child: Container(
-          width: 70,
-          height: 40,
-          decoration: BoxDecoration(
-            color: blueTheme(notifier.darkTheme),
-            borderRadius: BorderRadius.all(Radius.circular(5)),
-            border: Border.all(
-              color: selectorBorderColor(EditorOptions.rgbPicker, notifier.darkTheme),
-              width: 2,
             ),
-          ),
-          child: Row(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              Container(
-                width: 20,
-                height: 30,
-                alignment: Alignment.center,
-                decoration: BoxDecoration(
-                  color: Color.fromARGB(200, 255, 0, 0),
-                  borderRadius: BorderRadius.horizontal(left: Radius.circular(5)),
-                ),
-                child: Text(
-                  "R",
-                  style: TextStyle(
-                    color: Colors.white,
-                  ),
-                ),
-              ),
-              Container(
-                width: 20,
-                height: 30,
-                alignment: Alignment.center,
-                color: Color.fromARGB(150, 0, 255, 0),
-                child: Text(
-                  "G",
-                  style: TextStyle(
-                    color: Colors.black,
-                  ),
-                ),
-              ),
-              Container(
-                width: 20,
-                height: 30,
-                alignment: Alignment.center,
-                decoration: BoxDecoration(
-                  color: Color.fromARGB(150, 0, 0, 255),
-                  borderRadius: BorderRadius.horizontal(right: Radius.circular(5)),
-                ),
-                child: Text(
-                  "B",
-                  style: TextStyle(
-                    color: Colors.white,
-                  ),
-                ),
-              ),
-            ],
-          ),
+            SizedBox(width: 10),
+          ],
         ),
-      ),
 
-      // image
-      SizedBox(width: 10),
-      GestureDetector(
-        onTap: () => setEditorOption(EditorOptions.fromImage),
-        child: Container(
-          width: 70,
-          height: 40,
-          decoration: BoxDecoration(
-            color: blueTheme(notifier.darkTheme),
-            borderRadius: BorderRadius.all(Radius.circular(5)),
-            border: Border.all(
-              color: selectorBorderColor(EditorOptions.fromImage, notifier.darkTheme),
-              width: 2,
-            ),
-          ),
-          child: Icon(
-            Icons.image,
-            color: Colors.white,
-            size: 28,
-          ),
-        ),
-      ),
+      // // gray scale
+      // SizedBox(width: 10),
+      // GestureDetector(
+      //   onTap: () => setEditorOption(EditorOptions.grayScale),
+      //   child: Container(
+      //     width: 50,
+      //     height: 40,
+      //     decoration: BoxDecoration(
+      //       color: blueTheme(notifier.darkTheme),
+      //       borderRadius: BorderRadius.all(Radius.circular(5)),
+      //       border: Border.all(
+      //         color: selectorBorderColor(EditorOptions.grayScale, notifier.darkTheme),
+      //         width: 2,
+      //       ),
+      //     ),
+      //     child: Row(
+      //       mainAxisAlignment: MainAxisAlignment.center,
+      //       children: [
+      //         Text(
+      //           "Gray",
+      //           style: TextStyle(
+      //             color: Colors.white,
+      //           ),
+      //         ),
+      //       ],
+      //     ),
+      //   ),
+      // ),
 
-      // black and white
-      SizedBox(width: 10),
-      GestureDetector(
-        onTap: () => setEditorOption(EditorOptions.fromVideo),
-        child: Container(
-          width: 70,
-          height: 40,
-          decoration: BoxDecoration(
-            color: blueTheme(notifier.darkTheme),
-            borderRadius: BorderRadius.all(Radius.circular(5)),
-            border: Border.all(
-              color: selectorBorderColor(EditorOptions.fromVideo, notifier.darkTheme),
-              width: 2,
-            ),
-          ),
-          child: Icon(
-            Icons.video_call,
-            color: Colors.white,
-            size: 35,
-          ),
-        ),
-      ),
+      // // rgb
+      // SizedBox(width: 10),
+      // GestureDetector(
+      //   onTap: () => setEditorOption(EditorOptions.rgbPicker),
+      //   child: Container(
+      //     width: 70,
+      //     height: 40,
+      //     decoration: BoxDecoration(
+      //       color: blueTheme(notifier.darkTheme),
+      //       borderRadius: BorderRadius.all(Radius.circular(5)),
+      //       border: Border.all(
+      //         color: selectorBorderColor(EditorOptions.rgbPicker, notifier.darkTheme),
+      //         width: 2,
+      //       ),
+      //     ),
+      //     child: Row(
+      //       mainAxisAlignment: MainAxisAlignment.center,
+      //       children: [
+      //         Container(
+      //           width: 20,
+      //           height: 30,
+      //           alignment: Alignment.center,
+      //           decoration: BoxDecoration(
+      //             color: Color.fromARGB(200, 255, 0, 0),
+      //             borderRadius: BorderRadius.horizontal(left: Radius.circular(5)),
+      //           ),
+      //           child: Text(
+      //             "R",
+      //             style: TextStyle(
+      //               color: Colors.white,
+      //             ),
+      //           ),
+      //         ),
+      //         Container(
+      //           width: 20,
+      //           height: 30,
+      //           alignment: Alignment.center,
+      //           color: Color.fromARGB(150, 0, 255, 0),
+      //           child: Text(
+      //             "G",
+      //             style: TextStyle(
+      //               color: Colors.black,
+      //             ),
+      //           ),
+      //         ),
+      //         Container(
+      //           width: 20,
+      //           height: 30,
+      //           alignment: Alignment.center,
+      //           decoration: BoxDecoration(
+      //             color: Color.fromARGB(150, 0, 0, 255),
+      //             borderRadius: BorderRadius.horizontal(right: Radius.circular(5)),
+      //           ),
+      //           child: Text(
+      //             "B",
+      //             style: TextStyle(
+      //               color: Colors.white,
+      //             ),
+      //           ),
+      //         ),
+      //       ],
+      //     ),
+      //   ),
+      // ),
+
+      // // image
+      // SizedBox(width: 10),
+      // GestureDetector(
+      //   onTap: () => setEditorOption(EditorOptions.fromImage),
+      //   child: Container(
+      //     width: 70,
+      //     height: 40,
+      //     decoration: BoxDecoration(
+      //       color: blueTheme(notifier.darkTheme),
+      //       borderRadius: BorderRadius.all(Radius.circular(5)),
+      //       border: Border.all(
+      //         color: selectorBorderColor(EditorOptions.fromImage, notifier.darkTheme),
+      //         width: 2,
+      //       ),
+      //     ),
+      //     child: Icon(
+      //       Icons.image,
+      //       color: Colors.white,
+      //       size: 28,
+      //     ),
+      //   ),
+      // ),
+
+      // // black and white
+      // SizedBox(width: 10),
+      // GestureDetector(
+      //   onTap: () => setEditorOption(EditorOptions.fromVideo),
+      //   child: Container(
+      //     width: 70,
+      //     height: 40,
+      //     decoration: BoxDecoration(
+      //       color: blueTheme(notifier.darkTheme),
+      //       borderRadius: BorderRadius.all(Radius.circular(5)),
+      //       border: Border.all(
+      //         color: selectorBorderColor(EditorOptions.fromVideo, notifier.darkTheme),
+      //         width: 2,
+      //       ),
+      //     ),
+      //     child: Icon(
+      //       Icons.video_call,
+      //       color: Colors.white,
+      //       size: 35,
+      //     ),
+      //   ),
+      // ),
     ],
   );
 }
