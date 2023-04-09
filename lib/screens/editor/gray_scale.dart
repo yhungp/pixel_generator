@@ -263,65 +263,68 @@ class _GreyScaleState extends State<GreyScale> {
                                 mainAxisAlignment: MainAxisAlignment.start,
                                 crossAxisAlignment: CrossAxisAlignment.start,
                                 children: [
-                                  GestureDetector(
-                                    onPanUpdate: (details) {
-                                      final tapPosition = details.localPosition;
+                                  MouseRegion(
+                                    cursor: peekingColor ? SystemMouseCursors.click : SystemMouseCursors.basic,
+                                    child: GestureDetector(
+                                      onPanUpdate: (details) {
+                                        final tapPosition = details.localPosition;
 
-                                      setState(() {
-                                        posxMatrixPainter = tapPosition.dx;
-                                        posyMatrixPainter = tapPosition.dy;
+                                        setState(() {
+                                          posxMatrixPainter = tapPosition.dx;
+                                          posyMatrixPainter = tapPosition.dy;
 
-                                        checkIfCoordinatesOnRectangle(
+                                          checkIfCoordinatesOnRectangle(
+                                            posxMatrixPainter,
+                                            posyMatrixPainter,
+                                          );
+
+                                          matrixTouched = true;
+                                        });
+                                      },
+                                      onTapDown: (TapDownDetails details) {
+                                        final tapPosition = details.localPosition;
+
+                                        setState(() {
+                                          posxMatrixPainter = tapPosition.dx;
+                                          posyMatrixPainter = tapPosition.dy;
+
+                                          checkIfCoordinatesOnRectangle(
+                                            posxMatrixPainter,
+                                            posyMatrixPainter,
+                                          );
+
+                                          matrixTouched = true;
+                                        });
+                                      },
+                                      onPanEnd: (_) {
+                                        setState(() {
+                                          matrixTouched = false;
+                                        });
+                                      },
+                                      onTapUp: (_) {
+                                        setState(() {
+                                          matrixTouched = false;
+                                        });
+                                      },
+                                      child: CustomPaint(
+                                        size: Size(
+                                          matrixColumns * 13.0 * columns + (columns - 1) * 5,
+                                          matrixRows * 13.0 * rows + (rows - 1) * 5,
+                                        ),
+                                        painter: MatrixPainter(
                                           posxMatrixPainter,
                                           posyMatrixPainter,
-                                        );
-
-                                        matrixTouched = true;
-                                      });
-                                    },
-                                    onTapDown: (TapDownDetails details) {
-                                      final tapPosition = details.localPosition;
-
-                                      setState(() {
-                                        posxMatrixPainter = tapPosition.dx;
-                                        posyMatrixPainter = tapPosition.dy;
-
-                                        checkIfCoordinatesOnRectangle(
-                                          posxMatrixPainter,
-                                          posyMatrixPainter,
-                                        );
-
-                                        matrixTouched = true;
-                                      });
-                                    },
-                                    onPanEnd: (_) {
-                                      setState(() {
-                                        matrixTouched = false;
-                                      });
-                                    },
-                                    onTapUp: (_) {
-                                      setState(() {
-                                        matrixTouched = false;
-                                      });
-                                    },
-                                    child: CustomPaint(
-                                      size: Size(
-                                        matrixColumns * 13.0 * columns + (columns - 1) * 5,
-                                        matrixRows * 13.0 * rows + (rows - 1) * 5,
-                                      ),
-                                      painter: MatrixPainter(
-                                        posxMatrixPainter,
-                                        posyMatrixPainter,
-                                        false,
-                                        columns,
-                                        matrixColumns,
-                                        matrixRows,
-                                        rows,
-                                        matrixTouched,
-                                        currentColor,
-                                        colors,
-                                        widget.scale,
-                                        dontShowSpaceBetweenMatrix: showMatrixJoinedFlag,
+                                          false,
+                                          columns,
+                                          matrixColumns,
+                                          matrixRows,
+                                          rows,
+                                          matrixTouched,
+                                          currentColor,
+                                          colors,
+                                          widget.scale,
+                                          dontShowSpaceBetweenMatrix: showMatrixJoinedFlag,
+                                        ),
                                       ),
                                     ),
                                   ),

@@ -187,6 +187,26 @@ class _RGB_PickerState extends State<RGB_Picker> {
                               borderRadius: BorderRadius.all(Radius.circular(5)),
                             ),
                           ),
+                          SizedBox(
+                            width: 10,
+                          ),
+                          GestureDetector(
+                            onTap: (() {
+                              setState(() {
+                                peekingColor = !peekingColor;
+                              });
+                            }),
+                            child: Container(
+                              width: 30,
+                              height: 30,
+                              padding: EdgeInsets.all(2),
+                              decoration: BoxDecoration(
+                                borderRadius: BorderRadius.all(Radius.circular(5)),
+                                color: !peekingColor ? Colors.white : Colors.grey,
+                              ),
+                              child: Image.asset("assets/dropper.png"),
+                            ),
+                          ),
                         ],
                       ),
                     ),
@@ -229,65 +249,68 @@ class _RGB_PickerState extends State<RGB_Picker> {
                                 mainAxisAlignment: MainAxisAlignment.start,
                                 crossAxisAlignment: CrossAxisAlignment.start,
                                 children: [
-                                  GestureDetector(
-                                    onPanUpdate: (details) {
-                                      final tapPosition = details.localPosition;
+                                  MouseRegion(
+                                    cursor: peekingColor ? SystemMouseCursors.click : SystemMouseCursors.basic,
+                                    child: GestureDetector(
+                                      onPanUpdate: (details) {
+                                        final tapPosition = details.localPosition;
 
-                                      setState(() {
-                                        posxMatrixPainter = tapPosition.dx;
-                                        posyMatrixPainter = tapPosition.dy;
+                                        setState(() {
+                                          posxMatrixPainter = tapPosition.dx;
+                                          posyMatrixPainter = tapPosition.dy;
 
-                                        checkIfCoordinatesOnRectangle(
+                                          checkIfCoordinatesOnRectangle(
+                                            posxMatrixPainter,
+                                            posyMatrixPainter,
+                                          );
+
+                                          matrixTouched = true;
+                                        });
+                                      },
+                                      onTapDown: (TapDownDetails details) {
+                                        final tapPosition = details.localPosition;
+
+                                        setState(() {
+                                          posxMatrixPainter = tapPosition.dx;
+                                          posyMatrixPainter = tapPosition.dy;
+
+                                          checkIfCoordinatesOnRectangle(
+                                            posxMatrixPainter,
+                                            posyMatrixPainter,
+                                          );
+
+                                          matrixTouched = true;
+                                        });
+                                      },
+                                      onPanEnd: (_) {
+                                        setState(() {
+                                          matrixTouched = false;
+                                        });
+                                      },
+                                      onTapUp: (_) {
+                                        setState(() {
+                                          matrixTouched = false;
+                                        });
+                                      },
+                                      child: CustomPaint(
+                                        size: Size(
+                                          matrixColumns * 13.0 * columns + (columns - 1) * 5,
+                                          matrixRows * 13.0 * rows + (rows - 1) * 5,
+                                        ),
+                                        painter: MatrixPainter(
                                           posxMatrixPainter,
                                           posyMatrixPainter,
-                                        );
-
-                                        matrixTouched = true;
-                                      });
-                                    },
-                                    onTapDown: (TapDownDetails details) {
-                                      final tapPosition = details.localPosition;
-
-                                      setState(() {
-                                        posxMatrixPainter = tapPosition.dx;
-                                        posyMatrixPainter = tapPosition.dy;
-
-                                        checkIfCoordinatesOnRectangle(
-                                          posxMatrixPainter,
-                                          posyMatrixPainter,
-                                        );
-
-                                        matrixTouched = true;
-                                      });
-                                    },
-                                    onPanEnd: (_) {
-                                      setState(() {
-                                        matrixTouched = false;
-                                      });
-                                    },
-                                    onTapUp: (_) {
-                                      setState(() {
-                                        matrixTouched = false;
-                                      });
-                                    },
-                                    child: CustomPaint(
-                                      size: Size(
-                                        matrixColumns * 13.0 * columns + (columns - 1) * 5,
-                                        matrixRows * 13.0 * rows + (rows - 1) * 5,
-                                      ),
-                                      painter: MatrixPainter(
-                                        posxMatrixPainter,
-                                        posyMatrixPainter,
-                                        false,
-                                        columns,
-                                        matrixColumns,
-                                        matrixRows,
-                                        rows,
-                                        matrixTouched,
-                                        currentColor,
-                                        colors,
-                                        widget.scale,
-                                        dontShowSpaceBetweenMatrix: showMatrixJoinedFlag,
+                                          false,
+                                          columns,
+                                          matrixColumns,
+                                          matrixRows,
+                                          rows,
+                                          matrixTouched,
+                                          currentColor,
+                                          colors,
+                                          widget.scale,
+                                          dontShowSpaceBetweenMatrix: showMatrixJoinedFlag,
+                                        ),
                                       ),
                                     ),
                                   ),
@@ -517,6 +540,15 @@ class _RGB_PickerState extends State<RGB_Picker> {
     int mcIndex,
     Color color,
   ) {
+    if (peekingColor) {
+      currentColor = colors[rIndex][cIndex][mrIndex][mcIndex];
+
+      // posx = currentColor.blue.toInt() / 255 * 500;
+      setState(() {
+        peekingColor = false;
+      });
+      return;
+    }
     setState(() {
       colors[rIndex][cIndex][mrIndex][mcIndex] = color;
     });
