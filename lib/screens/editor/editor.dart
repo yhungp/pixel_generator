@@ -40,7 +40,7 @@ enum EditorOptions {
   fromVideo,
 }
 
-List EditorOptionsLabels = [
+List editorOptionsLabels = [
   "B/W",
   "Gray",
   "RGB",

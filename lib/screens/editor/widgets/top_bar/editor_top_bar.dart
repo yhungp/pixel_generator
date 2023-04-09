@@ -54,7 +54,7 @@ Row selector(
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: [
                     Text(
-                      EditorOptionsLabels[i],
+                      editorOptionsLabels[i],
                       style: TextStyle(
                         color: Colors.white,
                       ),
