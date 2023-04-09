@@ -4,7 +4,6 @@ import 'package:calculator/language/editor.dart';
 import 'package:calculator/main.dart';
 import 'package:calculator/screens/editor/widgets/button.dart';
 import 'package:calculator/screens/editor/widgets/hand_painting/code_from_colors_widget.dart';
-import 'package:calculator/screens/editor/widgets/hand_painting/set_matrix_black_or_white.dart';
 import 'package:calculator/screens/editor/widgets/matrix_painter.dart';
 import 'package:calculator/screens/editor/widgets/hand_painting/show_matrix_joined.dart';
 import 'package:calculator/styles/styles.dart';
@@ -77,6 +76,8 @@ class _RGB_PickerState extends State<RGB_Picker> {
 
   bool showCode = false;
 
+  List<Color> rapidAccessColors = [];
+
   @override
   void initState() {
     scale = widget.scale;
@@ -85,6 +86,8 @@ class _RGB_PickerState extends State<RGB_Picker> {
     columns = widget.columns;
     rows = widget.rows;
     colors = widget.colors;
+
+    rapidAccessColors = List.generate(rapidColors.length, (index) => rapidColors[index]);
 
     super.initState();
   }
@@ -102,26 +105,14 @@ class _RGB_PickerState extends State<RGB_Picker> {
       return Expanded(
         child: Container(
           padding: EdgeInsets.all(5),
+          width: double.infinity,
+          height: double.infinity,
           child: Column(
             children: [
               Padding(
                 padding: const EdgeInsets.only(bottom: 10),
                 child: Row(
                   children: [
-                    SetMatrixBlackOrWhite(
-                      func: () => setColors(Colors.black),
-                      notifier: notifier,
-                      color: Colors.white,
-                      textSelector: 0,
-                    ),
-                    SizedBox(width: 10),
-                    SetMatrixBlackOrWhite(
-                      func: () => setColors(Colors.white),
-                      notifier: notifier,
-                      color: Colors.white,
-                      textSelector: 1,
-                    ),
-                    SizedBox(width: 10),
                     Container(
                       decoration: BoxDecoration(
                         borderRadius: BorderRadius.all(Radius.circular(5)),
@@ -239,83 +230,101 @@ class _RGB_PickerState extends State<RGB_Picker> {
                             showHideCode: showHideCode,
                           )
                         : Expanded(
-                            child: Container(
-                              decoration: BoxDecoration(
-                                borderRadius: BorderRadius.all(Radius.circular(5)),
-                                color: blueTheme(notifier.darkTheme),
-                              ),
-                              padding: EdgeInsets.all(10),
-                              child: Column(
-                                mainAxisAlignment: MainAxisAlignment.start,
-                                crossAxisAlignment: CrossAxisAlignment.start,
-                                children: [
-                                  MouseRegion(
-                                    cursor: peekingColor ? SystemMouseCursors.click : SystemMouseCursors.basic,
-                                    child: GestureDetector(
-                                      onPanUpdate: (details) {
-                                        final tapPosition = details.localPosition;
+                            child: Row(
+                              children: [
+                                Container(
+                                  width: 50,
+                                  height: double.infinity,
+                                  margin: EdgeInsets.only(right: 10),
+                                  decoration: BoxDecoration(
+                                    borderRadius: BorderRadius.all(Radius.circular(5)),
+                                    color: blueTheme(notifier.darkTheme),
+                                  ),
+                                  child: Expanded(child: listOfColors()),
+                                ),
+                                Expanded(
+                                  child: Container(
+                                    width: double.infinity,
+                                    height: double.infinity,
+                                    decoration: BoxDecoration(
+                                      borderRadius: BorderRadius.all(Radius.circular(5)),
+                                      color: blueTheme(notifier.darkTheme),
+                                    ),
+                                    padding: EdgeInsets.all(10),
+                                    child: Column(
+                                      mainAxisAlignment: MainAxisAlignment.start,
+                                      crossAxisAlignment: CrossAxisAlignment.start,
+                                      children: [
+                                        MouseRegion(
+                                          cursor: peekingColor ? SystemMouseCursors.click : SystemMouseCursors.basic,
+                                          child: GestureDetector(
+                                            onPanUpdate: (details) {
+                                              final tapPosition = details.localPosition;
 
-                                        setState(() {
-                                          posxMatrixPainter = tapPosition.dx;
-                                          posyMatrixPainter = tapPosition.dy;
+                                              setState(() {
+                                                posxMatrixPainter = tapPosition.dx;
+                                                posyMatrixPainter = tapPosition.dy;
 
-                                          checkIfCoordinatesOnRectangle(
-                                            posxMatrixPainter,
-                                            posyMatrixPainter,
-                                          );
+                                                checkIfCoordinatesOnRectangle(
+                                                  posxMatrixPainter,
+                                                  posyMatrixPainter,
+                                                );
 
-                                          matrixTouched = true;
-                                        });
-                                      },
-                                      onTapDown: (TapDownDetails details) {
-                                        final tapPosition = details.localPosition;
+                                                matrixTouched = true;
+                                              });
+                                            },
+                                            onTapDown: (TapDownDetails details) {
+                                              final tapPosition = details.localPosition;
 
-                                        setState(() {
-                                          posxMatrixPainter = tapPosition.dx;
-                                          posyMatrixPainter = tapPosition.dy;
+                                              setState(() {
+                                                posxMatrixPainter = tapPosition.dx;
+                                                posyMatrixPainter = tapPosition.dy;
 
-                                          checkIfCoordinatesOnRectangle(
-                                            posxMatrixPainter,
-                                            posyMatrixPainter,
-                                          );
+                                                checkIfCoordinatesOnRectangle(
+                                                  posxMatrixPainter,
+                                                  posyMatrixPainter,
+                                                );
 
-                                          matrixTouched = true;
-                                        });
-                                      },
-                                      onPanEnd: (_) {
-                                        setState(() {
-                                          matrixTouched = false;
-                                        });
-                                      },
-                                      onTapUp: (_) {
-                                        setState(() {
-                                          matrixTouched = false;
-                                        });
-                                      },
-                                      child: CustomPaint(
-                                        size: Size(
-                                          matrixColumns * 13.0 * columns + (columns - 1) * 5,
-                                          matrixRows * 13.0 * rows + (rows - 1) * 5,
+                                                matrixTouched = true;
+                                              });
+                                            },
+                                            onPanEnd: (_) {
+                                              setState(() {
+                                                matrixTouched = false;
+                                              });
+                                            },
+                                            onTapUp: (_) {
+                                              setState(() {
+                                                matrixTouched = false;
+                                              });
+                                            },
+                                            child: CustomPaint(
+                                              size: Size(
+                                                matrixColumns * 13.0 * columns + (columns - 1) * 5,
+                                                matrixRows * 13.0 * rows + (rows - 1) * 5,
+                                              ),
+                                              painter: MatrixPainter(
+                                                posxMatrixPainter,
+                                                posyMatrixPainter,
+                                                false,
+                                                columns,
+                                                matrixColumns,
+                                                matrixRows,
+                                                rows,
+                                                matrixTouched,
+                                                currentColor,
+                                                colors,
+                                                widget.scale,
+                                                dontShowSpaceBetweenMatrix: showMatrixJoinedFlag,
+                                              ),
+                                            ),
+                                          ),
                                         ),
-                                        painter: MatrixPainter(
-                                          posxMatrixPainter,
-                                          posyMatrixPainter,
-                                          false,
-                                          columns,
-                                          matrixColumns,
-                                          matrixRows,
-                                          rows,
-                                          matrixTouched,
-                                          currentColor,
-                                          colors,
-                                          widget.scale,
-                                          dontShowSpaceBetweenMatrix: showMatrixJoinedFlag,
-                                        ),
-                                      ),
+                                      ],
                                     ),
                                   ),
-                                ],
-                              ),
+                                ),
+                              ],
                             ),
                           ),
                   ],
@@ -326,6 +335,75 @@ class _RGB_PickerState extends State<RGB_Picker> {
         ),
       );
     });
+  }
+
+  listOfColors() {
+    return ListView.builder(
+      itemCount: rapidAccessColors.length + 1,
+      itemBuilder: (BuildContext context, int index) {
+        if (index == rapidAccessColors.length) {
+          return Wrap(
+            children: [
+              Tooltip(
+                message: "Add current color to list",
+                child: GestureDetector(
+                  onTap: () {
+                    rapidAccessColors.add(currentColor);
+                    setState(() {});
+                  },
+                  child: Container(
+                    width: 30,
+                    height: 30,
+                    margin: EdgeInsets.fromLTRB(10, 10, 0, 0),
+                    decoration: BoxDecoration(
+                      color: Colors.grey[400],
+                      borderRadius: BorderRadius.all(Radius.circular(5)),
+                    ),
+                    child: Icon(Icons.add),
+                  ),
+                ),
+              ),
+            ],
+          );
+        }
+
+        return Wrap(
+          children: [
+            Visibility(
+              visible: index == List.generate(rapidColors.length, (index) => rapidColors[index]).length,
+              child: Container(
+                height: 1,
+                width: 50,
+                color: Colors.grey,
+                margin: EdgeInsets.only(top: 10),
+              ),
+            ),
+            GestureDetector(
+              onTap: () => setState(() {
+                currentColor = rapidAccessColors[index];
+              }),
+              onSecondaryTapDown: (details) {
+                print(rapidAccessColors[index]);
+              },
+              onDoubleTap: () => setColors(rapidAccessColors[index]),
+              child: Column(
+                children: [
+                  Container(
+                    width: 30,
+                    height: 30,
+                    decoration: BoxDecoration(
+                      color: rapidAccessColors[index],
+                      borderRadius: BorderRadius.all(Radius.circular(5)),
+                    ),
+                    margin: EdgeInsets.fromLTRB(10, 10, 0, 0),
+                  ),
+                ],
+              ),
+            ),
+          ],
+        );
+      },
+    );
   }
 
   showHideCode(bool value) {

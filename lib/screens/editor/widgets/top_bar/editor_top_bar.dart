@@ -1,5 +1,6 @@
 // ignore_for_file: prefer_const_constructors, non_constant_identifier_names, prefer_const_literals_to_create_immutables
 
+import 'package:calculator/language/editor.dart';
 import 'package:calculator/main.dart';
 import 'package:calculator/screens/editor/editor.dart';
 import 'package:calculator/screens/editor/widgets/scale_button.dart';
@@ -49,7 +50,7 @@ Row selector(
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
               Text(
-                "Save",
+                saveButton(notifier.language),
                 style: TextStyle(
                   color: Colors.white,
                 ),

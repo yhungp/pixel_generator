@@ -122,3 +122,8 @@ String fileSavedSuccessfullyLabel(int language) => [
       'The file has been saved successfully.',
       'El archivo se ha guardado con éxito.',
     ][language];
+
+String saveButton(int language) => [
+      'Save',
+      'Guardar',
+    ][language];

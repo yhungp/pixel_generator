@@ -20,6 +20,17 @@ var colors = [
   const Color.fromARGB(255, 255, 0, 0),
 ];
 
+List<Color> rapidColors = [
+  Colors.black,
+  const Color.fromARGB(255, 255, 0, 0),
+  const Color.fromARGB(255, 255, 255, 0),
+  const Color.fromARGB(255, 0, 255, 0),
+  const Color.fromARGB(255, 0, 255, 255),
+  const Color.fromARGB(255, 0, 0, 255),
+  const Color.fromARGB(255, 255, 0, 255),
+  Colors.white,
+];
+
 class HexColor extends Color {
   static int _getColorFromHex(String hexColor) {
     hexColor = hexColor.toUpperCase().replaceAll("#", "").replaceAll("0X", "");

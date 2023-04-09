@@ -168,26 +168,28 @@ class _EditorState extends State<Editor> {
               ? Center(
                   child: Text("Loading"),
                 )
-              : Column(
-                  mainAxisAlignment: MainAxisAlignment.start,
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    SizedBox(height: 5),
-                    EditorTopBar(
-                      notifier,
-                      setEditorOption,
-                      selectorBorderColor,
-                      scale,
-                      downScale,
-                      upScale,
-                      saveColors,
-                    ),
-                    SizedBox(height: 5),
-                    Divider(
-                      color: Colors.grey,
-                    ),
-                    editorSelector(),
-                  ],
+              : Expanded(
+                  child: Column(
+                    mainAxisAlignment: MainAxisAlignment.start,
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      SizedBox(height: 5),
+                      EditorTopBar(
+                        notifier,
+                        setEditorOption,
+                        selectorBorderColor,
+                        scale,
+                        downScale,
+                        upScale,
+                        saveColors,
+                      ),
+                      SizedBox(height: 5),
+                      Divider(
+                        color: Colors.grey,
+                      ),
+                      editorSelector(),
+                    ],
+                  ),
                 ),
         );
       },
