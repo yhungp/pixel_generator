@@ -19,3 +19,15 @@ var colors = [
   const Color.fromARGB(255, 255, 0, 255),
   const Color.fromARGB(255, 255, 0, 0),
 ];
+
+class HexColor extends Color {
+  static int _getColorFromHex(String hexColor) {
+    hexColor = hexColor.toUpperCase().replaceAll("#", "").replaceAll("0X", "");
+    if (hexColor.length == 6) {
+      hexColor = "FF$hexColor";
+    }
+    return int.parse(hexColor, radix: 16);
+  }
+
+  HexColor(final String hexColor) : super(_getColorFromHex(hexColor));
+}

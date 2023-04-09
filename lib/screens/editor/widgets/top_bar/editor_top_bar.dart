@@ -13,10 +13,11 @@ Row EditorTopBar(
   double scale,
   Function downScale,
   Function upScale,
+  Function saveColors,
 ) {
   return Row(
     children: [
-      selector(notifier, setEditorOption, selectorBorderColor),
+      selector(notifier, setEditorOption, selectorBorderColor, saveColors),
       Expanded(child: Container()),
       viewScale(notifier, scale, downScale, upScale),
     ],
@@ -27,6 +28,7 @@ Row selector(
   SettingsScreenNotifier notifier,
   Function setEditorOption,
   Function selectorBorderColor,
+  Function saveColors,
 ) {
   var values = EditorOptions.values;
   return Row(
@@ -35,7 +37,7 @@ Row selector(
       SizedBox(width: 5),
 
       GestureDetector(
-        onTap: () => () {},
+        onTap: () => saveColors(true),
         child: Container(
           width: 60,
           height: 40,

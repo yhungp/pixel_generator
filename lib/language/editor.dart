@@ -112,3 +112,13 @@ String showMatrixLabel(int language) => [
       "Show matrix array joined",
       "Mostrar matrices unidas unido",
     ][language];
+
+String fileSavedLabel(int language) => [
+      "File saved",
+      "Archivo guardado",
+    ][language];
+
+String fileSavedSuccessfullyLabel(int language) => [
+      'The file has been saved successfully.',
+      'El archivo se ha guardado con éxito.',
+    ][language];

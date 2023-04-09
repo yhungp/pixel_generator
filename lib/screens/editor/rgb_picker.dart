@@ -20,6 +20,9 @@ class RGB_Picker extends StatefulWidget {
   int columns;
   int rows;
   double scale;
+  Function setColors;
+  Function getSaveState;
+  List<List<List<List<Color>>>> colors;
 
   RGB_Picker({
     Key? key,
@@ -28,6 +31,9 @@ class RGB_Picker extends StatefulWidget {
     required this.matrixRows,
     required this.rows,
     required this.scale,
+    required this.getSaveState,
+    required this.setColors,
+    required this.colors,
   }) : super(key: key);
 
   @override
@@ -44,6 +50,8 @@ class _RGB_PickerState extends State<RGB_Picker> {
   int matrixRows = 8;
   int columns = 1;
   int rows = 1;
+  int language = 0;
+
   double scale = 1;
 
   double posxTone = 100;
@@ -76,15 +84,21 @@ class _RGB_PickerState extends State<RGB_Picker> {
     matrixRows = widget.matrixRows;
     columns = widget.columns;
     rows = widget.rows;
-
-    setColors(Colors.white);
+    colors = widget.colors;
 
     super.initState();
   }
 
   @override
   Widget build(BuildContext context) {
+    if (widget.getSaveState()) {
+      widget.setColors(colors, language);
+      setState(() {});
+    }
+
     return Consumer<SettingsScreenNotifier>(builder: (context, notifier, child) {
+      language = notifier.language;
+
       return Expanded(
         child: Container(
           padding: EdgeInsets.all(5),

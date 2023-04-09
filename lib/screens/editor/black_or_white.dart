@@ -18,6 +18,9 @@ class BlackOrWhite extends StatefulWidget {
   int columns;
   int rows;
   double scale;
+  Function setColors;
+  Function getSaveState;
+  List<List<List<List<Color>>>> colors;
 
   BlackOrWhite({
     Key? key,
@@ -26,6 +29,9 @@ class BlackOrWhite extends StatefulWidget {
     required this.matrixRows,
     required this.rows,
     required this.scale,
+    required this.getSaveState,
+    required this.setColors,
+    required this.colors,
   }) : super(key: key);
 
   @override
@@ -37,6 +43,8 @@ class _BlackOrWhiteState extends State<BlackOrWhite> {
   int matrixRows = 8;
   int columns = 1;
   int rows = 1;
+  int language = 0;
+
   double scale = 1;
 
   double posx = 0;
@@ -66,20 +74,7 @@ class _BlackOrWhiteState extends State<BlackOrWhite> {
     matrixRows = widget.matrixRows;
     columns = widget.columns;
     rows = widget.rows;
-
-    colors = List.generate(
-      rows,
-      (index) => List.generate(
-        columns,
-        (index) => List.generate(
-          matrixRows,
-          (index) => List.generate(
-            matrixColumns,
-            (index) => Colors.white,
-          ),
-        ),
-      ),
-    );
+    colors = widget.colors;
 
     super.initState();
   }
@@ -105,7 +100,14 @@ class _BlackOrWhiteState extends State<BlackOrWhite> {
 
   @override
   Widget build(BuildContext context) {
+    if (widget.getSaveState()) {
+      widget.setColors(colors, language);
+      setState(() {});
+    }
+
     return Consumer<SettingsScreenNotifier>(builder: (context, notifier, child) {
+      language = notifier.language;
+
       return Expanded(
         child: Container(
           padding: EdgeInsets.all(5),
