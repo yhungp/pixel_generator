@@ -34,6 +34,45 @@ Row selector(
       // black and white
       SizedBox(width: 5),
 
+      GestureDetector(
+        onTap: () => () {},
+        child: Container(
+          width: 60,
+          height: 40,
+          decoration: BoxDecoration(
+            color: blueTheme(notifier.darkTheme),
+            borderRadius: BorderRadius.all(Radius.circular(5)),
+          ),
+          child: Row(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              Text(
+                "Save",
+                style: TextStyle(
+                  color: Colors.white,
+                ),
+              ),
+            ],
+          ),
+        ),
+      ),
+
+      SizedBox(width: 5),
+
+      SizedBox(
+        height: 40,
+        child: Row(
+          children: [
+            VerticalDivider(
+              color: Colors.grey,
+              thickness: 1, //thickness of divier line
+            ),
+          ],
+        ),
+      ),
+
+      SizedBox(width: 5),
+
       for (var i = 0; i < values.length; i++)
         Row(
           children: [
@@ -66,146 +105,6 @@ Row selector(
             SizedBox(width: 10),
           ],
         ),
-
-      // // gray scale
-      // SizedBox(width: 10),
-      // GestureDetector(
-      //   onTap: () => setEditorOption(EditorOptions.grayScale),
-      //   child: Container(
-      //     width: 50,
-      //     height: 40,
-      //     decoration: BoxDecoration(
-      //       color: blueTheme(notifier.darkTheme),
-      //       borderRadius: BorderRadius.all(Radius.circular(5)),
-      //       border: Border.all(
-      //         color: selectorBorderColor(EditorOptions.grayScale, notifier.darkTheme),
-      //         width: 2,
-      //       ),
-      //     ),
-      //     child: Row(
-      //       mainAxisAlignment: MainAxisAlignment.center,
-      //       children: [
-      //         Text(
-      //           "Gray",
-      //           style: TextStyle(
-      //             color: Colors.white,
-      //           ),
-      //         ),
-      //       ],
-      //     ),
-      //   ),
-      // ),
-
-      // // rgb
-      // SizedBox(width: 10),
-      // GestureDetector(
-      //   onTap: () => setEditorOption(EditorOptions.rgbPicker),
-      //   child: Container(
-      //     width: 70,
-      //     height: 40,
-      //     decoration: BoxDecoration(
-      //       color: blueTheme(notifier.darkTheme),
-      //       borderRadius: BorderRadius.all(Radius.circular(5)),
-      //       border: Border.all(
-      //         color: selectorBorderColor(EditorOptions.rgbPicker, notifier.darkTheme),
-      //         width: 2,
-      //       ),
-      //     ),
-      //     child: Row(
-      //       mainAxisAlignment: MainAxisAlignment.center,
-      //       children: [
-      //         Container(
-      //           width: 20,
-      //           height: 30,
-      //           alignment: Alignment.center,
-      //           decoration: BoxDecoration(
-      //             color: Color.fromARGB(200, 255, 0, 0),
-      //             borderRadius: BorderRadius.horizontal(left: Radius.circular(5)),
-      //           ),
-      //           child: Text(
-      //             "R",
-      //             style: TextStyle(
-      //               color: Colors.white,
-      //             ),
-      //           ),
-      //         ),
-      //         Container(
-      //           width: 20,
-      //           height: 30,
-      //           alignment: Alignment.center,
-      //           color: Color.fromARGB(150, 0, 255, 0),
-      //           child: Text(
-      //             "G",
-      //             style: TextStyle(
-      //               color: Colors.black,
-      //             ),
-      //           ),
-      //         ),
-      //         Container(
-      //           width: 20,
-      //           height: 30,
-      //           alignment: Alignment.center,
-      //           decoration: BoxDecoration(
-      //             color: Color.fromARGB(150, 0, 0, 255),
-      //             borderRadius: BorderRadius.horizontal(right: Radius.circular(5)),
-      //           ),
-      //           child: Text(
-      //             "B",
-      //             style: TextStyle(
-      //               color: Colors.white,
-      //             ),
-      //           ),
-      //         ),
-      //       ],
-      //     ),
-      //   ),
-      // ),
-
-      // // image
-      // SizedBox(width: 10),
-      // GestureDetector(
-      //   onTap: () => setEditorOption(EditorOptions.fromImage),
-      //   child: Container(
-      //     width: 70,
-      //     height: 40,
-      //     decoration: BoxDecoration(
-      //       color: blueTheme(notifier.darkTheme),
-      //       borderRadius: BorderRadius.all(Radius.circular(5)),
-      //       border: Border.all(
-      //         color: selectorBorderColor(EditorOptions.fromImage, notifier.darkTheme),
-      //         width: 2,
-      //       ),
-      //     ),
-      //     child: Icon(
-      //       Icons.image,
-      //       color: Colors.white,
-      //       size: 28,
-      //     ),
-      //   ),
-      // ),
-
-      // // black and white
-      // SizedBox(width: 10),
-      // GestureDetector(
-      //   onTap: () => setEditorOption(EditorOptions.fromVideo),
-      //   child: Container(
-      //     width: 70,
-      //     height: 40,
-      //     decoration: BoxDecoration(
-      //       color: blueTheme(notifier.darkTheme),
-      //       borderRadius: BorderRadius.all(Radius.circular(5)),
-      //       border: Border.all(
-      //         color: selectorBorderColor(EditorOptions.fromVideo, notifier.darkTheme),
-      //         width: 2,
-      //       ),
-      //     ),
-      //     child: Icon(
-      //       Icons.video_call,
-      //       color: Colors.white,
-      //       size: 35,
-      //     ),
-      //   ),
-      // ),
     ],
   );
 }

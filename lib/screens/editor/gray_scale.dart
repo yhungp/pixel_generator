@@ -165,7 +165,7 @@ class _GreyScaleState extends State<GreyScale> {
                               }
                             },
                             child: CustomPaint(
-                              size: Size(500, 30),
+                              size: Size(370, 30),
                               painter: Rectangle(posx),
                             ),
                           ),

@@ -7,6 +7,7 @@ import 'package:calculator/language/matrix_creation.dart';
 import 'package:calculator/main.dart';
 import 'package:calculator/screens/matrix_creation/widgets/button.dart';
 import 'package:calculator/screens/matrix_creation/widgets/custom_text_field.dart';
+import 'package:calculator/utils/pretty_json.dart';
 import 'package:calculator/widgets/scale_button.dart';
 import 'package:calculator/styles/styles.dart';
 import 'package:calculator/widgets/array_of_matrix.dart';
@@ -54,8 +55,7 @@ class _MatrixCreationState extends State<MatrixCreation> {
   TextEditingController columnsText = TextEditingController();
   TextEditingController rowsText = TextEditingController();
 
-  final ScrollController horizontal = ScrollController(),
-      vertical = ScrollController();
+  final ScrollController horizontal = ScrollController(), vertical = ScrollController();
 
   @override
   void initState() {
@@ -73,29 +73,26 @@ class _MatrixCreationState extends State<MatrixCreation> {
     super.initState();
   }
 
-  var test = ["TEST", "TEST", "TEST", "TEST", "TEST"];
-
   @override
   Widget build(BuildContext context) {
     return Consumer<SettingsScreenNotifier>(
-        builder: (context, notifier, child) {
-      return Container(
-        padding: EdgeInsets.all(10),
-        height: double.infinity,
-        width: double.infinity,
-        color: blackTheme(notifier.darkTheme),
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.start,
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Row(
-              children: [
-                Container(
+      builder: (context, notifier, child) {
+        return Container(
+          padding: EdgeInsets.all(10),
+          height: double.infinity,
+          width: double.infinity,
+          color: blackTheme(notifier.darkTheme),
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.start,
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Row(
+                children: [
+                  Container(
                     padding: EdgeInsets.all(10),
                     margin: EdgeInsets.only(right: 10),
                     decoration: BoxDecoration(
-                        color: blueTheme(notifier.darkTheme),
-                        borderRadius: BorderRadius.all(Radius.circular(5))),
+                        color: blueTheme(notifier.darkTheme), borderRadius: BorderRadius.all(Radius.circular(5))),
                     child: Column(
                       children: [
                         Text(
@@ -121,54 +118,55 @@ class _MatrixCreationState extends State<MatrixCreation> {
                           ],
                         ),
                       ],
-                    )),
-                Container(
-                    padding: EdgeInsets.all(10),
-                    decoration: BoxDecoration(
-                        color: blueTheme(notifier.darkTheme),
-                        borderRadius: BorderRadius.all(Radius.circular(5))),
-                    child: Column(
-                      children: [
-                        Text(
-                          matrixArray(notifier.language),
-                          style: TextStyle(color: Colors.white),
-                        ),
-                        Row(
-                          children: [
-                            CustomTextField(
-                                controller: columnsText,
-                                darkTheme: notifier.darkTheme,
-                                index: "columnsText",
-                                notifier: notifier,
-                                upDownValue: upDownValue,
-                                onTextChange: onTextChange),
-                            CustomTextField(
-                                controller: rowsText,
-                                darkTheme: notifier.darkTheme,
-                                index: "rowsText",
-                                notifier: notifier,
-                                upDownValue: upDownValue,
-                                onTextChange: onTextChange),
-                          ],
-                        ),
-                      ],
-                    )),
-              ],
-            ),
-            SizedBox(height: 10),
-            arrayOfMatrix(
-              notifier,
-              int.parse(rowsText.text),
-              int.parse(columnsText.text),
-              int.parse(matrixRowsText.text),
-              int.parse(matrixColumnsText.text),
-              scale,
-            ),
-            viewScale(notifier)
-          ],
-        ),
-      );
-    });
+                    ),
+                  ),
+                  Container(
+                      padding: EdgeInsets.all(10),
+                      decoration: BoxDecoration(
+                          color: blueTheme(notifier.darkTheme), borderRadius: BorderRadius.all(Radius.circular(5))),
+                      child: Column(
+                        children: [
+                          Text(
+                            matrixArray(notifier.language),
+                            style: TextStyle(color: Colors.white),
+                          ),
+                          Row(
+                            children: [
+                              CustomTextField(
+                                  controller: columnsText,
+                                  darkTheme: notifier.darkTheme,
+                                  index: "columnsText",
+                                  notifier: notifier,
+                                  upDownValue: upDownValue,
+                                  onTextChange: onTextChange),
+                              CustomTextField(
+                                  controller: rowsText,
+                                  darkTheme: notifier.darkTheme,
+                                  index: "rowsText",
+                                  notifier: notifier,
+                                  upDownValue: upDownValue,
+                                  onTextChange: onTextChange),
+                            ],
+                          ),
+                        ],
+                      )),
+                ],
+              ),
+              SizedBox(height: 10),
+              arrayOfMatrix(
+                notifier,
+                int.parse(rowsText.text),
+                int.parse(columnsText.text),
+                int.parse(matrixRowsText.text),
+                int.parse(matrixColumnsText.text),
+                scale,
+              ),
+              viewScale(notifier)
+            ],
+          ),
+        );
+      },
+    );
   }
 
   double scale = 1;
@@ -204,12 +202,6 @@ class _MatrixCreationState extends State<MatrixCreation> {
           notifier,
           saveAndContinueBtn(notifier.language),
         ),
-        // SizedBox(width: 10),
-        // buttonOnMatrix(
-        //   continueToNextStep,
-        //   notifier,
-        //   continueBtn(notifier.language),
-        // ),
       ],
     );
   }
@@ -221,15 +213,25 @@ class _MatrixCreationState extends State<MatrixCreation> {
         int.parse(rowsText.text) != startingRows;
   }
 
-  // continueToNextStep(SettingsScreenNotifier notifier) {
-  //   widget.setProjectFile(filePath);
-  //   widget.setRoute("media_selector_from_matrix_creation");
-  //   notifier.setApplicationScreen(2);
-  // }
+  saveAndContinueToNextStep(SettingsScreenNotifier notifier) async {
+    var file = File(filePath);
 
-  saveAndContinueToNextStep(SettingsScreenNotifier notifier) {
+    if (!file.existsSync()) {
+      file.createSync();
+    }
+
+    final contents = await file.readAsString();
+    Map data = jsonDecode(contents);
+
+    data["matrix_columns"] = int.parse(matrixColumnsText.text);
+    data["matrix_rows"] = int.parse(matrixRowsText.text);
+    data["columns"] = int.parse(columnsText.text);
+    data["rows"] = int.parse(rowsText.text);
+
+    file.writeAsString(prettyJson(data));
+
     widget.setProjectFile(filePath);
-    widget.setRoute("media_selector_from_matrix_creation");
+    widget.setRoute("editor");
     notifier.setApplicationScreen(2);
   }
 
@@ -273,25 +275,21 @@ class _MatrixCreationState extends State<MatrixCreation> {
       switch (tag) {
         case "matrixColumnsText":
           if (upDown) {
-            matrixColumnsText.text =
-                (int.parse(matrixColumnsText.text) + 1).toString();
+            matrixColumnsText.text = (int.parse(matrixColumnsText.text) + 1).toString();
             return;
           }
           if (int.parse(matrixColumnsText.text) > 1) {
-            matrixColumnsText.text =
-                (int.parse(matrixColumnsText.text) - 1).toString();
+            matrixColumnsText.text = (int.parse(matrixColumnsText.text) - 1).toString();
           }
 
           break;
         case "matrixRowsText":
           if (upDown) {
-            matrixRowsText.text =
-                (int.parse(matrixRowsText.text) + 1).toString();
+            matrixRowsText.text = (int.parse(matrixRowsText.text) + 1).toString();
             return;
           }
           if (int.parse(matrixRowsText.text) > 1) {
-            matrixRowsText.text =
-                (int.parse(matrixRowsText.text) - 1).toString();
+            matrixRowsText.text = (int.parse(matrixRowsText.text) - 1).toString();
           }
           break;
         case "columnsText":
@@ -330,8 +328,7 @@ class _MatrixCreationState extends State<MatrixCreation> {
 
         Map recent = jsonDecode(contents);
 
-        if (recent.containsKey("matrix_columns") &&
-            recent["matrix_columns"].runtimeType == int) {
+        if (recent.containsKey("matrix_columns") && recent["matrix_columns"].runtimeType == int) {
           setState(() {
             matrixColumns = recent["matrix_columns"];
             startingMatrixColumns = recent["matrix_columns"];
@@ -339,8 +336,7 @@ class _MatrixCreationState extends State<MatrixCreation> {
           });
         }
 
-        if (recent.containsKey("matrix_rows") &&
-            recent["matrix_rows"].runtimeType == int) {
+        if (recent.containsKey("matrix_rows") && recent["matrix_rows"].runtimeType == int) {
           setState(() {
             matrixRows = recent["matrix_rows"];
             startingMatrixRows = recent["matrix_rows"];
@@ -348,8 +344,7 @@ class _MatrixCreationState extends State<MatrixCreation> {
           });
         }
 
-        if (recent.containsKey("matrix_columns") &&
-            recent["columns"].runtimeType == int) {
+        if (recent.containsKey("matrix_columns") && recent["columns"].runtimeType == int) {
           setState(() {
             columns = recent["columns"];
             startingColumns = recent["columns"];
