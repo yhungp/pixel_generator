@@ -30,13 +30,12 @@ class ScaleButton extends StatelessWidget {
         width: width,
         height: height,
         alignment: Alignment.center,
-        decoration: BoxDecoration(
-            borderRadius: BorderRadius.all(Radius.circular(20)),
-            color: blueTheme(darkTheme)),
+        decoration: BoxDecoration(borderRadius: BorderRadius.all(Radius.circular(20)), color: blueTheme(darkTheme)),
         child: Text(
           text,
           style: TextStyle(
             color: Colors.white,
+            fontSize: 12,
           ),
         ),
       ),
